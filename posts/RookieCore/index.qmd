@@ -1,0 +1,49 @@
+---
+title: "RookieCore"
+author: "fywc"
+date: "2023-02-06"
+categories: [news, code, analysis]
+---
+
+RookieCore 是一款简单的开源RISC-V处理器，采用三级流水:取指、译码、执行。
+This is a post with executable code.
+
+### if语句
+if语句每个分支都必须要使用 **begin..end** 包围起来，并且begin与if占同一行，end独占一行。
+
+```verilog
+if (a == 1'b1) begin
+    c <= b;
+end
+else begin
+    c <= a;
+end
+```
+
+### case语句
+case语句每个分支中，如果只有一行语句则不包围，否则使用 **begin..end**包围起来，并且begin与分支语句占同一行，end独占一行。
+
+```verilog
+case (a)
+    b: 
+        c = d;
+    e: begin
+        c = f;
+        d = f;
+    end
+    default: begin
+        c = g;
+        d = g;
+    end
+endcase
+```
+
+### always语句
+always语句必须使用 **begin..end** 包围起来，并且begin与always语句占同一行，end独占一行。
+
+```verilog
+always @ (posedge clk) begin
+    a <= b;
+end
+```
+
