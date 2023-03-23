@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "fywc",
+    "section": "",
+    "text": "About this blog hehehe"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "fywc",
+    "section": "Education",
+    "text": "Education\nInstitute of Computing Technology | Bei jing, CN Master in Computer Science | Sept 2022 - June 2025\nBeijing Jiaotong University | Bei jing, CN Bachelor in Computer Science | Sept 2018 - June 2022"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "fywc’s Blog",
+    "section": "",
+    "text": "Post With Code\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nHarlow Malloc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n \n\n\n\nRookieCore\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Post With Code",
+    "section": "",
+    "text": "This is a post with executable code."
+  },
+  {
+    "objectID": "posts/RookieCore/index.html",
+    "href": "posts/RookieCore/index.html",
+    "title": "RookieCore",
+    "section": "",
+    "text": "RookieCore 是一款简单的开源RISC-V处理器，采用三级流水:取指、译码、执行。 This is a post with executable code.\n\nif语句\nif语句每个分支都必须要使用 begin..end 包围起来，并且begin与if占同一行，end独占一行。\nif (a == 1'b1) begin\n    c <= b;\nend\nelse begin\n    c <= a;\nend\n\n\ncase语句\ncase语句每个分支中，如果只有一行语句则不包围，否则使用 begin..end包围起来，并且begin与分支语句占同一行，end独占一行。\ncase (a)\n    b: \n        c = d;\n    e: begin\n        c = f;\n        d = f;\n    end\n    default: begin\n        c = g;\n        d = g;\n    end\nendcase\n\n\nalways语句\nalways语句必须使用 begin..end 包围起来，并且begin与always语句占同一行，end独占一行。\nalways @ (posedge clk) begin\n    a <= b;\nend"
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  }
+]
