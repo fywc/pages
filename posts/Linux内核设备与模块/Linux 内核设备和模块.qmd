@@ -1,0 +1,330 @@
+# Linux 内核设备和模块
+
+## 目录
+
+-   [设备类型](#设备类型)
+    -   [伪设备](#伪设备)
+    -   [杂项设备](#杂项设备)
+    -   [模块](#模块)
+    -   [构建模块](#构建模块)
+        -   [放在内核源码树中](#放在内核源码树中)
+        -   [放在内核源码树外](#放在内核源码树外)
+    -   [安装模块](#安装模块)
+    -   [模块依赖性](#模块依赖性)
+    -   [载入模块](#载入模块)
+    -   [模块参数](#模块参数)
+    -   [导出符号表](#导出符号表)
+    -   [设备模型](#设备模型)
+        -   [kobject](#kobject)
+        -   [ktype](#ktype)
+        -   [kset](#kset)
+    -   [引用计数](#引用计数)
+-   [sysfs](#sysfs)
+    -   [sysfs中添加和删除kobject](#sysfs中添加和删除kobject)
+    -   [向sysfs中添加文件(attr)](#向sysfs中添加文件attr)
+    -   [默认文件](#默认文件)
+    -   [文件的创建与修改](#文件的创建与修改)
+    -   [sysfs约定　](#sysfs约定)
+    -   [内核事件层](#内核事件层)
+-   [Next Section](#Next-Section)
+
+# 设备类型
+
+在 Linux 以及所有 Unix 系统中，设备被分为以下三种类型：
+
+-   块设备
+    -   能够随机访问固定大小数据片的硬件设备
+-   字符设备
+    -   按照字符流有序访问的硬件设备
+-   网络设备
+    -   提供对网络的访问，通过一个物理适配器和特定协议实现
+
+## 伪设备
+
+一些虚拟设备驱动，仅提供访问内核功能．
+
+-   内核随机数发生器
+-   空设备  /dev/null
+-   零设备 /dev/zero
+-   满设备 /dev/full
+-   内存设备 /dev/mem
+
+## 杂项设备
+
+简写为miscdev，是对字符设备的封装，方便使用．
+
+## 模块
+
+内核在运行时动态向其中插入或删除代码，这些代码以模块的形式组合在一个单独的二进制镜像．
+
+## 构建模块
+
+### 放在内核源码树中
+
+-   字符设备存放在`drivers/char/`
+-   块设备存放在`drivers/block`&#x20;
+-   USE设备存放在 `drivers/usb/`&#x20;
+
+添加一个字符设备`fishing` , 编辑`drivers/char/Makefile` 并加入`obj-m += fishing/`
+
+在`drivers/char/fishing/`下,需要添加一个新的`Makefile`文件：
+
+```bash
+obj-m += fishing.o
+fishing-objs := fishing-main.o fishing-line.o
+```
+
+这样编译内核时，也会自动编译该模块，最终编译链接完的文件名为`fishing.ko`&#x20;
+
+### 放在内核源码树外
+
+假设放在`/home/dev/fishing/`目录中，那么修改`/home/dev/fishing/Makefile` :
+
+```bash
+obj-m += fishing.o
+fishing-objs := fishing-main.o fishing-line.o
+
+```
+
+编译时需要在`/home/dev/fishing/`目录下，然后执行:
+
+```bash
+make -C /mnt/disk/kernelsrc/ SUBDIRS=$PWD modules
+```
+
+其中`/mnt/disk/kernelsrc/`就是内核源码目录
+
+## 安装模块
+
+使用`make modules_install`
+
+## 模块依赖性
+
+Linux模块之间存在依赖性，依赖关系存放在`/libmodules/}version}/modules.dep` 文件．
+
+使用`depmod` 命令产生依赖信息，`-A` 参数表示仅更新新模块的依赖信息.
+
+## 载入模块
+
+```bash
+insmod fishing.ko
+rmmod fishing.ko
+modprobe modules
+modprobe -r modules
+```
+
+## 模块参数
+
+Linux 允许驱动程序声明参数，从而用户可以在系统启动或者模块装载时再指定参数值，这些参数对于驱动程序属于全局变量。
+
+模块参数会载入sysfs文件系统中，变为文件.
+
+```c
+module_param(name, type, perm);
+```
+
+## 导出符号表
+
+模块被载入后，就会被动态地连接(link)到内核，连接过程需要借助内核导出的符号表来访问内核函数。
+
+只有被**显式导出**的内核函数，才能被模块调用（类似动态链接库）。
+
+使用 `EXPORT_SYMBOL()`和`EXPORT_SYMBOL_GPL()` 可以在内核源码中显式导出内核函数：
+
+```c
+int get_pirate_beard_color(struct pirate *p)
+{
+  return p->beard.color;
+}
+EXPORT_SYMBOL(get_pirate_beard_color);
+```
+
+导出的内核符号表被看作导出的内核接口，称为内核API
+
+## 设备模型
+
+设备模型提供了一个独立的机制专门来表示设备，并描述其在系统中的拓扑结构，从而使得系统具有以下优点:
+
+-   代码重复最小化
+-   提供诸如引用计数等统一机制
+-   可以列举系统中所有的设备，观察它们的状态，并且查看它们连接的总线。
+-   可以将系统中的全部设备结构以树的形式完整、有效地展现出来——包括所有的总线和内部连接。
+-   可以将设备和其对应的驱动联系起来，反之亦然。
+-   可以将设备按照类型加以归类，比如分类为输入设备，而无需理解物理设备的拓扑结构。
+-   可以沿**设备树**的叶子向其根的方向依次遍历，以保证能以正确顺序关闭各设备的电源。
+
+### kobject
+
+kobject 类似于面向对象中的**基类**，设备类继承该类
+
+```c
+// include/linux/kobject.h
+struct kobject {
+  const char    *name;
+  struct list_head  entry;
+  struct kobject    *parent;// 父对象指针，用于表达设备树中的层次关系
+  struct kset    *kset;
+  struct kobj_type  *ktype;
+  struct sysfs_dirent  *sd; // sysfs的dirent对象指针，指向本对象(本对象在sysfs中其实是一个文件)
+  struct kref    kref;// 引用计数
+  unsigned int state_initialized:1;
+  unsigned int state_in_sysfs:1;
+  unsigned int state_add_uevent_sent:1;
+  unsigned int state_remove_uevent_sent:1;
+  unsigned int uevent_suppress:1;
+};
+```
+
+`kobject`的一个派生类是`cdev` ,表示字符设备:
+
+```c
+struct cdev
+{
+  struct kobject kobj; // 嵌入kobject表示继承，必须放在结构体开头实现多态
+  // 后面为该类的特有成员
+  struct module *owner;
+  const struct file_operations *ops;
+  struct list_head list;
+  dev_t dev;
+  unsigned int count;
+};
+```
+
+### ktype
+
+kobject 的成员 ktype 表示本 kobject 的**类型**，多个 kobject 可以关联同一个 ktype，描述一类 kobject 所具有的普遍特性。
+
+```c
+// include/linux/kobject.h
+struct kobj_type {
+  void (*release)(struct kobject *kobj); // 引用计数归0时的析构函数，也就是同类kobject通用
+  const struct sysfs_ops *sysfs_ops; // sysfs 的操作方法
+  struct attribute **default_attrs; // 属性，是个数组
+  const struct kobj_ns_type_operations *(*child_ns_type)(struct kobject *kobj);
+  const void *(*namespace)(struct kobject *kobj);
+};
+```
+
+### kset
+
+kset 用于对诸多 kobject 及其派生类对象进行分组（分组和 ktype 无关，即使 ktype 相同的也能分到不同组中）。分组依据比如“全部的块设备”，kset 的存在让分组更灵活，而不受限于相同或是不同的 ktype。
+
+kset 的存在是为了将 kobject 分组映射为 sysfs 中的目录关系信息.
+
+```c
+// include/linux/kobject.h
+struct kset {
+  struct list_head list; // 链表，连接该kset管理的所有组内kobj，指向kobj链表上的第一个节点
+  spinlock_t list_lock; // 保护链表的自旋锁
+  struct kobject kobj; // 作为组内的所有kobject的基类,这是kset的一大功能
+  const struct kset_uevent_ops *uevent_ops; // 用于处理集合中kobject对象的热插拔操作
+};
+```
+
+kset 对象作为链表头连接一组 kobject（kobj 之间通过 kobject 内的 entry 成员连接）：
+
+![](https://hjk.life/assets/img/2023-03-15-linux-kernel-devices-modules/f17.1.jpg)
+
+## 引用计数
+
+类似于高级语言的gc机制，当引用数为０时回收对象.
+
+kref结构：
+
+```c
+// include/linux/kref.h
+struct kref {
+  atomic_t refcount;
+};
+```
+
+引用计数操作方法：
+
+```c
+struct kobject *kobject_get(struct kobject *kobj);
+void kobject_put(struct kobject *kobj);
+
+```
+
+# sysfs
+
+sysfs 文件系统是一个处于内存中的**虚拟文件系统**，它为我们提供了 kobject 对象**层次结构**的视图。kobject 被映射为**目录**（非文件），通过 `sd` 成员映射[目录项](https://hjk.life/posts/linux-kernel-vfs/#目录项对象-dentry "目录项")。
+
+sysfs 取代了原来 `ioctl()` 操作**设备节点**和 `procfs` 文件系统操作**内核变量**的方式。只需在 sysfs 的目录中创建一个文件并关联设备，就能直接通过文件接口操作设备。
+
+要实现 sysfs 的映射，需要扫描所有 kobject 的 parent 和 kset 成员：
+
+-   如果 parent 为另一个 kobject，则本 kobject 就是其 parent 的子节点，在 sysfs 中也就是子目录（直接的 kobj 树，依赖 parent 构成的树）
+-   如果 parent 为 NULL, kset 成员有值，则该 kobject 对应的 sysfs 目录是 kset->kobj 的子目录（kobj 不在直接的 kobj 树中，而是在[kset](https://hjk.life/posts/linux-kernel-devices-modules/#kset "kset")下构成的树中）
+-   如果 parent 为 NULL，keset 也为 NULL，则说明其为 root，在 sysfs 中对应根级目录
+
+扫描完成后即可确定文件系统目录树。
+
+[HAL](https://www.freedesktop.org/wiki/Software/hal/ "HAL")基于 sysfs 中的数据建立起了一个内存数据库，将 class 概念、设备概念和驱动概念联系到一起。在这些数据之上，HAL 提供了丰富的 API 以使得应用程序更灵活。
+
+## sysfs中添加和删除kobject
+
+kobject默认初始化后并不关联到sysfs,需要使用`kobject_add()` ．
+
+## 向sysfs中添加文件(attr)
+
+kobject对应sysfs中的目录，而kobject对象中的default\_attr数组对应sysfs中的文件．
+
+该数组负责将内核数据映射成sysfs中的文件．
+
+## 默认文件
+
+kobject对象中的成员`default_attrs` 数组表示目录下的默认文件，`sysfs_ops`成员则描述了如何使用这些文件：
+
+```c
+// include/linux/sysfs.h
+struct sysfs_ops {
+  // 读取文件,从kobj（表示目录）和attr（表示文件）中，读取数据到buf中
+  ssize_t  (*show)(struct kobject *kobj, struct attribute *attr,char *buf);
+  // 写入文件
+  ssize_t  (*store)(struct kobject *,struct attribute *,const char *, size_t);
+  const void *(*namespace)(struct kobject *, const struct attribute *);
+};
+```
+
+## 文件的创建与修改
+
+一般而言，相同 ktype 的 kobject 的 default\_attrs 都是相同的，也就是这些目录下的文件组织结构(文件名，权限)都相同。
+
+```c
+//　创建文件
+int sysfs_create_file(struct kobject *kobj, const struct attribute tattr);
+//  创建符号链接
+int sysfs_create_link(struct kobject *kobj, struct kobject *target, char *name);
+//  删除新文件
+void sysfs_remove_file(struct kobject *kobj, const struct attribute *attr);
+//  删除符号链接
+void sysfs_remove_link(struct kobject *kobj, char *name) ;
+
+
+```
+
+## sysfs约定　
+
+-   一值一文件：sysfs 属性应该保证每个文件只导出一个值，该值应该是文本形式而且映射为简单 C 类型。避免文件内容过于复杂，这样使用 shell 或 C 语言读取写入该文件就会简单得多。
+-   清晰的层次组织数据
+-   sysfs 提供内核到用户空间的服务
+-   sysfs 已经取代 `ioctl()` 和 `procfs`，尽可能得使用 sysfs 操作内核变量
+
+## 内核事件层
+
+内核事件层实现了内核到用户的**消息通知**系统（通过 kobject 和 sysfs）
+
+事件是实现异步操作的必要组成部分，常见事件如硬盘满了，处理器过热了，分区挂载了。
+
+每个事件源都是一个 sysfs 路径，比如一个硬盘通知事件源为 `/sys/block/hda`。
+
+内核事件由内核空间传递到用户空间需要经过`netlink`（netlink 是一个用于传送网络信息的多点传送套接字）。使用示例：在用户空间实现一个系统后台服务用于监听套接字(socket)，处理任何读到的信息，并将事件传送到系统栈里，通过该方法也能实现将事件整合入 `D-BUS`。
+
+在内核代码中向用户空间发送信号使用函数`kobject_uevent()`, 最终事件就是包含 kobject 对应的 sysfs 路径和信号动作的**字符串**。
+
+***
+
+# Next Section
+
+[块I/O层](https://hjk.life/posts/linux-kernel-block-io/#%E8%AE%BE%E5%A4%87%E7%9A%84%E5%88%86%E7%B1%BB "块I/O层")
