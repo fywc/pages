@@ -2,8 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
-      "/posts/RookieCore/index.html",
       "/posts/post-with-code/index.html",
+      "/posts/RookieCore/index.html",
+      "/posts/CS6.175/index.html",
       "/posts/welcome/index.html"
     ]
   }

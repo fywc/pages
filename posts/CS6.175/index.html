@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Harlow Malloc">
+<meta name="author" content="fywc">
 <meta name="dcterms.date" content="2023-02-06">
 
-<title>fywc’s Blog - Post With Code</title>
+<title>fywc’s Blog - CS6.175</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -21,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -61,6 +95,9 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="../../site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="../../site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="../../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -108,7 +145,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Post With Code</h1>
+      <h1 class="title">CS6.175</h1>
                                 <div class="quarto-categories">
                 <div class="quarto-category">news</div>
                 <div class="quarto-category">code</div>
@@ -123,7 +160,7 @@ ul.task-list li input[type="checkbox"] {
       <div>
       <div class="quarto-title-meta-heading">Author</div>
       <div class="quarto-title-meta-contents">
-               <p>Harlow Malloc </p>
+               <p>fywc </p>
             </div>
     </div>
       
@@ -148,9 +185,249 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<p>This is a post with executable code.</p>
+<section id="四种fifo" class="level2">
+<h2 class="anchored" data-anchor-id="四种fifo">四种FIFO</h2>
+<p>Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。</p>
+<p>一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。</p>
+<p>与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。</p>
+<ol type="1">
+<li><p>Conflict FIFO</p>
+<p>不可以同时<code>enq</code>和<code>deq</code></p></li>
+<li><p>Pipeline FIFO</p>
+<p>满时可以同时进行<code>deq</code>和<code>enq</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a> {notEmpty, first, deq} <span class="op">&lt;</span> {notFull, enq} <span class="op">&lt;</span> clear</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>Bypass FIFO</p>
+<p>空时可以同时进行<code>enq</code>和<code>deq</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a> {notFull, enq} <span class="op">&lt;</span> {notEmpty, first, deq} <span class="op">&lt;</span> clear</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>Conflict-Free FIFO 任何时候都可以同时进行 <code>enq</code> 和 <code>deq</code></p></li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>    {notFull, notEmpty, deq, enq, first} <span class="op">&lt;</span> clear</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="ehr寄存器" class="level2">
+<h2 class="anchored" data-anchor-id="ehr寄存器">EHR寄存器</h2>
+<p>EHR寄存器是一种特殊的寄存器，可以同时进行寄存器的读取和写入操作，而不需要任何同步或者锁定机制，适用于流水线设计。缺点是EHR会导致关键路径过长，而且难以跟踪具体路径。</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th></th>
+<th>r0</th>
+<th>w0</th>
+<th>r1</th>
+<th>w1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>r0</td>
+<td>CF</td>
+<td>&lt;</td>
+<td>CF</td>
+<td>&lt;</td>
+</tr>
+<tr class="even">
+<td>w0</td>
+<td>&gt;</td>
+<td>C</td>
+<td>&lt;</td>
+<td>&lt;</td>
+</tr>
+<tr class="odd">
+<td>r1</td>
+<td>CF</td>
+<td>&gt;</td>
+<td>CF</td>
+<td>&lt;</td>
+</tr>
+<tr class="even">
+<td>w1</td>
+<td>&gt;</td>
+<td>&gt;</td>
+<td>&gt;</td>
+<td>C</td>
+</tr>
+</tbody>
+</table>
+<p>其中，优先级依次是w1 &gt; r1 &gt; w0 &gt; r0</p>
+</section>
+<section id="lab-5" class="level1">
+<h1>Lab 5</h1>
+<section id="单周期" class="level2">
+<h2 class="anchored" data-anchor-id="单周期">单周期</h2>
+</section>
+<section id="双周期" class="level2">
+<h2 class="anchored" data-anchor-id="双周期">双周期</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  A[取指] --&gt; B[执行]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="四周期" class="level2">
+<h2 class="anchored" data-anchor-id="四周期">四周期</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  A[取指] --&gt; B[译码]
+  B --&gt; C[执行]
+  C --&gt; D[写回]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="二级流水线" class="level2">
+<h2 class="anchored" data-anchor-id="二级流水线">二级流水线</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  A[取指] --&gt; B[执行]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="六级流水线" class="level2">
+<h2 class="anchored" data-anchor-id="六级流水线">六级流水线</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  A[取指] --&gt; B[译码]
+  B --&gt; C[读寄存器]
+  C --&gt; D[执行]
+  D --&gt; E[访存]
+  E --&gt; F[写回]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="lab-6" class="level1">
+<h1>Lab 6</h1>
+<section id="btb" class="level2">
+<h2 class="anchored" data-anchor-id="btb">BTB</h2>
+<p>包括当前指令的地址<code>current_pc</code>和预测地址<code>predicted_pc</code>. ## BHT</p>
+<p>通常采用二位饱和计数器，包括当前指令的地址<code>current_pc</code>和计数器<code>taken_prediction</code></p>
+<p>BHT可以和BTB合并在一起保存，格式如：</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">current_pc</th>
+<th style="text-align: right;">predicted_pc</th>
+<th style="text-align: center;">taken_prediction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="ras" class="level2">
+<h2 class="anchored" data-anchor-id="ras">RAS</h2>
+<p>RAS仅用于函数返回地址的预测。</p>
+<p>当程序执行到分支跳转指令时，RAS判断指令是否属于<strong>函数调用</strong>类型的分支跳转指令。若遇到<em>rd = x1</em>的<code>JAL/JALR</code>指令，则RAS将返回地址入栈; 若遇到<em>rd = x0 &amp;&amp; rs1 = x1</em>的<code>JALR</code>指令，则从RAS出栈，作为函数返回地址使用。</p>
+</section>
+</section>
+<section id="lab-7" class="level1">
+<h1>Lab 7</h1>
+<section id="cache" class="level2">
+<h2 class="anchored" data-anchor-id="cache">Cache</h2>
+<section id="blocking-cache" class="level3">
+<h3 class="anchored" data-anchor-id="blocking-cache">Blocking Cache</h3>
+<p>阻塞式缓存在未命中时会向内存发出请求，<strong>等待</strong>内存响应后才能继续处理后续请求。</p>
+<p>这种方式会导致处理器停顿，降低性能。</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  A[Ready] --&gt; B[StartMiss]
+  B --&gt; C[SendFillReq]
+  C --&gt; D[WaitFillResp]
+  D --&gt; E[Resp]
+</pre>
+</div>
+</div>
+</div>
+</div>
+<ol type="1">
+<li>Ready: 处理器可以继续执行下一条指令</li>
+<li>StartMiss：处理器发出未命中请求</li>
+<li>SendFillReq：处理器发送访存请求到内存</li>
+<li>WaitFillResp：处理器等待内存响应</li>
+<li>Resp：处理器接收到内存响应</li>
+</ol>
+</section>
+<section id="nonblocking-cache" class="level3">
+<h3 class="anchored" data-anchor-id="nonblocking-cache">NonBlocking Cache</h3>
+<p>非阻塞式缓存能够在接收到未命中请求后，<strong>无须空等</strong>就能继续处理其他请求。</p>
+<p>非阻塞式缓存的实现方式是<strong>MSHR</strong>。MSHR是一个队列，用于存储未命中的请求。</p>
+<p>非阻塞式缓存的miss有三种：</p>
+<ol type="1">
+<li>primary miss：某个块的第一次miss</li>
+<li>secondary miss：对某个已经在fetch的block中又一次miss。</li>
+<li>structural-stall miss：由于MSHR数量不够导致的miss，会发生阻塞。</li>
+</ol>
+</section>
+<section id="msi" class="level3">
+<h3 class="anchored" data-anchor-id="msi">MSI</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="MSI.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">MSI</figcaption>
+</figure>
+</div>
+</section>
+<section id="mesi" class="level3">
+<h3 class="anchored" data-anchor-id="mesi">MESI</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="MESI.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">MESI</figcaption>
+</figure>
+</div>
+</section>
+<section id="mosi" class="level3">
+<h3 class="anchored" data-anchor-id="mosi">MOSI</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="MOSI.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">MOSI</figcaption>
+</figure>
+</div>
+</section>
+<section id="moesi" class="level3">
+<h3 class="anchored" data-anchor-id="moesi">MOESI</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="MOESI.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">MOESI</figcaption>
+</figure>
+</div>
 
 
+</section>
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
