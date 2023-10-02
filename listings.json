@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/Linux内核设备与模块/Linux 内核设备和模块.html",
       "/posts/数据结构与算法/数据结构与算法.html",
       "/posts/post-with-code/index.html",
       "/posts/RookieCore/index.html",

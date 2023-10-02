@@ -14,11 +14,102 @@
     "text": "Education\nInstitute of Computing Technology | Bei jing, CN Master in Computer Science | Sept 2022 - June 2025\nBeijing Jiaotong University | Bei jing, CN Bachelor in Computer Science | Sept 2018 - June 2022"
   },
   {
-    "objectID": "posts/RookieCore/index.html",
-    "href": "posts/RookieCore/index.html",
-    "title": "RookieCore",
+    "objectID": "posts/CS6.175/index.html",
+    "href": "posts/CS6.175/index.html",
+    "title": "CS6.175",
     "section": "",
-    "text": "RookieCore 是一款简单的开源RISC-V处理器，采用三级流水:取指、译码、执行。 This is a post with executable code.\n\nif语句\nif语句每个分支都必须要使用 begin..end 包围起来，并且begin与if占同一行，end独占一行。\nif (a == 1'b1) begin\n    c &lt;= b;\nend\nelse begin\n    c &lt;= a;\nend\n\n\ncase语句\ncase语句每个分支中，如果只有一行语句则不包围，否则使用 begin..end包围起来，并且begin与分支语句占同一行，end独占一行。\ncase (a)\n    b: \n        c = d;\n    e: begin\n        c = f;\n        d = f;\n    end\n    default: begin\n        c = g;\n        d = g;\n    end\nendcase\n\n\nalways语句\nalways语句必须使用 begin..end 包围起来，并且begin与always语句占同一行，end独占一行。\nalways @ (posedge clk) begin\n    a &lt;= b;\nend"
+    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#四种fifo",
+    "href": "posts/CS6.175/index.html#四种fifo",
+    "title": "CS6.175",
+    "section": "",
+    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#ehr寄存器",
+    "href": "posts/CS6.175/index.html#ehr寄存器",
+    "title": "CS6.175",
+    "section": "EHR寄存器",
+    "text": "EHR寄存器\nEHR寄存器是一种特殊的寄存器，可以同时进行寄存器的读取和写入操作，而不需要任何同步或者锁定机制，适用于流水线设计。缺点是EHR会导致关键路径过长，而且难以跟踪具体路径。\n\n\n\n\nr0\nw0\nr1\nw1\n\n\n\n\nr0\nCF\n&lt;\nCF\n&lt;\n\n\nw0\n&gt;\nC\n&lt;\n&lt;\n\n\nr1\nCF\n&gt;\nCF\n&lt;\n\n\nw1\n&gt;\n&gt;\n&gt;\nC\n\n\n\n其中，优先级依次是w1 &gt; r1 &gt; w0 &gt; r0"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#单周期",
+    "href": "posts/CS6.175/index.html#单周期",
+    "title": "CS6.175",
+    "section": "单周期",
+    "text": "单周期"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#双周期",
+    "href": "posts/CS6.175/index.html#双周期",
+    "title": "CS6.175",
+    "section": "双周期",
+    "text": "双周期\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#四周期",
+    "href": "posts/CS6.175/index.html#四周期",
+    "title": "CS6.175",
+    "section": "四周期",
+    "text": "四周期\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[执行]\n  C --&gt; D[写回]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#二级流水线",
+    "href": "posts/CS6.175/index.html#二级流水线",
+    "title": "CS6.175",
+    "section": "二级流水线",
+    "text": "二级流水线\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#六级流水线",
+    "href": "posts/CS6.175/index.html#六级流水线",
+    "title": "CS6.175",
+    "section": "六级流水线",
+    "text": "六级流水线\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[读寄存器]\n  C --&gt; D[执行]\n  D --&gt; E[访存]\n  E --&gt; F[写回]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#btb",
+    "href": "posts/CS6.175/index.html#btb",
+    "title": "CS6.175",
+    "section": "BTB",
+    "text": "BTB\n包括当前指令的地址current_pc和预测地址predicted_pc. ## BHT\n通常采用二位饱和计数器，包括当前指令的地址current_pc和计数器taken_prediction\nBHT可以和BTB合并在一起保存，格式如：\n\n\n\ncurrent_pc\npredicted_pc\ntaken_prediction"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#ras",
+    "href": "posts/CS6.175/index.html#ras",
+    "title": "CS6.175",
+    "section": "RAS",
+    "text": "RAS\nRAS仅用于函数返回地址的预测。\n当程序执行到分支跳转指令时，RAS判断指令是否属于函数调用类型的分支跳转指令。若遇到rd = x1的JAL/JALR指令，则RAS将返回地址入栈; 若遇到rd = x0 && rs1 = x1的JALR指令，则从RAS出栈，作为函数返回地址使用。"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#cache",
+    "href": "posts/CS6.175/index.html#cache",
+    "title": "CS6.175",
+    "section": "Cache",
+    "text": "Cache\n\nBlocking Cache\n阻塞式缓存在未命中时会向内存发出请求，等待内存响应后才能继续处理后续请求。\n这种方式会导致处理器停顿，降低性能。\n\n\n\n\nflowchart LR\n  A[Ready] --&gt; B[StartMiss]\n  B --&gt; C[SendFillReq]\n  C --&gt; D[WaitFillResp]\n  D --&gt; E[Resp]\n\n\n\n\n\n\nReady: 处理器可以继续执行下一条指令\nStartMiss：处理器发出未命中请求\nSendFillReq：处理器发送访存请求到内存\nWaitFillResp：处理器等待内存响应\nResp：处理器接收到内存响应\n\n\n\nNonBlocking Cache\n非阻塞式缓存能够在接收到未命中请求后，无须空等就能继续处理其他请求。\n非阻塞式缓存的实现方式是MSHR。MSHR是一个队列，用于存储未命中的请求。\n非阻塞式缓存的miss有三种：\n\nprimary miss：某个块的第一次miss\nsecondary miss：对某个已经在fetch的block中又一次miss。\nstructural-stall miss：由于MSHR数量不够导致的miss，会发生阻塞。\n\n\n\nMSI\n\n\n\nMSI\n\n\n\n\nMESI\n\n\n\nMESI\n\n\n\n\nMOSI\n\n\n\nMOSI\n\n\n\n\nMOESI\n\n\n\nMOESI"
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Post With Code",
+    "section": "",
+    "text": "This is a post with executable code."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "fywc’s Blog",
+    "section": "",
+    "text": "Linux 内核设备和模块\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n数据结构与算法\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nOct 2, 2023\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nHarlow Malloc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nRookieCore\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nCS6.175\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/数据结构与算法/数据结构与算法.html",
@@ -98,101 +189,143 @@
     "text": "Linear Data Structures\nBy employing one or a combination of the aforementioned concepts, basic data structures can be implemented, serving as the foundation for more intricate data structures. Additionally, the space and time complexities, as well as memory costs, can be readily analyzed by leveraging the complexities and costs associated with these fundamental concepts.\n\nArray\nIn Programming languages, Arrays are built-in types. Array of pointers (or array of reference types) acts like Combination of CM and DCM. For primitive types (or value types like Int, enum, struct in C#,Swift,…) if stored in stack, the behavior is like Contiguous Memory data structures. But if the primitives get boxed and be allocated in the heap, the behavior is like Combination of CM and DCM.\n\nBasic operations time complexity: Same as Contiguous Memory data structures\nGood:\n\naccessAtRandomIndex, insertAtBack, removeAtBack operations.\nBulk memory allocation (fast).\nContiguous memory. Fast access.\nIf used with primitive types (Value types), no dynamic memory allocation cost.\n\nNot good:\n\ninsertAtFront, insertAtMiddle, removeAtFront, removeAtMiddle Operations.\nFixed size.\n\nProgramming Languages implementations:\n\nCPP: Array size is compile-time constant.\n\n\n\n\n\nDynamicArray\nSimilar to array, but can grow at runtime. DynamicArray of pointers (or DynamicArray of reference types) acts like Combination of CM and DCM. For primitive types (or value types like Int, enum, struct in C#,Swift,…) the behavior is like Contiguous Memory data structures. Steps for resizing:\n\nallocate new array with new size\ncopy the old array values to the new array\ndelete the old array\n\n\nBasic operations time complexity: Same as Contiguous Memory data structures\nGood:\n\naccessAtRandomIndex, insertAtBack, removeAtBack operations.\nBulk memory allocation (fast).\nIf used with primitive types (Value types), no dynamic memory allocation cost.\n\nNot good:\n\ninsertAtFront, insertAtMiddle, removeAtFront, removeAtMiddle Operations.\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy. For example in Swift programming language, each time an array capacity is full, it double the capacity of the array.\n\nProgramming Languages implementations:\n\nCPP: Vector.\n\n\n\n\nRing Buffer\nA ring buffer is a specialized data structure implemented using an array. It is a static-sized buffer where read and write operations occur through two distinct pointers that iterate through the array in a circular manner.\n\n\nBasic operations time complexity: Same as Array with the following improvement:\n\ninsertAtFront is O(1)\nremoveAtFront is O(1)\n\nGood:\n\naccessAtRandomIndex, insert operation.\nBulk memory allocation (fast).\nIf used with primitive types (Value types), no dynamic memory allocation cost.\nAs it is fixed-size, we can map it to virtual memory layer memory page to make it super fast.\n\nNot good:\n\nFixed size.\nWrite operations may fail if the frequency of writes exceeds the frequency of reads.\n\nProgramming Languages implementations:\n\nCPP: Has no built-in implementation for LinkedList. Here is an implementation.\n\n\n\n\nLinkedList\n\n\nBasic operations time complexity: Same as Discontiguous Memory data structures with one improvement.\n\ninsertAtBack() becomes O(1) because we keep track of tail.\nremoveAtBack() stays O(n) because we have to iterate from head to index n-1 to remove n.\n\nGood:\n\ninsertAtFront, removeAtFront, insertAtBack operations.\n\nNot good:\n\naccessAtRandomIndex, removeAtBack, insertAtMiddle, removeAtMiddle Operations.\nDynamic memory allocation (slow).\n\nProgramming Languages implementations:\n\nCPP: forward_list.\n\n\n\n\n\nFreeList\nAs you have noticed, one of the Not Goods of a LinkedList data structure is dynamic memory allocation. It means, whenever you need a new node, you have to create a new one dynamically using new keyword. Dynamic memory allocation is a heavy task. One way of resolving this issue is to use FreeLists. FreeLists can be thought of as a reservoir for the LinkedList nodes. One approach is to initialize a FreeList with a sequence of nodes and whenever you need a Node for your LinkedList, you get one from the FreeList instance and when you remove a Node from the LinkedList, you will not free the memory, but return it to the FreeList reservoir to be used again later. Another approach is the following implementation for LinkedListNode with a private static freelist. In this implementation, the freelist is not initialized with an initial size but it grows as the new nodes are added.\nclass LinkListNode&lt;E&gt; {      // Singly linked list node with freelist support\n    // Extensions to support freelists\n    private static LinkListNode freelist = null;                  // Freelist for the class\n\n    private E value;       // Value for this node\n    private LinkListNode&lt;E&gt; next;    // Point to next node in list\n    // Constructors\n    LinkList(E it, LinkListNode&lt;E&gt; inn) { value = it; next = inn; }\n    LinkList(LinkListNode&lt;E&gt; inn) { value = null; next = inn; }\n\n    E element() { return value; }                        // Return the value\n    E setElement(E it) { return value = it; }            // Set element value\n    LinkListNode&lt;E&gt; next() { return next; }                     // Return next link\n    LinkListNode&lt;E&gt; setNext(LinkListNode&lt;E&gt; inn) { return next = inn; } // Set next link\n\n    // Return a new link, from freelist if possible\n    static &lt;E&gt; LinkListNode&lt;E&gt; get(E it, LinkListNode&lt;E&gt; inn) {\n      if (freelist == null) {\n        return new LinkListNode&lt;E&gt;(it, inn);                 // Get from \"new\"\n      }\n      LinkListNode&lt;E&gt; temp = freelist;                       // Get from freelist\n      freelist = freelist.next();\n      temp.setElement(it);\n      temp.setNext(inn);\n      return temp;\n    }\n\n    // Return a link node to the freelist\n    void release() {\n      value = null;   // Drop reference to the element\n      next = freelist;\n      freelist = this;\n    }\n  }\n\n\nDouble Linked List\n\n\nBasic operations time complexity: Same as Discontiguous Memory data structures with two improvements:\n\ninsertAtBack() becomes O(1).\nremoveAtBack() becomes O(1). Now we have access to n-1 from n and we can remove the pointer to n from n-1.\n\nGood:\n\ninsertAtFront, removeAtFront, insertAtBack, removeAtBack operations.\n\nNot good:\n\naccessAtRandomIndex, insertAtMiddle Operations.\nDynamic memory allocation (slow).\nHigh overhead of extra storage for the forward and back reference.\n\nProgramming Languages implementations:\n\nCPP: list is doubly linkedList.\n\n\n\n\n\nCircularLinkedList\n\n\nBasic operations time complexity: Same as LinkedList with some more capabilities.\n\nWe can traverse to a previous node\nWe can traverse in loop.\n\n\n\n\nCircularDoubleLinkedList\n\n\nBasic operations time complexity: Same as DoubleLinkedList with some more capabilities.\n\nWe can traverse to a previous node\nWe can traverse in loop in both direction.\n\n\n\n\nStack\nStack is a Last-In-First-Out(LIFO) data structure. Any data structure that is Good at insert/remove from one of the ends can be used as a container for Stack. Based on this, stacks can be implemented using DynamicArray (Good at add/remove from the back), LinkedList (Good at add/remove from front), DoubleLinkedList(Good at add/remove from both front and back) and Deque. Each implementation inherits Good and Not Good of the container data structure.\n\n\nStack via DynamicArray\n\nBasic operations time complexity: Same as DynamicArray:\nMethods:\n\npush(): insertAtBack on array container.\npop: removeAtBack on array container.\n\nGood:\n\npush() and pop() are O(1) operations.\nBulk memory allocation for pointers.\nIf used with primitive types (value types), no dynamic memory allocation cost.\n\nNot good:\n\nNew memory allocations and copy cost when internal array capacity is full.\nHas unused memory allocation based on growth strategy of the pointer array.\n\nProgramming Languages implementations:\n\nCPP: Stack. In CPP vector, deque and list(DoubleLinkedList) can be used as container for Stack.\n\n\n\n\n\nStack via LinkedList\n\nBasic operations time complexity: Same as LinkedList. We use Head of LinkedList to insert/remove.\nMethods:\n\npush(): insertAtFront on LinkedList container.\npop: removeAtFront on LinkedList container.\n\nGood:\n\npush() and pop() are O(1) operations.\n\nNot good:\n\naccessAtRandomIndex is O(n).\nDynamic memory allocation (slow).\n\n\n\n\n\nStack via Deque\nDeque data structure can be implemented using Deque via DoubleLinkedList or Deque via Array. The Deque can serve as a container for a Stack due to its behavior. C++ default container for Stack is deque.\n\n\n\nQueue\nQueue data structure is First-In-First-Out. Every data structure that is Good at addAtFront and removeAtBack or vice versa can be used as a container for Queue data structure. DoubleLinkedList(Good at add/remove at both ends) can be used as the containers for Queue data structure. Also RingBuffer can be used for fixed size queues. DynamicArray: is not a good container for queue data structure because of O(n) for insert operation. We can amortize this complexity using Queue via Double Stack (Stack via DynamicArray). Another approach is storing contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array or a LinkedList containing pointers to each of the smaller arrays. In this case, the cost of inserting reduced from O(n) to the O(small_array.length). This approach is used for deque.\n\n\nQueue via DoubleLinkedList\n\nBasic operations time complexity: DoubleLinkedList\nMethods:\n\nenqueue(): insertAtFront on DoubleLinkedList container.\ndequeue(): removeAtBack on DoubleLinkedList container.\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\n\nNot good:\n\naccessAtRandomIndex operation.\nExtra memory for forward/backward pointers.\nDynamic memory allocation (slow).\n\nProgramming Languages implementations:\n\nCPP: queue in cpp can has deque or list (DoubleLinkedList) as the container. the default container is deque.\n\n\n\n\n\nQueue via RingBuffer\n\nBasic operations time complexity: RingBuffer\nMethods:\n\nenqueue(): insertAtRandomIndex on Array container.\ndequeue(): accessAtRandomIndex on Array container.\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\nFixed size, enqueue() may fail.\n\n\n\n\n\nQueue via Double Stack\nIf we use DynamicArray as container for our queue, the dequeue() time complexity would be O(n) (Adding items to start of an array is an O(n) operation ). But we can amortize this complexity to O(1) using two stacks. LeftStack for enqueue() and the RightStack for dequeue(). Each time the LeftStack is empty, copy the RightStack contents to the LeftStack. This operation guarantees First-In-First-Out for the queue.\n\nBasic operations time complexity: Similar to Stack via DynamicArray.\nMethods:\n\nenqueue(): insertAtBack on left Array container (the enqueue stack).\ndequeue(): removeAtBack on right Array container (the dequeue stack).\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\n\n\n\n\n\nDeque\nDeque (Double-Ended Queue) are a type of Queue that enqueue() and dequeue() can happen at both ends. Every data structure that is Good at insert/remove from both ends can be used as a container for Deque data structure. The only data structure that fullfil this requirement is DoubleLinkedList. Array is not a good data structure for implementing Deque data structure directly. However we can use some tricks to use Array as a container for Deque data structure. See Deque via Array.\n\n\nDeque via DoubleLinkedList\nImplementing a Deque via DoubleLinkedList is straightforward as this data structure has O(1) for insertAtFront/removeAtFront and insertAtBack/removeAtBack operations.\n\nMethods:\n\npushBack(): insertAtBack of the DoubleLinkedList container.\npushFront(): insertAtFront of the DoubleLinkedList container.\npopBack(): removeAtBack of the DoubleLinkedList container.\npopFront(): removeAtFront of the DoubleLinkedList container.\n\nGood:\n\nEasy implementation\n\nNot Good:\n\nRandom access operation.\nDynamic memory allocation (slow).\nHigh overhead of extra storage for the forward and back references.\n\n\n\n\n\nDeque via Array\nAs it was the case for Queue data structure, Array cannot be used as a container for Deque data structure directly because insertAtFront/removeAtFront operations are not O(1) for Arrays. We can use one of the following techniques to use Array as a container:\n\nUsing a special RingBuffer.\nUsing an Array and allocating deque contents from the center of the underlying array, and resizing the underlying array when either end is reached.\nStoring contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array containing pointers to each of the smaller arrays. In this case, the cost of resizing the array in step 2 is eliminated but different small arrays are not allocated contiguously in memory.\n\n\nGood:\n\nRandom Access operation\n\nNot Good\n\nMore complex implementation\nNeed for array resize when filled\n\nProgramming Languages implementations:\n\nCPP: Deque uses approach 3 of above mentioned tricks to use Array as container for Deque. In this approach data is stored in smaller arrays and these arrays are linked using a doubleLinkedList or another array.\n\n\n\n\n\n\nPriority Queue\nPriorityQueue is the same as Queue with one difference. The dequeue operation is not for the first item that has been inserted. Instead the dequeue item is selected based on a priority criteria and the item may be at the front, the middle or the end of the collection. Any data structure that is Good at inserting at one of the ends can be used as a container for PriorityQueue. As finding the item to be dequeued includes a searching phase, for linear data structures as the container for PriorityQueue the time complexity of dequeue operation is O(n). In case of Heap data structure as the container, the time complexity reduces to O(log(n)) due to internal structure of the Heap.\n\n\nPriorityQueue via DynamicArray\n\nMethods:\n\nenqueue(): insertAtBack on Array container.\ndequeue(): iterate and then removeAtMiddle on Array container. Time complexity is O(n).\n\nGood:\n\nenqueue() is O(1) operation.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\ndequeue() operation is O(n).\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\nProgramming Languages implementations:\n\nCPP: priority_queue is using deque as a container by default. vector also can be used.\n\n\n\n\nPriorityQueue via LinkedList\n\nMethods:\n\nenqueue(): insertAtBack on Array container.\ndequeue(): iterate and then removeAtMiddle on Array container. Time complexity is O(n).\n\nGood:\n\nenqueue() is O(1) operation.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\ndequeue() operation is O(n).\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\nProgramming Languages implementations:\n\nCPP: priority_queue is using deque as a container by default. vector also can be used.\n\n\n\n\nPriorityQueue via Deque\nDeque data structure can be implemented using either Deque via DoubleLinkedList or Deque via Array and PriorityQueue can use it as a container.\n\n\nPriorityQueue via BinaryHeap\n\nMethods:\n\nenqueue(): insert on BinaryHeap container.\ndequeue(): delete on BinaryHeap container.\n\nGood:\n\ndequeue() is O(log(n)) operation.\n\nNot good:\n\nenqueue is O(log(n)) operation. In PriorityQueue via DynamicArray and PriorityQueue via LinkedList this operation is O(1).\n\n\n\n\n\nAssociative Collections\nAn associative collection is an abstract data type that stores a collection of (key, value) pairs, ensuring that each possible key appears at most once in the collection. However, there is no standardized naming convention for these types of data structures, leading to varying terminology across different programming languages, which can cause confusion. Some alternative names for associative collections include associative array, map, symbol table, or dictionary. See here.\n\nUnorderedMap or HashTable\nOther name is HashTable. The main idea behind a Hashtable is to use a hashing function to map keys to specific buckets or slots in an array. Each bucket can store one or more key-value pairs. Hash functions can occasionally generate the same index for different keys, resulting in a collision. To handle collisions efficiently, Hashtable data structures employ various strategies:\n\nEach bucket in the array is a LinkedList of key-value pairs.\nOpen addressing\nResizing the Array.\n\n‌For most data structures, a linear search is an O(n) or O(log(n)) operation. HashTable is a data structure with an amortized O(1) time complexity for searching. Length of arrays in a HashTable is a prime number.\n\n\nGood:\n\nO(1) for search operation.\n\nNot Good:\n\nCollection has no order. No Random access.\nIf LinkedList used for collision handling: Worst-case for search can be O(n) (All nodes collide). Average-case is not O(1).\n\nProgramming Languages implementations:\n\nCPP: unordered_map is an unordered collection created using HashTable. Another version is unordered_multimap that allows for repetitive keys. in the unordered_map version the keys are unique.\n\n\n\n\nSortedMap\nA collection of key-value pairs which is sorted by the key.\n\nGood:\n\nSearch is O(log(n))\nkeys are sorted.\n\nNot Good:\n\nRandom access is not O(1).\nSuitable for small number of data.\n\nProgramming Languages implementations:\n\nCPP: map uses Red-Black Tree for implementation. Another version is multimap which allows duplicate keys. In the map version, keys are unique.\n\n\n\n\nUnordered\nA collection of key-value pairs which is sorted by the key.\n\nGood:\n\nSearch is O(log(n))\nkeys are sorted.\n\nNot Good:\n\nRandom access is not O(1).\nSuitable for small number of data.\n\nProgramming Languages implementations:\n\nCPP: map uses Red-Black Tree for implementation. Another version is multimap which allows duplicate keys. In the map version, keys are unique.\n\n\n\n\nOrderedSet via HashTable and LinkedList\nIt is almost exactly like OrderedMap via HashTable and LinkedList with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.\n\nGood:\n\nOrder of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)\n\nNot Good:\n\nNo random access with O(1) because of LinkedList.\n\n\n\n\nOrderedSet via Self Balancing Tree\nIt is almost exactly like OrderedMap via HashTable and LinkedList with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.\n\nGood:\n\nOrder of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)\n\nNot Good:\n\nNo random access with O(1) because of LinkedList.\n\n\n\n\n\nStandard Library Data Structures\n\nCPP"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "fywc’s Blog",
+    "objectID": "posts/RookieCore/index.html",
+    "href": "posts/RookieCore/index.html",
+    "title": "RookieCore",
     "section": "",
-    "text": "数据结构与算法\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nOct 2, 2023\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nHarlow Malloc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nRookieCore\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nCS6.175\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\n\n\nNo matching items"
+    "text": "RookieCore 是一款简单的开源RISC-V处理器，采用三级流水:取指、译码、执行。 This is a post with executable code.\n\nif语句\nif语句每个分支都必须要使用 begin..end 包围起来，并且begin与if占同一行，end独占一行。\nif (a == 1'b1) begin\n    c &lt;= b;\nend\nelse begin\n    c &lt;= a;\nend\n\n\ncase语句\ncase语句每个分支中，如果只有一行语句则不包围，否则使用 begin..end包围起来，并且begin与分支语句占同一行，end独占一行。\ncase (a)\n    b: \n        c = d;\n    e: begin\n        c = f;\n        d = f;\n    end\n    default: begin\n        c = g;\n        d = g;\n    end\nendcase\n\n\nalways语句\nalways语句必须使用 begin..end 包围起来，并且begin与always语句占同一行，end独占一行。\nalways @ (posedge clk) begin\n    a &lt;= b;\nend"
   },
   {
-    "objectID": "posts/post-with-code/index.html",
-    "href": "posts/post-with-code/index.html",
-    "title": "Post With Code",
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
+    "title": "Linux 内核设备和模块",
     "section": "",
-    "text": "This is a post with executable code."
+    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
   },
   {
-    "objectID": "posts/welcome/index.html",
-    "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
+    "title": "Linux 内核设备和模块",
     "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
   },
   {
-    "objectID": "posts/CS6.175/index.html",
-    "href": "posts/CS6.175/index.html",
-    "title": "CS6.175",
-    "section": "",
-    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
+    "title": "Linux 内核设备和模块",
+    "section": "伪设备",
+    "text": "伪设备\n一些虚拟设备驱动，仅提供访问内核功能．\n\n内核随机数发生器\n空设备 /dev/null\n零设备 /dev/zero\n满设备 /dev/full\n内存设备 /dev/mem"
   },
   {
-    "objectID": "posts/CS6.175/index.html#四种fifo",
-    "href": "posts/CS6.175/index.html#四种fifo",
-    "title": "CS6.175",
-    "section": "",
-    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
+    "title": "Linux 内核设备和模块",
+    "section": "杂项设备",
+    "text": "杂项设备\n简写为miscdev，是对字符设备的封装，方便使用．"
   },
   {
-    "objectID": "posts/CS6.175/index.html#ehr寄存器",
-    "href": "posts/CS6.175/index.html#ehr寄存器",
-    "title": "CS6.175",
-    "section": "EHR寄存器",
-    "text": "EHR寄存器\nEHR寄存器是一种特殊的寄存器，可以同时进行寄存器的读取和写入操作，而不需要任何同步或者锁定机制，适用于流水线设计。缺点是EHR会导致关键路径过长，而且难以跟踪具体路径。\n\n\n\n\nr0\nw0\nr1\nw1\n\n\n\n\nr0\nCF\n&lt;\nCF\n&lt;\n\n\nw0\n&gt;\nC\n&lt;\n&lt;\n\n\nr1\nCF\n&gt;\nCF\n&lt;\n\n\nw1\n&gt;\n&gt;\n&gt;\nC\n\n\n\n其中，优先级依次是w1 &gt; r1 &gt; w0 &gt; r0"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
+    "title": "Linux 内核设备和模块",
+    "section": "模块",
+    "text": "模块\n内核在运行时动态向其中插入或删除代码，这些代码以模块的形式组合在一个单独的二进制镜像．"
   },
   {
-    "objectID": "posts/CS6.175/index.html#单周期",
-    "href": "posts/CS6.175/index.html#单周期",
-    "title": "CS6.175",
-    "section": "单周期",
-    "text": "单周期"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
+    "title": "Linux 内核设备和模块",
+    "section": "构建模块",
+    "text": "构建模块\n\n放在内核源码树中\n\n字符设备存放在drivers/char/\n块设备存放在drivers/block \nUSE设备存放在 drivers/usb/ \n\n添加一个字符设备fishing , 编辑drivers/char/Makefile 并加入obj-m += fishing/\n在drivers/char/fishing/下,需要添加一个新的Makefile文件：\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n这样编译内核时，也会自动编译该模块，最终编译链接完的文件名为fishing.ko \n\n\n放在内核源码树外\n假设放在/home/dev/fishing/目录中，那么修改/home/dev/fishing/Makefile :\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n编译时需要在/home/dev/fishing/目录下，然后执行:\nmake -C /mnt/disk/kernelsrc/ SUBDIRS=$PWD modules\n其中/mnt/disk/kernelsrc/就是内核源码目录"
   },
   {
-    "objectID": "posts/CS6.175/index.html#双周期",
-    "href": "posts/CS6.175/index.html#双周期",
-    "title": "CS6.175",
-    "section": "双周期",
-    "text": "双周期\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
+    "title": "Linux 内核设备和模块",
+    "section": "安装模块",
+    "text": "安装模块\n使用make modules_install"
   },
   {
-    "objectID": "posts/CS6.175/index.html#四周期",
-    "href": "posts/CS6.175/index.html#四周期",
-    "title": "CS6.175",
-    "section": "四周期",
-    "text": "四周期\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[执行]\n  C --&gt; D[写回]"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
+    "title": "Linux 内核设备和模块",
+    "section": "模块依赖性",
+    "text": "模块依赖性\nLinux模块之间存在依赖性，依赖关系存放在/libmodules/}version}/modules.dep 文件．\n使用depmod 命令产生依赖信息，-A 参数表示仅更新新模块的依赖信息."
   },
   {
-    "objectID": "posts/CS6.175/index.html#二级流水线",
-    "href": "posts/CS6.175/index.html#二级流水线",
-    "title": "CS6.175",
-    "section": "二级流水线",
-    "text": "二级流水线\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
+    "title": "Linux 内核设备和模块",
+    "section": "载入模块",
+    "text": "载入模块\ninsmod fishing.ko\nrmmod fishing.ko\nmodprobe modules\nmodprobe -r modules"
   },
   {
-    "objectID": "posts/CS6.175/index.html#六级流水线",
-    "href": "posts/CS6.175/index.html#六级流水线",
-    "title": "CS6.175",
-    "section": "六级流水线",
-    "text": "六级流水线\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[读寄存器]\n  C --&gt; D[执行]\n  D --&gt; E[访存]\n  E --&gt; F[写回]"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
+    "title": "Linux 内核设备和模块",
+    "section": "模块参数",
+    "text": "模块参数\nLinux 允许驱动程序声明参数，从而用户可以在系统启动或者模块装载时再指定参数值，这些参数对于驱动程序属于全局变量。\n模块参数会载入sysfs文件系统中，变为文件.\nmodule_param(name, type, perm);"
   },
   {
-    "objectID": "posts/CS6.175/index.html#btb",
-    "href": "posts/CS6.175/index.html#btb",
-    "title": "CS6.175",
-    "section": "BTB",
-    "text": "BTB\n包括当前指令的地址current_pc和预测地址predicted_pc. ## BHT\n通常采用二位饱和计数器，包括当前指令的地址current_pc和计数器taken_prediction\nBHT可以和BTB合并在一起保存，格式如：\n\n\n\ncurrent_pc\npredicted_pc\ntaken_prediction"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
+    "title": "Linux 内核设备和模块",
+    "section": "导出符号表",
+    "text": "导出符号表\n模块被载入后，就会被动态地连接(link)到内核，连接过程需要借助内核导出的符号表来访问内核函数。\n只有被显式导出的内核函数，才能被模块调用（类似动态链接库）。\n使用 EXPORT_SYMBOL()和EXPORT_SYMBOL_GPL() 可以在内核源码中显式导出内核函数：\nint get_pirate_beard_color(struct pirate *p)\n{\n  return p-&gt;beard.color;\n}\nEXPORT_SYMBOL(get_pirate_beard_color);\n导出的内核符号表被看作导出的内核接口，称为内核API"
   },
   {
-    "objectID": "posts/CS6.175/index.html#ras",
-    "href": "posts/CS6.175/index.html#ras",
-    "title": "CS6.175",
-    "section": "RAS",
-    "text": "RAS\nRAS仅用于函数返回地址的预测。\n当程序执行到分支跳转指令时，RAS判断指令是否属于函数调用类型的分支跳转指令。若遇到rd = x1的JAL/JALR指令，则RAS将返回地址入栈; 若遇到rd = x0 && rs1 = x1的JALR指令，则从RAS出栈，作为函数返回地址使用。"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
+    "title": "Linux 内核设备和模块",
+    "section": "设备模型",
+    "text": "设备模型\n设备模型提供了一个独立的机制专门来表示设备，并描述其在系统中的拓扑结构，从而使得系统具有以下优点:\n\n代码重复最小化\n提供诸如引用计数等统一机制\n可以列举系统中所有的设备，观察它们的状态，并且查看它们连接的总线。\n可以将系统中的全部设备结构以树的形式完整、有效地展现出来——包括所有的总线和内部连接。\n可以将设备和其对应的驱动联系起来，反之亦然。\n可以将设备按照类型加以归类，比如分类为输入设备，而无需理解物理设备的拓扑结构。\n可以沿设备树的叶子向其根的方向依次遍历，以保证能以正确顺序关闭各设备的电源。\n\n\nkobject\nkobject 类似于面向对象中的基类，设备类继承该类\n// include/linux/kobject.h\nstruct kobject {\n  const char    *name;\n  struct list_head  entry;\n  struct kobject    *parent;// 父对象指针，用于表达设备树中的层次关系\n  struct kset    *kset;\n  struct kobj_type  *ktype;\n  struct sysfs_dirent  *sd; // sysfs的dirent对象指针，指向本对象(本对象在sysfs中其实是一个文件)\n  struct kref    kref;// 引用计数\n  unsigned int state_initialized:1;\n  unsigned int state_in_sysfs:1;\n  unsigned int state_add_uevent_sent:1;\n  unsigned int state_remove_uevent_sent:1;\n  unsigned int uevent_suppress:1;\n};\nkobject的一个派生类是cdev ,表示字符设备:\nstruct cdev\n{\n  struct kobject kobj; // 嵌入kobject表示继承，必须放在结构体开头实现多态\n  // 后面为该类的特有成员\n  struct module *owner;\n  const struct file_operations *ops;\n  struct list_head list;\n  dev_t dev;\n  unsigned int count;\n};\n\n\nktype\nkobject 的成员 ktype 表示本 kobject 的类型，多个 kobject 可以关联同一个 ktype，描述一类 kobject 所具有的普遍特性。\n// include/linux/kobject.h\nstruct kobj_type {\n  void (*release)(struct kobject *kobj); // 引用计数归0时的析构函数，也就是同类kobject通用\n  const struct sysfs_ops *sysfs_ops; // sysfs 的操作方法\n  struct attribute **default_attrs; // 属性，是个数组\n  const struct kobj_ns_type_operations *(*child_ns_type)(struct kobject *kobj);\n  const void *(*namespace)(struct kobject *kobj);\n};\n\n\nkset\nkset 用于对诸多 kobject 及其派生类对象进行分组（分组和 ktype 无关，即使 ktype 相同的也能分到不同组中）。分组依据比如“全部的块设备”，kset 的存在让分组更灵活，而不受限于相同或是不同的 ktype。\nkset 的存在是为了将 kobject 分组映射为 sysfs 中的目录关系信息.\n// include/linux/kobject.h\nstruct kset {\n  struct list_head list; // 链表，连接该kset管理的所有组内kobj，指向kobj链表上的第一个节点\n  spinlock_t list_lock; // 保护链表的自旋锁\n  struct kobject kobj; // 作为组内的所有kobject的基类,这是kset的一大功能\n  const struct kset_uevent_ops *uevent_ops; // 用于处理集合中kobject对象的热插拔操作\n};\nkset 对象作为链表头连接一组 kobject（kobj 之间通过 kobject 内的 entry 成员连接）："
   },
   {
-    "objectID": "posts/CS6.175/index.html#cache",
-    "href": "posts/CS6.175/index.html#cache",
-    "title": "CS6.175",
-    "section": "Cache",
-    "text": "Cache\n\nBlocking Cache\n阻塞式缓存在未命中时会向内存发出请求，等待内存响应后才能继续处理后续请求。\n这种方式会导致处理器停顿，降低性能。\n\n\n\n\nflowchart LR\n  A[Ready] --&gt; B[StartMiss]\n  B --&gt; C[SendFillReq]\n  C --&gt; D[WaitFillResp]\n  D --&gt; E[Resp]\n\n\n\n\n\n\nReady: 处理器可以继续执行下一条指令\nStartMiss：处理器发出未命中请求\nSendFillReq：处理器发送访存请求到内存\nWaitFillResp：处理器等待内存响应\nResp：处理器接收到内存响应\n\n\n\nNonBlocking Cache\n非阻塞式缓存能够在接收到未命中请求后，无须空等就能继续处理其他请求。\n非阻塞式缓存的实现方式是MSHR。MSHR是一个队列，用于存储未命中的请求。\n非阻塞式缓存的miss有三种：\n\nprimary miss：某个块的第一次miss\nsecondary miss：对某个已经在fetch的block中又一次miss。\nstructural-stall miss：由于MSHR数量不够导致的miss，会发生阻塞。\n\n\n\nMSI\n\n\n\nMSI\n\n\n\n\nMESI\n\n\n\nMESI\n\n\n\n\nMOSI\n\n\n\nMOSI\n\n\n\n\nMOESI\n\n\n\nMOESI"
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
+    "title": "Linux 内核设备和模块",
+    "section": "引用计数",
+    "text": "引用计数\n类似于高级语言的gc机制，当引用数为０时回收对象.\nkref结构：\n// include/linux/kref.h\nstruct kref {\n  atomic_t refcount;\n};\n引用计数操作方法：\nstruct kobject *kobject_get(struct kobject *kobj);\nvoid kobject_put(struct kobject *kobj);"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
+    "title": "Linux 内核设备和模块",
+    "section": "sysfs中添加和删除kobject",
+    "text": "sysfs中添加和删除kobject\nkobject默认初始化后并不关联到sysfs,需要使用kobject_add() ．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
+    "title": "Linux 内核设备和模块",
+    "section": "向sysfs中添加文件(attr)",
+    "text": "向sysfs中添加文件(attr)\nkobject对应sysfs中的目录，而kobject对象中的default_attr数组对应sysfs中的文件．\n该数组负责将内核数据映射成sysfs中的文件．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
+    "title": "Linux 内核设备和模块",
+    "section": "默认文件",
+    "text": "默认文件\nkobject对象中的成员default_attrs 数组表示目录下的默认文件，sysfs_ops成员则描述了如何使用这些文件：\n// include/linux/sysfs.h\nstruct sysfs_ops {\n  // 读取文件,从kobj（表示目录）和attr（表示文件）中，读取数据到buf中\n  ssize_t  (*show)(struct kobject *kobj, struct attribute *attr,char *buf);\n  // 写入文件\n  ssize_t  (*store)(struct kobject *,struct attribute *,const char *, size_t);\n  const void *(*namespace)(struct kobject *, const struct attribute *);\n};"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
+    "title": "Linux 内核设备和模块",
+    "section": "文件的创建与修改",
+    "text": "文件的创建与修改\n一般而言，相同 ktype 的 kobject 的 default_attrs 都是相同的，也就是这些目录下的文件组织结构(文件名，权限)都相同。\n//　创建文件\nint sysfs_create_file(struct kobject *kobj, const struct attribute tattr);\n//  创建符号链接\nint sysfs_create_link(struct kobject *kobj, struct kobject *target, char *name);\n//  删除新文件\nvoid sysfs_remove_file(struct kobject *kobj, const struct attribute *attr);\n//  删除符号链接\nvoid sysfs_remove_link(struct kobject *kobj, char *name) ;"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
+    "title": "Linux 内核设备和模块",
+    "section": "sysfs约定　",
+    "text": "sysfs约定　\n\n一值一文件：sysfs 属性应该保证每个文件只导出一个值，该值应该是文本形式而且映射为简单 C 类型。避免文件内容过于复杂，这样使用 shell 或 C 语言读取写入该文件就会简单得多。\n清晰的层次组织数据\nsysfs 提供内核到用户空间的服务\nsysfs 已经取代 ioctl() 和 procfs，尽可能得使用 sysfs 操作内核变量"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
+    "title": "Linux 内核设备和模块",
+    "section": "内核事件层",
+    "text": "内核事件层\n内核事件层实现了内核到用户的消息通知系统（通过 kobject 和 sysfs）\n事件是实现异步操作的必要组成部分，常见事件如硬盘满了，处理器过热了，分区挂载了。\n每个事件源都是一个 sysfs 路径，比如一个硬盘通知事件源为 /sys/block/hda。\n内核事件由内核空间传递到用户空间需要经过netlink（netlink 是一个用于传送网络信息的多点传送套接字）。使用示例：在用户空间实现一个系统后台服务用于监听套接字(socket)，处理任何读到的信息，并将事件传送到系统栈里，通过该方法也能实现将事件整合入 D-BUS。\n在内核代码中向用户空间发送信号使用函数kobject_uevent(), 最终事件就是包含 kobject 对应的 sysfs 路径和信号动作的字符串。"
   }
 ]
