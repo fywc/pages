@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="fywc">
+<meta name="dcterms.date" content="2023-10-02">
+
+<title>fywc’s Blog - 数据结构与算法</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">fywc’s Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">fywc</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">数据结构与算法</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">news</div>
+                <div class="quarto-category">code</div>
+                <div class="quarto-category">analysis</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>fywc </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">October 2, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="数据结构与算法" class="level1">
+<h1>数据结构与算法</h1>
+<section id="目录" class="level2">
+<h2 class="anchored" data-anchor-id="目录">目录</h2>
+<ul>
+<li><a href="#Memory">Memory</a>
+<ul>
+<li><a href="#Physical-Layer">Physical Layer</a></li>
+<li><a href="#Virtual-Layer">Virtual Layer</a>
+<ul>
+<li><a href="#Location">Location:</a></li>
+</ul></li>
+<li><a href="#Arrangement">Arrangement</a></li>
+</ul></li>
+<li><a href="#Algorithm">Algorithm</a>
+<ul>
+<li><a href="#Fundamental-operations">Fundamental operations</a>
+<ul>
+<li><a href="#Fundamental-Algorithms">Fundamental Algorithms</a>
+<ul>
+<li><a href="#Sorting-algorithms">Sorting algorithms</a></li>
+</ul></li>
+<li><a href="#Searching-Algorithm">Searching Algorithm</a></li>
+</ul></li>
+<li><a href="#Algorithm-Design-Techniques">Algorithm Design Techniques</a></li>
+</ul></li>
+<li><a href="#Data-Structures">Data Structures</a>
+<ul>
+<li><a href="#Contiguous-Memory-Data-Structures">Contiguous Memory Data Structures</a></li>
+<li><a href="#Discontiguous-Memory-Data-Structures">Discontiguous Memory Data Structures</a></li>
+<li><a href="#Combination-of-CM-and-DCM">Combination of CM and DCM</a></li>
+<li><a href="#Linear-Data-Structures">Linear Data Structures</a>
+<ul>
+<li><a href="#Array">Array</a></li>
+<li><a href="#DynamicArray">DynamicArray</a></li>
+<li><a href="#Ring-Buffer">Ring Buffer</a></li>
+<li><a href="#LinkedList">LinkedList</a></li>
+<li><a href="#FreeList">FreeList</a></li>
+<li><a href="#Double-Linked-List">Double Linked List</a></li>
+<li><a href="#CircularLinkedList">CircularLinkedList</a></li>
+<li><a href="#CircularDoubleLinkedList">CircularDoubleLinkedList</a></li>
+<li><a href="#Stack">Stack</a>
+<ul>
+<li><a href="#Stack-via-DynamicArray">Stack via DynamicArray</a></li>
+<li><a href="#Stack-via-LinkedList">Stack via LinkedList</a></li>
+<li><a href="#Stack-via-Deque">Stack via Deque</a></li>
+</ul></li>
+<li><a href="#Queue">Queue</a>
+<ul>
+<li><a href="#Queue-via-DoubleLinkedList">Queue via DoubleLinkedList</a></li>
+<li><a href="#Queue-via-RingBuffer">Queue via RingBuffer</a></li>
+<li><a href="#Queue-via-Double-Stack">Queue via Double Stack</a></li>
+</ul></li>
+<li><a href="#Deque">Deque</a>
+<ul>
+<li><a href="#Deque-via-DoubleLinkedList">Deque via DoubleLinkedList</a></li>
+<li><a href="#Deque-via-Array">Deque via Array</a></li>
+</ul></li>
+<li><a href="#Priority-Queue">Priority Queue</a>
+<ul>
+<li><a href="#PriorityQueue-via-DynamicArray">PriorityQueue via DynamicArray</a></li>
+<li><a href="#PriorityQueue-via-LinkedList">PriorityQueue via LinkedList</a></li>
+<li><a href="#PriorityQueue-via-Deque">PriorityQueue via Deque</a></li>
+<li><a href="#PriorityQueue-via-BinaryHeap">PriorityQueue via BinaryHeap</a></li>
+</ul></li>
+<li><a href="#Associative-Collections">Associative Collections</a>
+<ul>
+<li><a href="#UnorderedMap-or-HashTable">UnorderedMap or HashTable</a></li>
+<li><a href="#SortedMap">SortedMap</a></li>
+<li><a href="#Unordered">Unordered</a></li>
+<li><a href="#OrderedSet-via-HashTable-and-LinkedList">OrderedSet via HashTable and LinkedList</a></li>
+<li><a href="#OrderedSet-via-Self-Balancing-Tree">OrderedSet via Self Balancing Tree</a></li>
+</ul></li>
+<li><a href="#Standard-Library-Data-Structures">Standard Library Data Structures</a>
+<ul>
+<li><a href="#CPP">CPP</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="memory" class="level1">
+<h1>Memory</h1>
+<section id="physical-layer" class="level2">
+<h2 class="anchored" data-anchor-id="physical-layer">Physical Layer</h2>
+<p>The physical layer of a computer system is responsible for the actual storage and retrieval of data in electronic or magnetic form. Memory in the physical layer is organized hierarchically, with different types and levels of memory. Types of Memory in the Physical Layer:</p>
+<ul>
+<li>Registers</li>
+<li>Cache Memory</li>
+<li>Main Memory(Random Access Memory: RAM)</li>
+<li>Secondary Memories: (HDD, SSD)</li>
+</ul>
+<p>Physical memory is invisible to programs in virtual memory systems and as a programmer you’re not required to reason about it.</p>
+</section>
+<section id="virtual-layer" class="level2">
+<h2 class="anchored" data-anchor-id="virtual-layer">Virtual Layer</h2>
+<section id="location" class="level3">
+<h3 class="anchored" data-anchor-id="location">Location:</h3>
+<ul>
+<li><code>Stack</code> : Fast allocation. Faster access.
+<ul>
+<li>Moving just an integer pointer for allocates/de-allocates memory.</li>
+</ul></li>
+<li><code>Heap</code> : Slow Allocation. Slower access
+<ul>
+<li>Search Heap</li>
+<li>Sync heap for other threads</li>
+<li>Allocate memory</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="arrangement" class="level2">
+<h2 class="anchored" data-anchor-id="arrangement">Arrangement</h2>
+<ul>
+<li><code>Contiguous</code> Bulk allocation in continuous memory block. (faster access).</li>
+<li><code>Discontiguous</code> Dynamic allocation in separated memory blocks.(slower access).</li>
+</ul>
+</section>
+</section>
+<section id="algorithm" class="level1">
+<h1>Algorithm</h1>
+<p>At the core of all algorithms are the fundamental operations that involve <code>accessing</code> and potentially <code>mutating</code> the data blocks, regardless of how we arrange our data-blocks in memory and what are the logical connections between them. At this level, all algorithms can be reduced to one or some of the following operations.</p>
+<section id="fundamental-operations" class="level2">
+<h2 class="anchored" data-anchor-id="fundamental-operations">Fundamental operations</h2>
+<ul>
+<li><code>read</code>
+<ul>
+<li>accessDataBySequence() (Either forward or backward)</li>
+<li>getIndexingInformation(): <code>getStartIndex()</code>, <code>getEndIndex()</code>, <code>getNextIndex(forIndex)</code>, <code>getPreviousIndex(forIndex)</code></li>
+<li>accessDataAtRandomIndex(:): For Random access, time complexity should be of order <code>O(1)</code>.</li>
+<li>accessDataAtFront()</li>
+<li>accessDataAtBack()</li>
+</ul></li>
+<li><code>write</code>
+<ul>
+<li>insertDataAtRandomIndex(:)</li>
+<li>insertDataAtFront()</li>
+<li>insertDataAtBack()</li>
+<li>removeDataAtRandomIndex(:)</li>
+<li>removeDataAtFront()</li>
+<li>removeDataAtBack()</li>
+<li>updateDataAtRandomIndex(:)</li>
+<li>updateDataAtFront()</li>
+<li>updateDataAtBack()</li>
+</ul></li>
+</ul>
+<p>For example, <code>Linear search</code> algorithm uses <code>accessDataBySequence</code> and compare each item with a specified value to find the answer while <code>Binary search</code> algorithm needs <code>accessDataAtRandomIndex</code> operation. </p>
+<p>A note on <code>Random Access</code>: In the context of data structures, random access refers to the ability to instantly access a specific location. With <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a>, for instance, if you select a random index, the Array data structure can immediately provide you with the address of that index. However, if you attempt to access a random index in a <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#linkedlist" title="LinkedList">LinkedList</a>, the data structure cannot instantaneously provide the address. Instead, it must iterate from the beginning (starting from head) until it reaches the desired index. Consequently, LinkedLists are considered to have a time complexity of <code>O(n)</code> (Upper bound) for random access operation. Most algorithms require <code>O(1)</code> random access, and languages such as Java have introduced a marker interface(with no methods) called <a href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/RandomAccess.java" title="RandomAccess">RandomAccess</a>. This interface serves as a reminder that certain algorithms rely on random access. To ensure that these algorithms perform efficiently with your data structure, it is necessary to make it compatible with random access. </p>
+<section id="fundamental-algorithms" class="level3">
+<h3 class="anchored" data-anchor-id="fundamental-algorithms">Fundamental Algorithms</h3>
+<p>Fundamental operations form the building blocks upon which algorithms are constructed. Conversely, certain algorithms play fundamental rules for other algorithms. Take, for instance, the impact of input data order on the time efficiency of algorithms. Sorting the data beforehand can greatly simplify our lives, as it has a significant positive effect on the efficiency of numerous algorithms. Sorting can be accomplished through two methods. The first method involves utilizing a sorting algorithm to arrange an unsorted collection. The second method involves utilizing specific data structures, such as binary search trees, that facilitate the sorting of data through amortization.</p>
+<section id="sorting-algorithms" class="level4">
+<h4 class="anchored" data-anchor-id="sorting-algorithms">Sorting algorithms</h4>
+<p>All sort algorithms need <code>getIndexingInformation</code>, <code>accessDataAtRandomIndex(:)</code> operations. Also items must be comparable.</p>
+<ul>
+<li>In-place sorting algorithms: They need <code>updateDataAtRandomIndex(:)</code> operation.
+<ol type="1">
+<li>Bubble sort</li>
+<li>Selection sor</li>
+<li>Insertion sort</li>
+<li>Heap sort</li>
+<li>Quick sort</li>
+</ol></li>
+<li>Not In-Place Sorting Algorithms:
+<ol type="1">
+<li>Merge sort</li>
+<li>Radix sort (non-comparison)</li>
+<li>Bucket sort (non-comparison)</li>
+</ol></li>
+</ul>
+</section>
+</section>
+<section id="searching-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="searching-algorithm">Searching Algorithm</h3>
+<ul>
+<li>Linear search: needs <code>accessDataBySequence()</code></li>
+<li>Binary search: needs <code>accessDataAtRandomIndex(:)</code> with <code>O(1)</code></li>
+</ul>
+</section>
+</section>
+<section id="algorithm-design-techniques" class="level2">
+<h2 class="anchored" data-anchor-id="algorithm-design-techniques">Algorithm Design Techniques</h2>
+<ul>
+<li>Divide and conquer</li>
+<li>Recursion</li>
+<li>Randomized algorithms: Input MUST be RANDOM.</li>
+<li>Dynamic programming</li>
+<li>Greedy algorithms</li>
+</ul>
+</section>
+</section>
+<section id="data-structures" class="level1">
+<h1>Data Structures</h1>
+<p>Each data structure has the following characteristics:</p>
+<ul>
+<li><code>Virtual layer Memory management</code> at the virtual layer.</li>
+<li><code>Logical connection</code> between data-blocks, either <code>implicit</code> or <code>explicit</code>.
+<ul>
+<li>Implicit: In an <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a> data-blocks have no direct connection, but implicitly they are arranged in a specific order contiguously in memory.</li>
+<li>Explicit: In <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#linkedlist" title="LinkedList">LinkedList</a> the blocks may not be stored contiguously in memory, but each node has the connection information to some other nodes.</li>
+</ul></li>
+<li><code>Rules</code> for applying basic operations.</li>
+<li>Provides basic <code>read</code> and <code>write</code> operations with a space/time complexity. The space/time complexities for data structures for basic operations can easily be analyzed using the following concepts: <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#contiguous-memory-data-structures" title="Contiguous Memory data structures">Contiguous Memory data structures</a> and <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#discontiguous-memory-data-structures" title="Discontiguous Memory data structures">Discontiguous Memory data structures</a></li>
+</ul>
+<section id="contiguous-memory-data-structures" class="level2">
+<h2 class="anchored" data-anchor-id="contiguous-memory-data-structures">Contiguous Memory Data Structures</h2>
+<ul>
+<li>Init with fixed size. size stays fixed.</li>
+<li>Address of each block can be calculated via: <code>start + k * blocksize</code>. Random access time complexity is <code>O(1)</code></li>
+<li>Bulk memory allocation</li>
+<li>Same size memory blocks (Same type)</li>
+<li>Base data Structure example: Array</li>
+</ul>
+<p><img src="image/image_UqHOby5CGV.png" class="img-fluid"></p>
+</section>
+<section id="discontiguous-memory-data-structures" class="level2">
+<h2 class="anchored" data-anchor-id="discontiguous-memory-data-structures">Discontiguous Memory Data Structures</h2>
+<ul>
+<li>This arrangement is a special kind of Graph (We can represent graphs using it).</li>
+<li>Each block contains the address of next block.</li>
+<li>Time complexity for random access operation is <code>O(n)</code></li>
+<li>Dynamic memory allocation</li>
+<li>Memory block sizes can be different (Different types).</li>
+<li>Base data structure example: LinkedList</li>
+</ul>
+<p><img src="image/image_HkRM0zHDUo.png" class="img-fluid"></p>
+</section>
+<section id="combination-of-cm-and-dcm" class="level2">
+<h2 class="anchored" data-anchor-id="combination-of-cm-and-dcm">Combination of CM and DCM</h2>
+<ul>
+<li>A contiguous-memory array of pointers to contiguous-memory or discontiguous-memory collection of objects.</li>
+<li>Time complexity for random access operations is <code>O(1)</code> (via array of pointers) but accessing objects in non-continuous memory have a little overhead.</li>
+<li>Bulk memory allocation for address (pointer) array, dynamic memory allocation for objects.</li>
+<li>Objects can have different memory sizes (different types).</li>
+<li>Base data structure example: An array of referenced objects in most programming languages.</li>
+</ul>
+<p><img src="image/image_Cc5pOtoL9Z.png" class="img-fluid"></p>
+</section>
+<section id="linear-data-structures" class="level2">
+<h2 class="anchored" data-anchor-id="linear-data-structures">Linear Data Structures</h2>
+<p>By employing one or a combination of the aforementioned concepts, basic data structures can be implemented, serving as the foundation for more intricate data structures. Additionally, the space and time complexities, as well as memory costs, can be readily analyzed by leveraging the complexities and costs associated with these fundamental concepts.</p>
+<section id="array" class="level3">
+<h3 class="anchored" data-anchor-id="array">Array</h3>
+<p>In Programming languages, Arrays are built-in types. Array of pointers (or array of reference types) acts like <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#combination-of-cm-and-dcm" title="Combination of CM and DCM">Combination of CM and DCM</a>. For primitive types (or value types like Int, enum, struct in C#,Swift,…) if stored in stack, the behavior is like <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#contiguous-memory-data-structures" title="Contiguous Memory data structures">Contiguous Memory data structures</a>. But if the primitives get boxed and be allocated in the heap, the behavior is like <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#combination-of-cm-and-dcm" title="Combination of CM and DCM">Combination of CM and DCM</a>.</p>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#contiguous-memory-data-structures" title="Contiguous Memory data structures">Contiguous Memory data structures</a></li>
+<li><code>Good</code>:
+<ul>
+<li><code>accessAtRandomIndex</code>, <code>insertAtBack</code>, <code>removeAtBack</code> operations.</li>
+<li>Bulk memory allocation (fast).</li>
+<li>Contiguous memory. Fast access.</li>
+<li>If used with primitive types (Value types), no dynamic memory allocation cost.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>insertAtFront</code>, <code>insertAtMiddle</code>, <code>removeAtFront</code>, <code>removeAtMiddle</code> Operations.</li>
+<li>Fixed size.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/array/array/" title="Array">Array</a> size is compile-time constant.</li>
+</ul></li>
+</ul>
+<p><img src="image/Array_ManimCE_v0.17.3_knhxeg_EiAPJt4SU_.gif" class="img-fluid"></p>
+</section>
+<section id="dynamicarray" class="level3">
+<h3 class="anchored" data-anchor-id="dynamicarray">DynamicArray</h3>
+<p>Similar to array, but can grow at runtime. DynamicArray of pointers (or DynamicArray of reference types) acts like <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#combination-of-cm-and-dcm" title="Combination of CM and DCM">Combination of CM and DCM</a>. For primitive types (or value types like Int, enum, struct in C#,Swift,…) the behavior is like <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#contiguous-memory-data-structures" title="Contiguous Memory data structures">Contiguous Memory data structures</a>. Steps for resizing:</p>
+<ol type="1">
+<li>allocate new array with new size</li>
+<li>copy the old array values to the new array</li>
+<li>delete the old array</li>
+</ol>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#contiguous-memory-data-structures" title="Contiguous Memory data structures">Contiguous Memory data structures</a></li>
+<li><code>Good</code>:
+<ul>
+<li><code>accessAtRandomIndex</code>, <code>insertAtBack</code>, <code>removeAtBack</code> operations.</li>
+<li>Bulk memory allocation (fast).</li>
+<li>If used with primitive types (Value types), no dynamic memory allocation cost.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>insertAtFront</code>, <code>insertAtMiddle</code>, <code>removeAtFront</code>, <code>removeAtMiddle</code> Operations.</li>
+<li>New memory allocations and copy cost when capacity is full.</li>
+<li>Has unused memory allocation based on growth strategy. For example in Swift programming language, each time an array capacity is full, it double the capacity of the array.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/vector/vector/" title="Vector">Vector</a>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="ring-buffer" class="level3">
+<h3 class="anchored" data-anchor-id="ring-buffer">Ring Buffer</h3>
+<p>A ring buffer is a specialized data structure implemented using an array. It is a static-sized buffer where read and write operations occur through two distinct pointers that iterate through the array in a circular manner.</p>
+<p><img src="image/RingBuffer_ManimCE_v0.17.3_iptgwj_3B273S8e7s.gif" class="img-fluid"></p>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a> with the following improvement:
+<ul>
+<li><code>insertAtFront</code> is <code>O(1)</code></li>
+<li><code>removeAtFront</code> is <code>O(1)</code></li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>accessAtRandomIndex</code>, <code>insert</code> operation.</li>
+<li>Bulk memory allocation (fast).</li>
+<li>If used with primitive types (Value types), no dynamic memory allocation cost.</li>
+<li>As it is fixed-size, we can map it to virtual memory layer memory page to make it super fast.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li>Fixed size.</li>
+<li>Write operations may fail if the frequency of writes exceeds the frequency of reads.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: Has no built-in implementation for LinkedList. <a href="https://www.boost.org/doc/libs/1_77_0/doc/html/circular_buffer.html" title="Here">Here</a> is an implementation.</li>
+</ul></li>
+</ul>
+</section>
+<section id="linkedlist" class="level3">
+<h3 class="anchored" data-anchor-id="linkedlist">LinkedList</h3>
+<p><img src="image/image_XD-c5UyhIR.png" class="img-fluid"></p>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#discontiguous-memory-data-structures" title="Discontiguous Memory data structures">Discontiguous Memory data structures</a> with one improvement.
+<ul>
+<li><code>insertAtBack()</code> becomes <code>O(1)</code> because we keep track of tail.</li>
+<li><code>removeAtBack()</code> stays <code>O(n)</code> because we have to iterate from head to index n-1 to remove n.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>insertAtFront</code>, <code>removeAtFront</code>, <code>insertAtBack</code> operations.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>accessAtRandomIndex</code>, <code>removeAtBack</code>, <code>insertAtMiddle</code>, <code>removeAtMiddle</code> Operations.</li>
+<li>Dynamic memory allocation (slow).</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/forward_list/forward_list/" title="forward_list">forward_list</a>.</li>
+</ul></li>
+</ul>
+<p><img src="image/LinkedList_ManimCE_v0.17.3_lh89av_fdt9eTOf5-.gif" class="img-fluid"></p>
+</section>
+<section id="freelist" class="level3">
+<h3 class="anchored" data-anchor-id="freelist">FreeList</h3>
+<p>As you have noticed, one of the <code>Not Good</code>s of a LinkedList data structure is dynamic memory allocation. It means, whenever you need a new node, you have to create a new one dynamically using <code>new</code> keyword. Dynamic memory allocation is a heavy task. One way of resolving this issue is to use FreeLists. FreeLists can be thought of as a reservoir for the LinkedList nodes. One approach is to initialize a FreeList with a sequence of nodes and whenever you need a Node for your LinkedList, you get one from the FreeList instance and when you remove a Node from the LinkedList, you will not free the memory, but return it to the FreeList reservoir to be used again later. Another approach is the following implementation for LinkedListNode with a private static freelist. In this implementation, the freelist is not initialized with an initial size but it grows as the new nodes are added.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> <span class="op">{</span>      <span class="co">// Singly linked list node with freelist support</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Extensions to support freelists</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="at">static</span> LinkListNode freelist <span class="op">=</span> null<span class="op">;</span>                  <span class="co">// Freelist for the class</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> E value<span class="op">;</span>       <span class="co">// Value for this node</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> next<span class="op">;</span>    <span class="co">// Point to next node in list</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Constructors</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    LinkList<span class="op">(</span>E it<span class="op">,</span> LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> inn<span class="op">)</span> <span class="op">{</span> value <span class="op">=</span> it<span class="op">;</span> next <span class="op">=</span> inn<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    LinkList<span class="op">(</span>LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> inn<span class="op">)</span> <span class="op">{</span> value <span class="op">=</span> null<span class="op">;</span> next <span class="op">=</span> inn<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    E element<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> value<span class="op">;</span> <span class="op">}</span>                        <span class="co">// Return the value</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    E setElement<span class="op">(</span>E it<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> value <span class="op">=</span> it<span class="op">;</span> <span class="op">}</span>            <span class="co">// Set element value</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> next<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> next<span class="op">;</span> <span class="op">}</span>                     <span class="co">// Return next link</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> setNext<span class="op">(</span>LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> inn<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> next <span class="op">=</span> inn<span class="op">;</span> <span class="op">}</span> <span class="co">// Set next link</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Return a new link, from freelist if possible</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">static</span> <span class="op">&lt;</span>E<span class="op">&gt;</span> LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> get<span class="op">(</span>E it<span class="op">,</span> LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> inn<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>freelist <span class="op">==</span> null<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="kw">new</span> LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;(</span>it<span class="op">,</span> inn<span class="op">);</span>                 <span class="co">// Get from "new"</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>      LinkListNode<span class="op">&lt;</span>E<span class="op">&gt;</span> temp <span class="op">=</span> freelist<span class="op">;</span>                       <span class="co">// Get from freelist</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>      freelist <span class="op">=</span> freelist<span class="op">.</span>next<span class="op">();</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      temp<span class="op">.</span>setElement<span class="op">(</span>it<span class="op">);</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      temp<span class="op">.</span>setNext<span class="op">(</span>inn<span class="op">);</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> temp<span class="op">;</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Return a link node to the freelist</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> release<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>      value <span class="op">=</span> null<span class="op">;</span>   <span class="co">// Drop reference to the element</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>      next <span class="op">=</span> freelist<span class="op">;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>      freelist <span class="op">=</span> <span class="kw">this</span><span class="op">;</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="double-linked-list" class="level3">
+<h3 class="anchored" data-anchor-id="double-linked-list">Double Linked List</h3>
+<p><img src="image/image_ZDAtbslsFO.png" class="img-fluid"></p>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#discontiguous-memory-data-structures" title="Discontiguous Memory data structures">Discontiguous Memory data structures</a> with two improvements:
+<ul>
+<li><code>insertAtBack()</code> becomes <code>O(1)</code>.</li>
+<li><code>removeAtBack()</code> becomes <code>O(1)</code>. Now we have access to n-1 from n and we can remove the pointer to n from n-1.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>insertAtFront</code>, <code>removeAtFront</code>, <code>insertAtBack</code>, <code>removeAtBack</code> operations.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>accessAtRandomIndex</code>, <code>insertAtMiddle</code> Operations.</li>
+<li>Dynamic memory allocation (slow).</li>
+<li>High overhead of extra storage for the forward and back reference.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/list/list/" title="list">list</a> is doubly linkedList.</li>
+</ul></li>
+</ul>
+<p><img src="image/DoubleLinkedList_ManimCE_v0.17.3_dyltfy_Bwbs7cARBa.gif" class="img-fluid"></p>
+</section>
+<section id="circularlinkedlist" class="level3">
+<h3 class="anchored" data-anchor-id="circularlinkedlist">CircularLinkedList</h3>
+<p><img src="image/image_0kpWw3rlOY.png" class="img-fluid"></p>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#linkedlist" title="LinkedList">LinkedList</a> with some more capabilities.
+<ul>
+<li>We can traverse to a previous node</li>
+<li>We can traverse in loop.</li>
+</ul></li>
+</ul>
+</section>
+<section id="circulardoublelinkedlist" class="level3">
+<h3 class="anchored" data-anchor-id="circulardoublelinkedlist">CircularDoubleLinkedList</h3>
+<p><img src="image/image_wbg0Lmqnm6.png" class="img-fluid"></p>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#doublelinkedlist" title="DoubleLinkedList">DoubleLinkedList</a> with some more capabilities.
+<ul>
+<li>We can traverse to a previous node</li>
+<li>We can traverse in loop in both direction.</li>
+</ul></li>
+</ul>
+</section>
+<section id="stack" class="level3">
+<h3 class="anchored" data-anchor-id="stack">Stack</h3>
+<p>Stack is a Last-In-First-Out(LIFO) data structure. Any data structure that is <code>Good</code> at insert/remove from one of the ends can be used as a container for Stack. Based on this, stacks can be implemented using <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#dynamicarray" title="DynamicArray">DynamicArray</a> (<code>Good</code> at add/remove from the back), <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#linkedlist" title="LinkedList">LinkedList</a> (<code>Good</code> at add/remove from front), <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#doublelinkedlist" title="DoubleLinkedList">DoubleLinkedList</a>(<code>Good</code> at add/remove from both front and back) and <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque" title="Deque">Deque</a>. Each implementation inherits <code>Good</code> and <code>Not Good</code> of the container data structure.</p>
+<p><img src="image/image_b9bTUJoROm.png" class="img-fluid"></p>
+<section id="stack-via-dynamicarray" class="level4">
+<h4 class="anchored" data-anchor-id="stack-via-dynamicarray">Stack via DynamicArray</h4>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#dynamicarray" title="DynamicArray:">DynamicArray:</a></li>
+<li><code>Methods</code>:
+<ul>
+<li><code>push()</code>: <code>insertAtBack</code> on array container.</li>
+<li><code>pop</code>: <code>removeAtBack</code> on array container.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>push()</code> and <code>pop()</code> are <code>O(1)</code> operations.</li>
+<li>Bulk memory allocation for pointers.</li>
+<li>If used with primitive types (value types), no dynamic memory allocation cost.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li>New memory allocations and copy cost when internal array capacity is full.</li>
+<li>Has unused memory allocation based on growth strategy of the pointer array.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/stack/stack/" title="Stack">Stack</a>. In CPP vector, deque and list(DoubleLinkedList) can be used as container for Stack.</li>
+</ul></li>
+</ul>
+<p><img src="image/Stack_Array_ManimCE_v0.17.3_pgsilv_aWi8TkXEQA.gif" class="img-fluid"></p>
+</section>
+<section id="stack-via-linkedlist" class="level4">
+<h4 class="anchored" data-anchor-id="stack-via-linkedlist">Stack via LinkedList</h4>
+<ul>
+<li><code>Basic operations</code> time complexity: Same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#linkedlist" title="LinkedList">LinkedList</a>. We use Head of LinkedList to insert/remove.</li>
+<li><code>Methods</code>:
+<ul>
+<li><code>push()</code>: <code>insertAtFront</code> on LinkedList container.</li>
+<li><code>pop</code>: <code>removeAtFront</code> on LinkedList container.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>push()</code> and <code>pop()</code> are <code>O(1)</code> operations.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>accessAtRandomIndex</code> is <code>O(n)</code>.</li>
+<li>Dynamic memory allocation (slow).</li>
+</ul></li>
+</ul>
+<p><img src="image/Stack_LinkedList_ManimCE_v0.17.3_qssq7i_nqm121MZ6z.gif" class="img-fluid"></p>
+</section>
+<section id="stack-via-deque" class="level4">
+<h4 class="anchored" data-anchor-id="stack-via-deque">Stack via Deque</h4>
+<p><a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque" title="Deque">Deque</a> data structure can be implemented using <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque-via-doublelinkedlist" title="Deque via DoubleLinkedList">Deque via DoubleLinkedList</a> or <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque-via-array" title="Deque via Array">Deque via Array</a>. The <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque" title="Deque">Deque</a> can serve as a container for a Stack due to its behavior. C++ default container for Stack is deque.</p>
+</section>
+</section>
+<section id="queue" class="level3">
+<h3 class="anchored" data-anchor-id="queue">Queue</h3>
+<p>Queue data structure is First-In-First-Out. Every data structure that is <code>Good</code> at addAtFront and removeAtBack or vice versa can be used as a container for Queue data structure. <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#doublelinkedlist" title="DoubleLinkedList">DoubleLinkedList</a>(<code>Good</code> at add/remove at both ends) can be used as the containers for Queue data structure. Also <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#ringbuffer" title="RingBuffer">RingBuffer</a> can be used for fixed size queues. <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#dynamicarray" title="DynamicArray:">DynamicArray:</a> is not a good container for queue data structure because of <code>O(n)</code> for insert operation. We can amortize this complexity using <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#queue-via-double-stack" title="Queue via Double Stack (Stack via DynamicArray)">Queue via Double Stack (Stack via DynamicArray)</a>. Another approach is storing contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array or a LinkedList containing pointers to each of the smaller arrays. In this case, the cost of inserting reduced from <code>O(n)</code> to the <code>O(small_array.length)</code>. This approach is used for <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque-via-array" title="deque">deque</a>.</p>
+<p><img src="image/image_TcY2_bpZlc.png" class="img-fluid"></p>
+<section id="queue-via-doublelinkedlist" class="level4">
+<h4 class="anchored" data-anchor-id="queue-via-doublelinkedlist">Queue via DoubleLinkedList</h4>
+<ul>
+<li><code>Basic operations</code> time complexity: <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#doublelinkedlist" title="DoubleLinkedList">DoubleLinkedList</a></li>
+<li><code>Methods</code>:
+<ul>
+<li><code>enqueue()</code>: <code>insertAtFront</code> on DoubleLinkedList container.</li>
+<li><code>dequeue()</code>: <code>removeAtBack</code> on DoubleLinkedList container.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>enqueue()</code> and <code>dequeue()</code> are <code>O(1)</code> operations.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>accessAtRandomIndex</code> operation.</li>
+<li>Extra memory for forward/backward pointers.</li>
+<li>Dynamic memory allocation (slow).</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/queue/queue/" title="queue">queue</a> in cpp can has deque or list (DoubleLinkedList) as the container. the default container is deque.</li>
+</ul></li>
+</ul>
+<p><img src="image/Queue_DoubleLinkedList_ManimCE_v0.17.3_rcilzx_zKnU.gif" class="img-fluid"></p>
+</section>
+<section id="queue-via-ringbuffer" class="level4">
+<h4 class="anchored" data-anchor-id="queue-via-ringbuffer">Queue via RingBuffer</h4>
+<ul>
+<li><code>Basic operations</code> time complexity: <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#ringbuffer" title="RingBuffer">RingBuffer</a></li>
+<li><code>Methods</code>:
+<ul>
+<li><code>enqueue()</code>: <code>insertAtRandomIndex</code> on Array container.</li>
+<li><code>dequeue()</code>: <code>accessAtRandomIndex</code> on Array container.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>enqueue()</code> and <code>dequeue()</code> are <code>O(1)</code> operations.</li>
+<li>If used for primitive types (value types), No dynamic allocation.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li>Fixed size, <code>enqueue()</code> may fail.</li>
+</ul></li>
+</ul>
+<p><img src="image/Queue_RingBuffer_ManimCE_v0.17.3_padxl8_sP5Cpvj74v.gif" class="img-fluid"></p>
+</section>
+<section id="queue-via-double-stack" class="level4">
+<h4 class="anchored" data-anchor-id="queue-via-double-stack">Queue via Double Stack</h4>
+<p>If we use <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#dynamicarray" title="DynamicArray">DynamicArray</a> as container for our queue, the <code>dequeue()</code> time complexity would be <code>O(n)</code> (Adding items to start of an array is an <code>O(n)</code> operation ). But we can amortize this complexity to <code>O(1)</code> using two stacks. LeftStack for <code>enqueue()</code> and the RightStack for <code>dequeue()</code>. Each time the LeftStack is empty, copy the RightStack contents to the LeftStack. This operation guarantees First-In-First-Out for the queue.</p>
+<ul>
+<li><code>Basic operations</code> time complexity: Similar to <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#stack-via-dynamicarray" title="Stack via DynamicArray">Stack via DynamicArray</a>.</li>
+<li><code>Methods</code>:
+<ul>
+<li><code>enqueue()</code>: <code>insertAtBack</code> on left Array container (the enqueue stack).</li>
+<li><code>dequeue()</code>: <code>removeAtBack</code> on right Array container (the dequeue stack).</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>enqueue()</code> and <code>dequeue()</code> are <code>O(1)</code> operations.</li>
+<li>If used for primitive types (value types), No dynamic allocation.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li>New memory allocations and copy cost when capacity is full.</li>
+<li>Has unused memory allocation based on growth strategy.</li>
+</ul></li>
+</ul>
+<p><img src="image/Queue_DoubleStack_ManimCE_v0.17.3_iyi9vd_jlFhtvT6C.gif" class="img-fluid"></p>
+</section>
+</section>
+<section id="deque" class="level3">
+<h3 class="anchored" data-anchor-id="deque">Deque</h3>
+<p>Deque (Double-Ended Queue) are a type of Queue that <code>enqueue()</code> and <code>dequeue()</code> can happen at both ends. Every data structure that is <code>Good</code> at insert/remove from both ends can be used as a container for Deque data structure. The only data structure that fullfil this requirement is <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#doublelinkedlist" title="DoubleLinkedList">DoubleLinkedList</a>. <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a> is not a good data structure for implementing Deque data structure directly. However we can use some tricks to use <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a> as a container for Deque data structure. See <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque-via-array" title="Deque via Array">Deque via Array</a>.</p>
+<p><img src="image/image_Aw-mzlcDii.png" class="img-fluid"></p>
+<section id="deque-via-doublelinkedlist" class="level4">
+<h4 class="anchored" data-anchor-id="deque-via-doublelinkedlist">Deque via DoubleLinkedList</h4>
+<p>Implementing a Deque via <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#doublelinkedlist" title="DoubleLinkedList">DoubleLinkedList</a> is straightforward as this data structure has <code>O(1)</code> for insertAtFront/removeAtFront and insertAtBack/removeAtBack operations.</p>
+<ul>
+<li><code>Methods</code>:
+<ul>
+<li><code>pushBack()</code>: insertAtBack of the DoubleLinkedList container.</li>
+<li><code>pushFront()</code>: insertAtFront of the DoubleLinkedList container.</li>
+<li><code>popBack()</code>: removeAtBack of the DoubleLinkedList container.</li>
+<li><code>popFront()</code>: removeAtFront of the DoubleLinkedList container.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li>Easy implementation</li>
+</ul></li>
+<li><code>Not Good</code>:
+<ul>
+<li>Random access operation.</li>
+<li>Dynamic memory allocation (slow).</li>
+<li>High overhead of extra storage for the forward and back references.</li>
+</ul></li>
+</ul>
+<p><img src="image/Deque_DoubleLinkedList_ManimCE_v0.17.3_zaqstl_JlsU.gif" class="img-fluid"></p>
+</section>
+<section id="deque-via-array" class="level4">
+<h4 class="anchored" data-anchor-id="deque-via-array">Deque via Array</h4>
+<p>As it was the case for Queue data structure, <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a> cannot be used as a container for Deque data structure directly because insertAtFront/removeAtFront operations are not <code>O(1)</code> for Arrays. We can use one of the following techniques to use <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a> as a container:</p>
+<ol type="1">
+<li>Using a special <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#ringbuffer" title="RingBuffer">RingBuffer</a>.</li>
+<li>Using an Array and allocating deque contents from the center of the underlying array, and resizing the underlying array when either end is reached.</li>
+<li>Storing contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array containing pointers to each of the smaller arrays. In this case, the cost of resizing the array in step 2 is eliminated but different small arrays are not allocated contiguously in memory.</li>
+</ol>
+<ul>
+<li><code>Good</code>:
+<ul>
+<li>Random Access operation</li>
+</ul></li>
+<li><code>Not Good</code>
+<ul>
+<li>More complex implementation</li>
+<li>Need for array resize when filled</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/deque/deque/" title="Deque">Deque</a> uses approach 3 of above mentioned tricks to use <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#array" title="Array">Array</a> as container for Deque. In this approach data is stored in smaller arrays and these arrays are linked using a doubleLinkedList or another array.</li>
+</ul></li>
+</ul>
+<p><img src="image/Deque_RingBuffer_ManimCE_v0.17.3_tldel1_U1pG47pSOg.gif" class="img-fluid"></p>
+</section>
+</section>
+<section id="priority-queue" class="level3">
+<h3 class="anchored" data-anchor-id="priority-queue">Priority Queue</h3>
+<p>PriorityQueue is the same as <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#queue" title="Queue">Queue</a> with one difference. The <code>dequeue</code> operation is not for the first item that has been inserted. Instead the dequeue item is selected based on a priority criteria and the item may be at the front, the middle or the end of the collection. Any data structure that is <code>Good</code> at inserting at one of the ends can be used as a container for PriorityQueue. As finding the item to be dequeued includes a searching phase, for linear data structures as the container for PriorityQueue the time complexity of dequeue operation is <code>O(n)</code>. In case of Heap data structure as the container, the time complexity reduces to <code>O(log(n))</code> due to internal structure of the Heap.</p>
+<p><img src="image/image_IPyiA06mem.png" class="img-fluid"></p>
+<section id="priorityqueue-via-dynamicarray" class="level4">
+<h4 class="anchored" data-anchor-id="priorityqueue-via-dynamicarray">PriorityQueue via DynamicArray</h4>
+<ul>
+<li><code>Methods</code>:
+<ul>
+<li><code>enqueue()</code>: <code>insertAtBack</code> on Array container.</li>
+<li><code>dequeue()</code>: iterate and then <code>removeAtMiddle</code> on Array container. Time complexity is <code>O(n)</code>.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>enqueue()</code> is <code>O(1)</code> operation.</li>
+<li>If used for primitive types (value types), No dynamic allocation.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>dequeue()</code> operation is <code>O(n)</code>.</li>
+<li>New memory allocations and copy cost when capacity is full.</li>
+<li>Has unused memory allocation based on growth strategy.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/queue/priority_queue/" title="priority_queue">priority_queue</a> is using deque as a container by default. vector also can be used.</li>
+</ul></li>
+</ul>
+</section>
+<section id="priorityqueue-via-linkedlist" class="level4">
+<h4 class="anchored" data-anchor-id="priorityqueue-via-linkedlist">PriorityQueue via LinkedList</h4>
+<ul>
+<li><code>Methods</code>:
+<ul>
+<li><code>enqueue()</code>: <code>insertAtBack</code> on Array container.</li>
+<li><code>dequeue()</code>: iterate and then <code>removeAtMiddle</code> on Array container. Time complexity is <code>O(n)</code>.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>enqueue()</code> is <code>O(1)</code> operation.</li>
+<li>If used for primitive types (value types), No dynamic allocation.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>dequeue()</code> operation is <code>O(n)</code>.</li>
+<li>New memory allocations and copy cost when capacity is full.</li>
+<li>Has unused memory allocation based on growth strategy.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/queue/priority_queue/" title="priority_queue">priority_queue</a> is using deque as a container by default. vector also can be used.</li>
+</ul></li>
+</ul>
+</section>
+<section id="priorityqueue-via-deque" class="level4">
+<h4 class="anchored" data-anchor-id="priorityqueue-via-deque">PriorityQueue via Deque</h4>
+<p><a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque" title="Deque">Deque</a> data structure can be implemented using either <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque-via-doublelinkedlist" title="Deque via DoubleLinkedList">Deque via DoubleLinkedList</a> or <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#deque-via-array" title="Deque via Array">Deque via Array</a> and PriorityQueue can use it as a container.</p>
+</section>
+<section id="priorityqueue-via-binaryheap" class="level4">
+<h4 class="anchored" data-anchor-id="priorityqueue-via-binaryheap">PriorityQueue via BinaryHeap</h4>
+<ul>
+<li><code>Methods</code>:
+<ul>
+<li><code>enqueue()</code>: <code>insert</code> on BinaryHeap container.</li>
+<li><code>dequeue()</code>: <code>delete</code> on BinaryHeap container.</li>
+</ul></li>
+<li><code>Good</code>:
+<ul>
+<li><code>dequeue()</code> is <code>O(log(n))</code> operation.</li>
+</ul></li>
+<li><code>Not good</code>:
+<ul>
+<li><code>enqueue</code> is <code>O(log(n))</code> operation. In <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#priorityqueue-via-dynamicarray" title="PriorityQueue via DynamicArray">PriorityQueue via DynamicArray</a> and <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#priorityqueue-via-linkedlist" title="PriorityQueue via LinkedList">PriorityQueue via LinkedList</a> this operation is <code>O(1)</code>.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="associative-collections" class="level3">
+<h3 class="anchored" data-anchor-id="associative-collections">Associative Collections</h3>
+<p>An associative collection is an abstract data type that stores a collection of (key, value) pairs, ensuring that each possible key appears at most once in the collection. However, there is no standardized naming convention for these types of data structures, leading to varying terminology across different programming languages, which can cause confusion. Some alternative names for associative collections include associative array, map, symbol table, or dictionary. See <a href="https://en.wikipedia.org/wiki/Associative_array" title="here">here</a>.</p>
+<section id="unorderedmap-or-hashtable" class="level4">
+<h4 class="anchored" data-anchor-id="unorderedmap-or-hashtable">UnorderedMap or HashTable</h4>
+<p>Other name is HashTable. The main idea behind a Hashtable is to use a hashing function to map keys to specific buckets or slots in an array. Each bucket can store one or more key-value pairs. Hash functions can occasionally generate the same index for different keys, resulting in a collision. To handle collisions efficiently, Hashtable data structures employ various strategies:</p>
+<ol type="1">
+<li>Each bucket in the array is a LinkedList of key-value pairs.</li>
+<li><a href="https://en.wikipedia.org/wiki/Open_addressing" title="Open addressing">Open addressing</a></li>
+<li>Resizing the Array.</li>
+</ol>
+<p>‌For most data structures, a linear search is an <code>O(n)</code> or <code>O(log(n))</code> operation. HashTable is a data structure with an amortized <code>O(1)</code> time complexity for searching. Length of arrays in a HashTable is a prime number.</p>
+<p><img src="image/image_z-_zl0cjhq.png" class="img-fluid"></p>
+<ul>
+<li><code>Good</code>:
+<ul>
+<li><code>O(1)</code> for search operation.</li>
+</ul></li>
+<li><code>Not Good</code>:
+<ul>
+<li>Collection has no order. No Random access.</li>
+<li>If LinkedList used for collision handling: Worst-case for search can be <code>O(n)</code> (All nodes collide). Average-case is not <code>O(1)</code>.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/unordered_map/unordered_map/" title="unordered_map">unordered_map</a> is an unordered collection created using HashTable. Another version is <a href="https://cplusplus.com/reference/unordered_map/unordered_multimap/" title="unordered_multimap">unordered_multimap</a> that allows for repetitive keys. in the <a href="https://cplusplus.com/reference/unordered_map/unordered_map/" title="unordered_map">unordered_map</a> version the keys are unique.</li>
+</ul></li>
+</ul>
+</section>
+<section id="sortedmap" class="level4">
+<h4 class="anchored" data-anchor-id="sortedmap">SortedMap</h4>
+<p>A collection of key-value pairs which is sorted by the key.</p>
+<ul>
+<li><code>Good</code>:
+<ul>
+<li>Search is <code>O(log(n))</code></li>
+<li>keys are sorted.</li>
+</ul></li>
+<li><code>Not Good</code>:
+<ul>
+<li>Random access is not <code>O(1)</code>.</li>
+<li>Suitable for small number of data.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/map/map/" title="map">map</a> uses Red-Black Tree for implementation. Another version is <a href="https://cplusplus.com/reference/map/multimap/" title="multimap">multimap</a> which allows duplicate keys. In the <a href="https://cplusplus.com/reference/map/map/" title="map">map</a> version, keys are unique.</li>
+</ul></li>
+</ul>
+</section>
+<section id="unordered" class="level4">
+<h4 class="anchored" data-anchor-id="unordered">Unordered</h4>
+<p>A collection of key-value pairs which is sorted by the key.</p>
+<ul>
+<li><code>Good</code>:
+<ul>
+<li>Search is <code>O(log(n))</code></li>
+<li>keys are sorted.</li>
+</ul></li>
+<li><code>Not Good</code>:
+<ul>
+<li>Random access is not <code>O(1)</code>.</li>
+<li>Suitable for small number of data.</li>
+</ul></li>
+<li>Programming Languages implementations:
+<ul>
+<li><strong>CPP</strong>: <a href="https://cplusplus.com/reference/map/map/" title="map">map</a> uses Red-Black Tree for implementation. Another version is <a href="https://cplusplus.com/reference/map/multimap/" title="multimap">multimap</a> which allows duplicate keys. In the <a href="https://cplusplus.com/reference/map/map/" title="map">map</a> version, keys are unique.</li>
+</ul></li>
+</ul>
+</section>
+<section id="orderedset-via-hashtable-and-linkedlist" class="level4">
+<h4 class="anchored" data-anchor-id="orderedset-via-hashtable-and-linkedlist">OrderedSet via HashTable and LinkedList</h4>
+<p>It is almost exactly like <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#orderedmap-via-hashtable-and-linkedlist" title="OrderedMap via HashTable and LinkedList">OrderedMap via HashTable and LinkedList</a> with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.</p>
+<ul>
+<li><code>Good</code>:
+<ul>
+<li>Order of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)</li>
+</ul></li>
+<li><code>Not Good</code>:
+<ul>
+<li>No random access with <code>O(1)</code> because of LinkedList.</li>
+</ul></li>
+</ul>
+</section>
+<section id="orderedset-via-self-balancing-tree" class="level4">
+<h4 class="anchored" data-anchor-id="orderedset-via-self-balancing-tree">OrderedSet via Self Balancing Tree</h4>
+<p>It is almost exactly like <a href="https://dev.to/khaledhosseini/data-structures-and-algorithms-for-multi-language-programmers-c-swift-python-java-c-javascript-alp#orderedmap-via-hashtable-and-linkedlist" title="OrderedMap via HashTable and LinkedList">OrderedMap via HashTable and LinkedList</a> with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.</p>
+<ul>
+<li><code>Good</code>:
+<ul>
+<li>Order of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)</li>
+</ul></li>
+<li><code>Not Good</code>:
+<ul>
+<li>No random access with <code>O(1)</code> because of LinkedList.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="standard-library-data-structures" class="level3">
+<h3 class="anchored" data-anchor-id="standard-library-data-structures">Standard Library Data Structures</h3>
+<section id="cpp" class="level4">
+<h4 class="anchored" data-anchor-id="cpp">CPP</h4>
+<p><img src="image/image_Gjj24W6caM.png" class="img-fluid"></p>
+
+
+</section>
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
