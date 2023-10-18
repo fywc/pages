@@ -2,34 +2,38 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://github.com/fywc/pages/about.html</loc>
-    <lastmod>2023-10-02T15:59:51.411Z</lastmod>
+    <lastmod>2023-10-18T16:45:52.095Z</lastmod>
   </url>
   <url>
-    <loc>https://github.com/fywc/pages/posts/CS6.175/index.html</loc>
-    <lastmod>2023-10-02T15:59:50.671Z</lastmod>
-  </url>
-  <url>
-    <loc>https://github.com/fywc/pages/posts/welcome/index.html</loc>
-    <lastmod>2023-10-02T15:59:49.963Z</lastmod>
-  </url>
-  <url>
-    <loc>https://github.com/fywc/pages/posts/post-with-code/index.html</loc>
-    <lastmod>2023-10-02T15:59:48.007Z</lastmod>
-  </url>
-  <url>
-    <loc>https://github.com/fywc/pages/index.html</loc>
-    <lastmod>2023-10-02T15:59:47.391Z</lastmod>
-  </url>
-  <url>
-    <loc>https://github.com/fywc/pages/posts/数据结构与算法/数据结构与算法.html</loc>
-    <lastmod>2023-10-02T15:59:49.659Z</lastmod>
+    <loc>https://github.com/fywc/pages/posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html</loc>
+    <lastmod>2023-10-18T16:45:51.183Z</lastmod>
   </url>
   <url>
     <loc>https://github.com/fywc/pages/posts/RookieCore/index.html</loc>
-    <lastmod>2023-10-02T15:59:50.243Z</lastmod>
+    <lastmod>2023-10-18T16:45:50.123Z</lastmod>
+  </url>
+  <url>
+    <loc>https://github.com/fywc/pages/posts/数据结构与算法/数据结构与算法.html</loc>
+    <lastmod>2023-10-18T16:45:49.431Z</lastmod>
+  </url>
+  <url>
+    <loc>https://github.com/fywc/pages/index.html</loc>
+    <lastmod>2023-10-18T16:45:46.615Z</lastmod>
+  </url>
+  <url>
+    <loc>https://github.com/fywc/pages/posts/post-with-code/index.html</loc>
+    <lastmod>2023-10-18T16:45:47.355Z</lastmod>
+  </url>
+  <url>
+    <loc>https://github.com/fywc/pages/posts/welcome/index.html</loc>
+    <lastmod>2023-10-18T16:45:49.771Z</lastmod>
+  </url>
+  <url>
+    <loc>https://github.com/fywc/pages/posts/CS6.175/index.html</loc>
+    <lastmod>2023-10-18T16:45:50.659Z</lastmod>
   </url>
   <url>
     <loc>https://github.com/fywc/pages/posts/Linux内核设备与模块/Linux 内核设备和模块.html</loc>
-    <lastmod>2023-10-02T15:59:51.135Z</lastmod>
+    <lastmod>2023-10-18T16:45:51.715Z</lastmod>
   </url>
 </urlset>
