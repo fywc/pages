@@ -506,4 +506,8 @@ Invalid syntax in expression.
 
 # Referenece
 
-<https://visualgdb.com/gdbreference/commands/>
+[Visualgdb Reference](https://visualgdb.com/gdbreference/commands/)
+
+[Debugging with GDB](https://sourceware.org/gdb/current/onlinedocs/gdb.html/)
+
+[100个gdb小技巧](https://wizardforcel.gitbooks.io/100-gdb-tips/content/index.html)
