@@ -1,1 +1,1 @@
-Sitemap: https://github.com/fywc/pages/sitemap.xml
+Sitemap: https://fywc.github.io/pages/sitemap.xml

@@ -2,13 +2,14 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/软硬件协同迷思/软硬件协同迷思.html",
+      "/posts/gdb集合/GDB命令集合.html",
       "/posts/Linux内核设备与模块/Linux 内核设备和模块.html",
       "/posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html",
-      "/posts/gdb集合/GDB命令集合.html",
       "/posts/数据结构与算法/数据结构与算法.html",
-      "/posts/RookieCore/index.html",
       "/posts/post-with-code/index.html",
       "/posts/CS6.175/index.html",
+      "/posts/RookieCore/index.html",
       "/posts/welcome/index.html"
     ]
   }

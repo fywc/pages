@@ -1,5 +1,320 @@
 [
   {
+    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html",
+    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html",
+    "title": "Deadlock-Livelock-Starvation",
+    "section": "",
+    "text": "In a multiprogramming environment, more than one process may compete for a finite set of resources. If a process requests for a resource and the resource is not presently available, then the process waits for it. Sometimes this waiting process never succeeds to get access to the resource. This waiting for resources leads to three scenarios – deadlock, livelock, and starvation.\n\n\n\nIn this section, we’ll first discuss deadlock, its necessary conditions, and how to prevent it.\n\n\nA deadlock is a situation in which processes block each other due to resource acquisition and none of the processes makes any progress as they wait for the resource held by the other process.\n\nThe above figure shows the deadlock scenario between process 1 and process 2. Both processes are holding one resource and waiting for the other resource held by the other process. This is a deadlock situation as neither process 1 or process 2 can make progress until one of the processes gives up its resource.\n\n\n\nTo successfully characterize a scenario as deadlock, the following four conditions must hold simultaneously:\nMutual Exclusion: At least one resource needs to be held by a process in a non-sharable mode. Any other process requesting that resource needs to wait.\nHold and Wait: A process must hold one resource and requests additional resources that are currently held by other processes.\nNo Preemption: A resource can’t be forcefully released from a process. A process can only release a resource voluntarily once it deems to release.\nCircular Wait: A set of a process p0,p1,p2,…pn exists in a manner that p0 is waiting for a resource held by p1, pn-1 waiting for a resource held by p0.\n\n\n\nTo prevent the occurrence of deadlock, at least one of the necessary conditions discussed in the previous section should not hold true. Let us examine the possibility of any of these conditions being false:\nMutual Exclusion: In some cases, this condition can be false. For example, in a read-only file system, one or more processes can be granted sharable access. However, this condition can’t always be false. The reason being some resources are intrinsically non-sharable. For instance, a mutex lock is a non-sharable resource.\nHold and Wait: To ensure that the hold-and-wait condition never occurs, we need to guarantee that once a process requests for a resource it is not holding any other resource at that time. In general, a process should request all resources before it begins its execution.\nNo Preemption: To make this condition false, a process needs to make sure that it automatically releases all currently held resources if the newly requested resource is not available.\nCircular Wait: This condition can be made false by imposing a total ordering of all resource types and ensure that each process requests resources in increasing order of enumeration.\n\n\n\n\nIn this section, we’ll discuss live lock which is similar to deadlock with a subtle difference.\n\n\nIn the case of a livelock, the states of the processes involved in a live lock scenario constantly change. On the other hand, the processes still depend on each other and can never finish their tasks.\n\nThe above figure shows an example of livelock. Both “process 1” and “process 2” need a common resource. Each process checks whether the other process is in an active state. If so, then it hands over the resource to the other process. However as both, the process is inactive status, both kept on handing over the resource to each other indefinitely.\nA real-world example of livelock occurs when two people make a telephone call to each other and both find the line is busy. Both gentlemen decide to hang up and attempt to call after the same time interval. Thus, in the next retry too, they ended up in the same situation. This is an example of a live lock as this can go on forever.\n\n\n\nAlthough similar in nature, deadlock, and live locks are not the same. In a deadlock, processes involved in a deadlock are stuck indefinitely and do not make any state change. However, in a live lock scenario, processes block each other and wait indefinitely but they change their resource state continuously. The notable point is that the resource state change has no effect and does not help the processes make any progress in their task.\n\n\n\n\nIn this section, we’ll discuss starvation which generally occurs as a result of a deadlock, livelock, or caused by a greedy process.\n\n\nStarvation is an outcome of a process that is unable to gain regular access to the shared resources it requires to complete a task and thus, unable to make any progress.\n\nThe above figure shows an example of starvation of “process 2” and “process 3” for the CPU as “process 1” is occupying it for a long duration.\n\n\n\nStarvation can occur due to deadlock, livelock, or caused by another process.\nAs we have seen in the event of a deadlock or a live lock a process competes with another process to acquire the desired resource to complete its task. However, due to the deadlock or livelock scenario, it failed to acquire the resource and generally starved for the resource.\nFurther, it may occur that a process repeatedly gains access to a shared resource or use it for a longer duration while other processes wait for the same resource. Thus, the waiting processes are starved for the resource by the greedy process.\n\n\n\nOne of the possible solutions to prevent starvation is to use a resource scheduling algorithm with a priority queue that also uses the aging technique. Aging is a technique that periodically increases the priority of a waiting process. With this approach, any process waiting for a resource for a longer duration eventually gains a higher priority. And as the resource sharing is driven through the priority of the process, no process starves for a resource indefinitely.\nAnother solution to prevent starvation is to follow the round-robin pattern while allocating the resources to a process. In this pattern, the resource is fairly allocated to each process providing a chance to use the resource before it is allocated to another process again.\n\n\n\n\nIn this article, we discussed concepts of deadlock, livelock, and starvation which occur in a multi-processing operating system.\nA deadlock is a situation that occurs when processes block each other with resource acquisition and makes no further progress. Livelock is a deadlock-like situation in which processes block each other with a repeated state change yet make no progress. Starvation is the outcome of a deadlock, livelock, or as a result of continuous resource denial to a process."
+  },
+  {
+    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#introduction",
+    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#introduction",
+    "title": "Deadlock-Livelock-Starvation",
+    "section": "",
+    "text": "In a multiprogramming environment, more than one process may compete for a finite set of resources. If a process requests for a resource and the resource is not presently available, then the process waits for it. Sometimes this waiting process never succeeds to get access to the resource. This waiting for resources leads to three scenarios – deadlock, livelock, and starvation."
+  },
+  {
+    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#deadlock",
+    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#deadlock",
+    "title": "Deadlock-Livelock-Starvation",
+    "section": "",
+    "text": "In this section, we’ll first discuss deadlock, its necessary conditions, and how to prevent it.\n\n\nA deadlock is a situation in which processes block each other due to resource acquisition and none of the processes makes any progress as they wait for the resource held by the other process.\n\nThe above figure shows the deadlock scenario between process 1 and process 2. Both processes are holding one resource and waiting for the other resource held by the other process. This is a deadlock situation as neither process 1 or process 2 can make progress until one of the processes gives up its resource.\n\n\n\nTo successfully characterize a scenario as deadlock, the following four conditions must hold simultaneously:\nMutual Exclusion: At least one resource needs to be held by a process in a non-sharable mode. Any other process requesting that resource needs to wait.\nHold and Wait: A process must hold one resource and requests additional resources that are currently held by other processes.\nNo Preemption: A resource can’t be forcefully released from a process. A process can only release a resource voluntarily once it deems to release.\nCircular Wait: A set of a process p0,p1,p2,…pn exists in a manner that p0 is waiting for a resource held by p1, pn-1 waiting for a resource held by p0.\n\n\n\nTo prevent the occurrence of deadlock, at least one of the necessary conditions discussed in the previous section should not hold true. Let us examine the possibility of any of these conditions being false:\nMutual Exclusion: In some cases, this condition can be false. For example, in a read-only file system, one or more processes can be granted sharable access. However, this condition can’t always be false. The reason being some resources are intrinsically non-sharable. For instance, a mutex lock is a non-sharable resource.\nHold and Wait: To ensure that the hold-and-wait condition never occurs, we need to guarantee that once a process requests for a resource it is not holding any other resource at that time. In general, a process should request all resources before it begins its execution.\nNo Preemption: To make this condition false, a process needs to make sure that it automatically releases all currently held resources if the newly requested resource is not available.\nCircular Wait: This condition can be made false by imposing a total ordering of all resource types and ensure that each process requests resources in increasing order of enumeration."
+  },
+  {
+    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#livelock",
+    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#livelock",
+    "title": "Deadlock-Livelock-Starvation",
+    "section": "",
+    "text": "In this section, we’ll discuss live lock which is similar to deadlock with a subtle difference.\n\n\nIn the case of a livelock, the states of the processes involved in a live lock scenario constantly change. On the other hand, the processes still depend on each other and can never finish their tasks.\n\nThe above figure shows an example of livelock. Both “process 1” and “process 2” need a common resource. Each process checks whether the other process is in an active state. If so, then it hands over the resource to the other process. However as both, the process is inactive status, both kept on handing over the resource to each other indefinitely.\nA real-world example of livelock occurs when two people make a telephone call to each other and both find the line is busy. Both gentlemen decide to hang up and attempt to call after the same time interval. Thus, in the next retry too, they ended up in the same situation. This is an example of a live lock as this can go on forever.\n\n\n\nAlthough similar in nature, deadlock, and live locks are not the same. In a deadlock, processes involved in a deadlock are stuck indefinitely and do not make any state change. However, in a live lock scenario, processes block each other and wait indefinitely but they change their resource state continuously. The notable point is that the resource state change has no effect and does not help the processes make any progress in their task."
+  },
+  {
+    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#starvation",
+    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#starvation",
+    "title": "Deadlock-Livelock-Starvation",
+    "section": "",
+    "text": "In this section, we’ll discuss starvation which generally occurs as a result of a deadlock, livelock, or caused by a greedy process.\n\n\nStarvation is an outcome of a process that is unable to gain regular access to the shared resources it requires to complete a task and thus, unable to make any progress.\n\nThe above figure shows an example of starvation of “process 2” and “process 3” for the CPU as “process 1” is occupying it for a long duration.\n\n\n\nStarvation can occur due to deadlock, livelock, or caused by another process.\nAs we have seen in the event of a deadlock or a live lock a process competes with another process to acquire the desired resource to complete its task. However, due to the deadlock or livelock scenario, it failed to acquire the resource and generally starved for the resource.\nFurther, it may occur that a process repeatedly gains access to a shared resource or use it for a longer duration while other processes wait for the same resource. Thus, the waiting processes are starved for the resource by the greedy process.\n\n\n\nOne of the possible solutions to prevent starvation is to use a resource scheduling algorithm with a priority queue that also uses the aging technique. Aging is a technique that periodically increases the priority of a waiting process. With this approach, any process waiting for a resource for a longer duration eventually gains a higher priority. And as the resource sharing is driven through the priority of the process, no process starves for a resource indefinitely.\nAnother solution to prevent starvation is to follow the round-robin pattern while allocating the resources to a process. In this pattern, the resource is fairly allocated to each process providing a chance to use the resource before it is allocated to another process again."
+  },
+  {
+    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#conclusion",
+    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#conclusion",
+    "title": "Deadlock-Livelock-Starvation",
+    "section": "",
+    "text": "In this article, we discussed concepts of deadlock, livelock, and starvation which occur in a multi-processing operating system.\nA deadlock is a situation that occurs when processes block each other with resource acquisition and makes no further progress. Livelock is a deadlock-like situation in which processes block each other with a repeated state change yet make no progress. Starvation is the outcome of a deadlock, livelock, or as a result of continuous resource denial to a process."
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
+    "title": "Linux 内核设备和模块",
+    "section": "",
+    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
+    "title": "Linux 内核设备和模块",
+    "section": "",
+    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
+    "title": "Linux 内核设备和模块",
+    "section": "伪设备",
+    "text": "伪设备\n一些虚拟设备驱动，仅提供访问内核功能．\n\n内核随机数发生器\n空设备 /dev/null\n零设备 /dev/zero\n满设备 /dev/full\n内存设备 /dev/mem"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
+    "title": "Linux 内核设备和模块",
+    "section": "杂项设备",
+    "text": "杂项设备\n简写为miscdev，是对字符设备的封装，方便使用．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
+    "title": "Linux 内核设备和模块",
+    "section": "模块",
+    "text": "模块\n内核在运行时动态向其中插入或删除代码，这些代码以模块的形式组合在一个单独的二进制镜像．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
+    "title": "Linux 内核设备和模块",
+    "section": "构建模块",
+    "text": "构建模块\n\n放在内核源码树中\n\n字符设备存放在drivers/char/\n块设备存放在drivers/block \nUSE设备存放在 drivers/usb/ \n\n添加一个字符设备fishing , 编辑drivers/char/Makefile 并加入obj-m += fishing/\n在drivers/char/fishing/下,需要添加一个新的Makefile文件：\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n这样编译内核时，也会自动编译该模块，最终编译链接完的文件名为fishing.ko \n\n\n放在内核源码树外\n假设放在/home/dev/fishing/目录中，那么修改/home/dev/fishing/Makefile :\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n编译时需要在/home/dev/fishing/目录下，然后执行:\nmake -C /mnt/disk/kernelsrc/ SUBDIRS=$PWD modules\n其中/mnt/disk/kernelsrc/就是内核源码目录"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
+    "title": "Linux 内核设备和模块",
+    "section": "安装模块",
+    "text": "安装模块\n使用make modules_install"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
+    "title": "Linux 内核设备和模块",
+    "section": "模块依赖性",
+    "text": "模块依赖性\nLinux模块之间存在依赖性，依赖关系存放在/libmodules/}version}/modules.dep 文件．\n使用depmod 命令产生依赖信息，-A 参数表示仅更新新模块的依赖信息."
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
+    "title": "Linux 内核设备和模块",
+    "section": "载入模块",
+    "text": "载入模块\ninsmod fishing.ko\nrmmod fishing.ko\nmodprobe modules\nmodprobe -r modules"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
+    "title": "Linux 内核设备和模块",
+    "section": "模块参数",
+    "text": "模块参数\nLinux 允许驱动程序声明参数，从而用户可以在系统启动或者模块装载时再指定参数值，这些参数对于驱动程序属于全局变量。\n模块参数会载入sysfs文件系统中，变为文件.\nmodule_param(name, type, perm);"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
+    "title": "Linux 内核设备和模块",
+    "section": "导出符号表",
+    "text": "导出符号表\n模块被载入后，就会被动态地连接(link)到内核，连接过程需要借助内核导出的符号表来访问内核函数。\n只有被显式导出的内核函数，才能被模块调用（类似动态链接库）。\n使用 EXPORT_SYMBOL()和EXPORT_SYMBOL_GPL() 可以在内核源码中显式导出内核函数：\nint get_pirate_beard_color(struct pirate *p)\n{\n  return p-&gt;beard.color;\n}\nEXPORT_SYMBOL(get_pirate_beard_color);\n导出的内核符号表被看作导出的内核接口，称为内核API"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
+    "title": "Linux 内核设备和模块",
+    "section": "设备模型",
+    "text": "设备模型\n设备模型提供了一个独立的机制专门来表示设备，并描述其在系统中的拓扑结构，从而使得系统具有以下优点:\n\n代码重复最小化\n提供诸如引用计数等统一机制\n可以列举系统中所有的设备，观察它们的状态，并且查看它们连接的总线。\n可以将系统中的全部设备结构以树的形式完整、有效地展现出来——包括所有的总线和内部连接。\n可以将设备和其对应的驱动联系起来，反之亦然。\n可以将设备按照类型加以归类，比如分类为输入设备，而无需理解物理设备的拓扑结构。\n可以沿设备树的叶子向其根的方向依次遍历，以保证能以正确顺序关闭各设备的电源。\n\n\nkobject\nkobject 类似于面向对象中的基类，设备类继承该类\n// include/linux/kobject.h\nstruct kobject {\n  const char    *name;\n  struct list_head  entry;\n  struct kobject    *parent;// 父对象指针，用于表达设备树中的层次关系\n  struct kset    *kset;\n  struct kobj_type  *ktype;\n  struct sysfs_dirent  *sd; // sysfs的dirent对象指针，指向本对象(本对象在sysfs中其实是一个文件)\n  struct kref    kref;// 引用计数\n  unsigned int state_initialized:1;\n  unsigned int state_in_sysfs:1;\n  unsigned int state_add_uevent_sent:1;\n  unsigned int state_remove_uevent_sent:1;\n  unsigned int uevent_suppress:1;\n};\nkobject的一个派生类是cdev ,表示字符设备:\nstruct cdev\n{\n  struct kobject kobj; // 嵌入kobject表示继承，必须放在结构体开头实现多态\n  // 后面为该类的特有成员\n  struct module *owner;\n  const struct file_operations *ops;\n  struct list_head list;\n  dev_t dev;\n  unsigned int count;\n};\n\n\nktype\nkobject 的成员 ktype 表示本 kobject 的类型，多个 kobject 可以关联同一个 ktype，描述一类 kobject 所具有的普遍特性。\n// include/linux/kobject.h\nstruct kobj_type {\n  void (*release)(struct kobject *kobj); // 引用计数归0时的析构函数，也就是同类kobject通用\n  const struct sysfs_ops *sysfs_ops; // sysfs 的操作方法\n  struct attribute **default_attrs; // 属性，是个数组\n  const struct kobj_ns_type_operations *(*child_ns_type)(struct kobject *kobj);\n  const void *(*namespace)(struct kobject *kobj);\n};\n\n\nkset\nkset 用于对诸多 kobject 及其派生类对象进行分组（分组和 ktype 无关，即使 ktype 相同的也能分到不同组中）。分组依据比如“全部的块设备”，kset 的存在让分组更灵活，而不受限于相同或是不同的 ktype。\nkset 的存在是为了将 kobject 分组映射为 sysfs 中的目录关系信息.\n// include/linux/kobject.h\nstruct kset {\n  struct list_head list; // 链表，连接该kset管理的所有组内kobj，指向kobj链表上的第一个节点\n  spinlock_t list_lock; // 保护链表的自旋锁\n  struct kobject kobj; // 作为组内的所有kobject的基类,这是kset的一大功能\n  const struct kset_uevent_ops *uevent_ops; // 用于处理集合中kobject对象的热插拔操作\n};\nkset 对象作为链表头连接一组 kobject（kobj 之间通过 kobject 内的 entry 成员连接）："
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
+    "title": "Linux 内核设备和模块",
+    "section": "引用计数",
+    "text": "引用计数\n类似于高级语言的gc机制，当引用数为０时回收对象.\nkref结构：\n// include/linux/kref.h\nstruct kref {\n  atomic_t refcount;\n};\n引用计数操作方法：\nstruct kobject *kobject_get(struct kobject *kobj);\nvoid kobject_put(struct kobject *kobj);"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
+    "title": "Linux 内核设备和模块",
+    "section": "sysfs中添加和删除kobject",
+    "text": "sysfs中添加和删除kobject\nkobject默认初始化后并不关联到sysfs,需要使用kobject_add() ．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
+    "title": "Linux 内核设备和模块",
+    "section": "向sysfs中添加文件(attr)",
+    "text": "向sysfs中添加文件(attr)\nkobject对应sysfs中的目录，而kobject对象中的default_attr数组对应sysfs中的文件．\n该数组负责将内核数据映射成sysfs中的文件．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
+    "title": "Linux 内核设备和模块",
+    "section": "默认文件",
+    "text": "默认文件\nkobject对象中的成员default_attrs 数组表示目录下的默认文件，sysfs_ops成员则描述了如何使用这些文件：\n// include/linux/sysfs.h\nstruct sysfs_ops {\n  // 读取文件,从kobj（表示目录）和attr（表示文件）中，读取数据到buf中\n  ssize_t  (*show)(struct kobject *kobj, struct attribute *attr,char *buf);\n  // 写入文件\n  ssize_t  (*store)(struct kobject *,struct attribute *,const char *, size_t);\n  const void *(*namespace)(struct kobject *, const struct attribute *);\n};"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
+    "title": "Linux 内核设备和模块",
+    "section": "文件的创建与修改",
+    "text": "文件的创建与修改\n一般而言，相同 ktype 的 kobject 的 default_attrs 都是相同的，也就是这些目录下的文件组织结构(文件名，权限)都相同。\n//　创建文件\nint sysfs_create_file(struct kobject *kobj, const struct attribute tattr);\n//  创建符号链接\nint sysfs_create_link(struct kobject *kobj, struct kobject *target, char *name);\n//  删除新文件\nvoid sysfs_remove_file(struct kobject *kobj, const struct attribute *attr);\n//  删除符号链接\nvoid sysfs_remove_link(struct kobject *kobj, char *name) ;"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
+    "title": "Linux 内核设备和模块",
+    "section": "sysfs约定　",
+    "text": "sysfs约定　\n\n一值一文件：sysfs 属性应该保证每个文件只导出一个值，该值应该是文本形式而且映射为简单 C 类型。避免文件内容过于复杂，这样使用 shell 或 C 语言读取写入该文件就会简单得多。\n清晰的层次组织数据\nsysfs 提供内核到用户空间的服务\nsysfs 已经取代 ioctl() 和 procfs，尽可能得使用 sysfs 操作内核变量"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
+    "title": "Linux 内核设备和模块",
+    "section": "内核事件层",
+    "text": "内核事件层\n内核事件层实现了内核到用户的消息通知系统（通过 kobject 和 sysfs）\n事件是实现异步操作的必要组成部分，常见事件如硬盘满了，处理器过热了，分区挂载了。\n每个事件源都是一个 sysfs 路径，比如一个硬盘通知事件源为 /sys/block/hda。\n内核事件由内核空间传递到用户空间需要经过netlink（netlink 是一个用于传送网络信息的多点传送套接字）。使用示例：在用户空间实现一个系统后台服务用于监听套接字(socket)，处理任何读到的信息，并将事件传送到系统栈里，通过该方法也能实现将事件整合入 D-BUS。\n在内核代码中向用户空间发送信号使用函数kobject_uevent(), 最终事件就是包含 kobject 对应的 sysfs 路径和信号动作的字符串。"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html",
+    "title": "软硬件协同迷思",
+    "section": "",
+    "text": "最初的出发点是用自动调优在软件性能优化和硬件设计间建立直接联系，与传统自动调优不同的是，这要基于一些硬件设计参数去建模，并计算程序性能，而不是用真机或机器学习的黑盒模型，因为这样才能获得硬件设计参数的直接反馈，例如哪些参数组合是均衡的，哪些存在瓶颈且瓶颈在哪。\n由此得出以下几个判断：\n\n从改硬件设计、kernel优化、瓶颈分析再回到硬件设计，这个反馈链太长，互动效率往往不高；\n手动优化汇编是落后的生产力，工作量大扩展性差；\n算力比人力更有竞争力，机器自动搜索比人力搜索适用性更强；\n问题复杂度增加时，算力比人力更容易扩展；\n\n根据上述判断，结合目前可行的技术分析，可以在现有编译器的基础上，只加入新功能的简单支持，然后用上层语言最多是IR实现自动调优。\n遇到的问题：\n\n硬件功能在设计时就没仔细考虑软件的用法和使用场景。同时具备“硬件工程师+了解具体使用场景和流程”的人很少，这是架构师的能力范围。每个功能的软硬件对接都需要慢慢调试，没有几代产品的相互磨合，是很难做好的。需要有人能够既懂软件应用，懂一点编译器，也懂一点硬件架构，承担技术串联的角色，才能打破技术壁垒，更流畅地实现从底层硬件到上层软件的功能输送。\n编译器的后端优化自动化程度远远不够，依然费时费力。如果只是使用x86和CUDA的编译器，因为这两家的编译器比较成熟，所以优化效果比较好，但是如果要支持新的ISA或者硬件架构，就需要自己去重新实现优化。LLVM中仅有tablegen+支持后端自动化优化，很多部分都要重新磨合；MLIR中有Table Driven Declarative Rewrite Rule，但自动化程度也有限；TVM中自动调优多数在LLVM以上，硬件后端优化不是重点。所以后端优化问题也需要解决。\n硬件建模还是有很多看不清的工作量。对于一些简单的算子和算法，其运算过程哪些硬件参数有影响，能够大致有谱，但像Cache Hit Rate的估计，就有些玄妙。大部分时候有统计规律可循，但也有严重偏离规律的情况发生。这时候，软硬协同的价值也体现出来了，提前对接有助于暴露问题。对于硬件设计的规律，多数情况是软件迁就硬件，软件一要补硬件的坑，二要发挥硬件的能力。并且软件更新迭代成本更小，所以要用软件去补足硬件短板。\n\n\n\n\n软硬件设计不是竞技，但有时候能做的事情选择不做，也是有一定考量的。在软件实现中，CUDA一些函数的corner case中会用到local memory，即使GPR充裕也不转存GPR，因为用local memory，只要不进入到这个corner 分支，那就几乎没有开销，最多费一点指令cache。而如果用GPR，那即使不进入这个分支，也会影响总GPR数，从而影响Occupancy。也就是说只要使用了额外的GPR，不管这部分代码有没有运行，它都有开销，即使有时候是无害的。\nNV的硬件运行逻辑上也有很多限制，比如64bit或128bit访存指令的地址必须对齐，操作64bit和128bit的GPR也必须对齐。NV也有一些常见的指令不支持，也有些指令会重复。所以，很多功能的做或不做，还是有诸多考虑的。\nNV的一些调度逻辑，例如control codes，也从硬件转移到了软件，这应该是因为编译器具有更全局的视野，可以更好地做依赖分析和指令调度，同时也简化硬件设计，节省面积。\n还有一些功能被直接舍弃了，例如NV中没有算数异常处理的功能，比如除0，移除之类的，L1 Cache之间也没有Coherence。这很难用软件弥补，所以干脆软件和硬件都不支持了。\n\n\n\n一个应用，从算法开始，到软件实现，再到编译的中间表示，再到机器指令，都是信息一级一级传递的过程。协同优化也是信息交互的过程，例如最常见的矩阵乘法，在算子曾可以用标准实现，也可以用快速矩阵乘法实现，如果知道是卷积或者其他特殊矩阵，就可以有特定的加速算法。普通的矩阵乘算法，有相应的矩阵乘加速器或是tensorcore，也可以做相应的加速。如果是矩阵连乘或可融合的操作，在上层也容易实现相应的优化。\n但是信息传递也存在很多困难，不管是C还是LLVM的IR，都有一些硬件操作难以表述，最终变成内置函数。内置函数多了，上层表示就难以理解和优化，最后会堆积到硬件后端，这其中会损失一些可能的优化。\n最后到指令集的问题，什么样的指令集方便优化呢？显然，每个指令都一样慢的最好优化，只要没有冗余就算是优化好了，但这显然与设计追求不相符。我认为好的指令集应该具有表述能力强（一个功能有多种独立实现），独立性好（类似函数式逻辑，相互干扰少），资源瓶颈少（例如各种barrier，carr flag都有多个选择，不会导致相关操作序列化）等特点。从上层看，就是指令调度和算数优化的可能性比较多，自由度大。另外一点是对信息的具体化能力较强，比如不同的依赖关系可以用不同的scoreboard保证次序，减少干扰。"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的技术隔阂",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的技术隔阂",
+    "title": "软硬件协同迷思",
+    "section": "",
+    "text": "最初的出发点是用自动调优在软件性能优化和硬件设计间建立直接联系，与传统自动调优不同的是，这要基于一些硬件设计参数去建模，并计算程序性能，而不是用真机或机器学习的黑盒模型，因为这样才能获得硬件设计参数的直接反馈，例如哪些参数组合是均衡的，哪些存在瓶颈且瓶颈在哪。\n由此得出以下几个判断：\n\n从改硬件设计、kernel优化、瓶颈分析再回到硬件设计，这个反馈链太长，互动效率往往不高；\n手动优化汇编是落后的生产力，工作量大扩展性差；\n算力比人力更有竞争力，机器自动搜索比人力搜索适用性更强；\n问题复杂度增加时，算力比人力更容易扩展；\n\n根据上述判断，结合目前可行的技术分析，可以在现有编译器的基础上，只加入新功能的简单支持，然后用上层语言最多是IR实现自动调优。\n遇到的问题：\n\n硬件功能在设计时就没仔细考虑软件的用法和使用场景。同时具备“硬件工程师+了解具体使用场景和流程”的人很少，这是架构师的能力范围。每个功能的软硬件对接都需要慢慢调试，没有几代产品的相互磨合，是很难做好的。需要有人能够既懂软件应用，懂一点编译器，也懂一点硬件架构，承担技术串联的角色，才能打破技术壁垒，更流畅地实现从底层硬件到上层软件的功能输送。\n编译器的后端优化自动化程度远远不够，依然费时费力。如果只是使用x86和CUDA的编译器，因为这两家的编译器比较成熟，所以优化效果比较好，但是如果要支持新的ISA或者硬件架构，就需要自己去重新实现优化。LLVM中仅有tablegen+支持后端自动化优化，很多部分都要重新磨合；MLIR中有Table Driven Declarative Rewrite Rule，但自动化程度也有限；TVM中自动调优多数在LLVM以上，硬件后端优化不是重点。所以后端优化问题也需要解决。\n硬件建模还是有很多看不清的工作量。对于一些简单的算子和算法，其运算过程哪些硬件参数有影响，能够大致有谱，但像Cache Hit Rate的估计，就有些玄妙。大部分时候有统计规律可循，但也有严重偏离规律的情况发生。这时候，软硬协同的价值也体现出来了，提前对接有助于暴露问题。对于硬件设计的规律，多数情况是软件迁就硬件，软件一要补硬件的坑，二要发挥硬件的能力。并且软件更新迭代成本更小，所以要用软件去补足硬件短板。"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的分工和协作是难点",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的分工和协作是难点",
+    "title": "软硬件协同迷思",
+    "section": "",
+    "text": "软硬件设计不是竞技，但有时候能做的事情选择不做，也是有一定考量的。在软件实现中，CUDA一些函数的corner case中会用到local memory，即使GPR充裕也不转存GPR，因为用local memory，只要不进入到这个corner 分支，那就几乎没有开销，最多费一点指令cache。而如果用GPR，那即使不进入这个分支，也会影响总GPR数，从而影响Occupancy。也就是说只要使用了额外的GPR，不管这部分代码有没有运行，它都有开销，即使有时候是无害的。\nNV的硬件运行逻辑上也有很多限制，比如64bit或128bit访存指令的地址必须对齐，操作64bit和128bit的GPR也必须对齐。NV也有一些常见的指令不支持，也有些指令会重复。所以，很多功能的做或不做，还是有诸多考虑的。\nNV的一些调度逻辑，例如control codes，也从硬件转移到了软件，这应该是因为编译器具有更全局的视野，可以更好地做依赖分析和指令调度，同时也简化硬件设计，节省面积。\n还有一些功能被直接舍弃了，例如NV中没有算数异常处理的功能，比如除0，移除之类的，L1 Cache之间也没有Coherence。这很难用软件弥补，所以干脆软件和硬件都不支持了。"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的信息传递和协同优化密切相关",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的信息传递和协同优化密切相关",
+    "title": "软硬件协同迷思",
+    "section": "",
+    "text": "一个应用，从算法开始，到软件实现，再到编译的中间表示，再到机器指令，都是信息一级一级传递的过程。协同优化也是信息交互的过程，例如最常见的矩阵乘法，在算子曾可以用标准实现，也可以用快速矩阵乘法实现，如果知道是卷积或者其他特殊矩阵，就可以有特定的加速算法。普通的矩阵乘算法，有相应的矩阵乘加速器或是tensorcore，也可以做相应的加速。如果是矩阵连乘或可融合的操作，在上层也容易实现相应的优化。\n但是信息传递也存在很多困难，不管是C还是LLVM的IR，都有一些硬件操作难以表述，最终变成内置函数。内置函数多了，上层表示就难以理解和优化，最后会堆积到硬件后端，这其中会损失一些可能的优化。\n最后到指令集的问题，什么样的指令集方便优化呢？显然，每个指令都一样慢的最好优化，只要没有冗余就算是优化好了，但这显然与设计追求不相符。我认为好的指令集应该具有表述能力强（一个功能有多种独立实现），独立性好（类似函数式逻辑，相互干扰少），资源瓶颈少（例如各种barrier，carr flag都有多个选择，不会导致相关操作序列化）等特点。从上层看，就是指令调度和算数优化的可能性比较多，自由度大。另外一点是对信息的具体化能力较强，比如不同的依赖关系可以用不同的scoreboard保证次序，减少干扰。"
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Post With Code",
+    "section": "",
+    "text": "This is a post with executable code."
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "fywc",
+    "section": "",
+    "text": "About this blog hehehe"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "fywc",
+    "section": "Education",
+    "text": "Education\nInstitute of Computing Technology | Bei jing, CN Master in Computer Science | Sept 2022 - June 2025\nBeijing Jiaotong University | Bei jing, CN Bachelor in Computer Science | Sept 2018 - June 2022"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "fywc’s Blog",
+    "section": "",
+    "text": "软硬件协同迷思\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGDB命令集合\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLinux 内核设备和模块\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDeadlock-Livelock-Starvation\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n数据结构与算法\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nOct 2, 2023\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nHarlow Malloc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nCS6.175\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nRookieCore\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html",
+    "href": "posts/CS6.175/index.html",
+    "title": "CS6.175",
+    "section": "",
+    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#四种fifo",
+    "href": "posts/CS6.175/index.html#四种fifo",
+    "title": "CS6.175",
+    "section": "",
+    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#ehr寄存器",
+    "href": "posts/CS6.175/index.html#ehr寄存器",
+    "title": "CS6.175",
+    "section": "EHR寄存器",
+    "text": "EHR寄存器\nEHR寄存器是一种特殊的寄存器，可以同时进行寄存器的读取和写入操作，而不需要任何同步或者锁定机制，适用于流水线设计。缺点是EHR会导致关键路径过长，而且难以跟踪具体路径。\n\n\n\n\nr0\nw0\nr1\nw1\n\n\n\n\nr0\nCF\n&lt;\nCF\n&lt;\n\n\nw0\n&gt;\nC\n&lt;\n&lt;\n\n\nr1\nCF\n&gt;\nCF\n&lt;\n\n\nw1\n&gt;\n&gt;\n&gt;\nC\n\n\n\n其中，优先级依次是w1 &gt; r1 &gt; w0 &gt; r0"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#单周期",
+    "href": "posts/CS6.175/index.html#单周期",
+    "title": "CS6.175",
+    "section": "单周期",
+    "text": "单周期"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#双周期",
+    "href": "posts/CS6.175/index.html#双周期",
+    "title": "CS6.175",
+    "section": "双周期",
+    "text": "双周期\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#四周期",
+    "href": "posts/CS6.175/index.html#四周期",
+    "title": "CS6.175",
+    "section": "四周期",
+    "text": "四周期\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[执行]\n  C --&gt; D[写回]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#二级流水线",
+    "href": "posts/CS6.175/index.html#二级流水线",
+    "title": "CS6.175",
+    "section": "二级流水线",
+    "text": "二级流水线\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#六级流水线",
+    "href": "posts/CS6.175/index.html#六级流水线",
+    "title": "CS6.175",
+    "section": "六级流水线",
+    "text": "六级流水线\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[读寄存器]\n  C --&gt; D[执行]\n  D --&gt; E[访存]\n  E --&gt; F[写回]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#btb",
+    "href": "posts/CS6.175/index.html#btb",
+    "title": "CS6.175",
+    "section": "BTB",
+    "text": "BTB\n包括当前指令的地址current_pc和预测地址predicted_pc. ## BHT\n通常采用二位饱和计数器，包括当前指令的地址current_pc和计数器taken_prediction\nBHT可以和BTB合并在一起保存，格式如：\n\n\n\ncurrent_pc\npredicted_pc\ntaken_prediction"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#ras",
+    "href": "posts/CS6.175/index.html#ras",
+    "title": "CS6.175",
+    "section": "RAS",
+    "text": "RAS\nRAS仅用于函数返回地址的预测。\n当程序执行到分支跳转指令时，RAS判断指令是否属于函数调用类型的分支跳转指令。若遇到rd = x1的JAL/JALR指令，则RAS将返回地址入栈; 若遇到rd = x0 && rs1 = x1的JALR指令，则从RAS出栈，作为函数返回地址使用。"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#cache",
+    "href": "posts/CS6.175/index.html#cache",
+    "title": "CS6.175",
+    "section": "Cache",
+    "text": "Cache\n\nBlocking Cache\n阻塞式缓存在未命中时会向内存发出请求，等待内存响应后才能继续处理后续请求。\n这种方式会导致处理器停顿，降低性能。\n\n\n\n\n\nflowchart LR\n  A[Ready] --&gt; B[StartMiss]\n  B --&gt; C[SendFillReq]\n  C --&gt; D[WaitFillResp]\n  D --&gt; E[Resp]\n\n\n\n\n\n\n\nReady: 处理器可以继续执行下一条指令\nStartMiss：处理器发出未命中请求\nSendFillReq：处理器发送访存请求到内存\nWaitFillResp：处理器等待内存响应\nResp：处理器接收到内存响应\n\n\n\nNonBlocking Cache\n非阻塞式缓存能够在接收到未命中请求后，无须空等就能继续处理其他请求。\n非阻塞式缓存的实现方式是MSHR。MSHR是一个队列，用于存储未命中的请求。\n非阻塞式缓存的miss有三种：\n\nprimary miss：某个块的第一次miss\nsecondary miss：对某个已经在fetch的block中又一次miss。\nstructural-stall miss：由于MSHR数量不够导致的miss，会发生阻塞。\n\n\n\nMSI\n\n\n\nMSI\n\n\n\n\nMESI\n\n\n\nMESI\n\n\n\n\nMOSI\n\n\n\nMOSI\n\n\n\n\nMOESI\n\n\n\nMOESI"
+  },
+  {
     "objectID": "posts/gdb集合/GDB命令集合.html",
     "href": "posts/gdb集合/GDB命令集合.html",
     "title": "GDB命令集合",
@@ -210,216 +525,6 @@
     "text": "强制调用函数\n(gdb) call &lt;expr&gt;\n# 表达式中可以一是函数，以此达到强制调用函数的目的。并显示函数的返回值，如果函数返回值是void，那么就不显示。\n# 另一个相似的命令也可以完成这一功能——print，print后面可以跟表达式，所以也可以用他来调用函数，print和call的不同是，如果函数返回void，call则不显示，print则显示函数返回值，并把该值存入历史数据中。"
   },
   {
-    "objectID": "posts/post-with-code/index.html",
-    "href": "posts/post-with-code/index.html",
-    "title": "Post With Code",
-    "section": "",
-    "text": "This is a post with executable code."
-  },
-  {
-    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html",
-    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html",
-    "title": "Deadlock-Livelock-Starvation",
-    "section": "",
-    "text": "In a multiprogramming environment, more than one process may compete for a finite set of resources. If a process requests for a resource and the resource is not presently available, then the process waits for it. Sometimes this waiting process never succeeds to get access to the resource. This waiting for resources leads to three scenarios – deadlock, livelock, and starvation.\n\n\n\nIn this section, we’ll first discuss deadlock, its necessary conditions, and how to prevent it.\n\n\nA deadlock is a situation in which processes block each other due to resource acquisition and none of the processes makes any progress as they wait for the resource held by the other process.\n\nThe above figure shows the deadlock scenario between process 1 and process 2. Both processes are holding one resource and waiting for the other resource held by the other process. This is a deadlock situation as neither process 1 or process 2 can make progress until one of the processes gives up its resource.\n\n\n\nTo successfully characterize a scenario as deadlock, the following four conditions must hold simultaneously:\nMutual Exclusion: At least one resource needs to be held by a process in a non-sharable mode. Any other process requesting that resource needs to wait.\nHold and Wait: A process must hold one resource and requests additional resources that are currently held by other processes.\nNo Preemption: A resource can’t be forcefully released from a process. A process can only release a resource voluntarily once it deems to release.\nCircular Wait: A set of a process p0,p1,p2,…pn exists in a manner that p0 is waiting for a resource held by p1, pn-1 waiting for a resource held by p0.\n\n\n\nTo prevent the occurrence of deadlock, at least one of the necessary conditions discussed in the previous section should not hold true. Let us examine the possibility of any of these conditions being false:\nMutual Exclusion: In some cases, this condition can be false. For example, in a read-only file system, one or more processes can be granted sharable access. However, this condition can’t always be false. The reason being some resources are intrinsically non-sharable. For instance, a mutex lock is a non-sharable resource.\nHold and Wait: To ensure that the hold-and-wait condition never occurs, we need to guarantee that once a process requests for a resource it is not holding any other resource at that time. In general, a process should request all resources before it begins its execution.\nNo Preemption: To make this condition false, a process needs to make sure that it automatically releases all currently held resources if the newly requested resource is not available.\nCircular Wait: This condition can be made false by imposing a total ordering of all resource types and ensure that each process requests resources in increasing order of enumeration.\n\n\n\n\nIn this section, we’ll discuss live lock which is similar to deadlock with a subtle difference.\n\n\nIn the case of a livelock, the states of the processes involved in a live lock scenario constantly change. On the other hand, the processes still depend on each other and can never finish their tasks.\n\nThe above figure shows an example of livelock. Both “process 1” and “process 2” need a common resource. Each process checks whether the other process is in an active state. If so, then it hands over the resource to the other process. However as both, the process is inactive status, both kept on handing over the resource to each other indefinitely.\nA real-world example of livelock occurs when two people make a telephone call to each other and both find the line is busy. Both gentlemen decide to hang up and attempt to call after the same time interval. Thus, in the next retry too, they ended up in the same situation. This is an example of a live lock as this can go on forever.\n\n\n\nAlthough similar in nature, deadlock, and live locks are not the same. In a deadlock, processes involved in a deadlock are stuck indefinitely and do not make any state change. However, in a live lock scenario, processes block each other and wait indefinitely but they change their resource state continuously. The notable point is that the resource state change has no effect and does not help the processes make any progress in their task.\n\n\n\n\nIn this section, we’ll discuss starvation which generally occurs as a result of a deadlock, livelock, or caused by a greedy process.\n\n\nStarvation is an outcome of a process that is unable to gain regular access to the shared resources it requires to complete a task and thus, unable to make any progress.\n\nThe above figure shows an example of starvation of “process 2” and “process 3” for the CPU as “process 1” is occupying it for a long duration.\n\n\n\nStarvation can occur due to deadlock, livelock, or caused by another process.\nAs we have seen in the event of a deadlock or a live lock a process competes with another process to acquire the desired resource to complete its task. However, due to the deadlock or livelock scenario, it failed to acquire the resource and generally starved for the resource.\nFurther, it may occur that a process repeatedly gains access to a shared resource or use it for a longer duration while other processes wait for the same resource. Thus, the waiting processes are starved for the resource by the greedy process.\n\n\n\nOne of the possible solutions to prevent starvation is to use a resource scheduling algorithm with a priority queue that also uses the aging technique. Aging is a technique that periodically increases the priority of a waiting process. With this approach, any process waiting for a resource for a longer duration eventually gains a higher priority. And as the resource sharing is driven through the priority of the process, no process starves for a resource indefinitely.\nAnother solution to prevent starvation is to follow the round-robin pattern while allocating the resources to a process. In this pattern, the resource is fairly allocated to each process providing a chance to use the resource before it is allocated to another process again.\n\n\n\n\nIn this article, we discussed concepts of deadlock, livelock, and starvation which occur in a multi-processing operating system.\nA deadlock is a situation that occurs when processes block each other with resource acquisition and makes no further progress. Livelock is a deadlock-like situation in which processes block each other with a repeated state change yet make no progress. Starvation is the outcome of a deadlock, livelock, or as a result of continuous resource denial to a process."
-  },
-  {
-    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#introduction",
-    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#introduction",
-    "title": "Deadlock-Livelock-Starvation",
-    "section": "",
-    "text": "In a multiprogramming environment, more than one process may compete for a finite set of resources. If a process requests for a resource and the resource is not presently available, then the process waits for it. Sometimes this waiting process never succeeds to get access to the resource. This waiting for resources leads to three scenarios – deadlock, livelock, and starvation."
-  },
-  {
-    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#deadlock",
-    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#deadlock",
-    "title": "Deadlock-Livelock-Starvation",
-    "section": "",
-    "text": "In this section, we’ll first discuss deadlock, its necessary conditions, and how to prevent it.\n\n\nA deadlock is a situation in which processes block each other due to resource acquisition and none of the processes makes any progress as they wait for the resource held by the other process.\n\nThe above figure shows the deadlock scenario between process 1 and process 2. Both processes are holding one resource and waiting for the other resource held by the other process. This is a deadlock situation as neither process 1 or process 2 can make progress until one of the processes gives up its resource.\n\n\n\nTo successfully characterize a scenario as deadlock, the following four conditions must hold simultaneously:\nMutual Exclusion: At least one resource needs to be held by a process in a non-sharable mode. Any other process requesting that resource needs to wait.\nHold and Wait: A process must hold one resource and requests additional resources that are currently held by other processes.\nNo Preemption: A resource can’t be forcefully released from a process. A process can only release a resource voluntarily once it deems to release.\nCircular Wait: A set of a process p0,p1,p2,…pn exists in a manner that p0 is waiting for a resource held by p1, pn-1 waiting for a resource held by p0.\n\n\n\nTo prevent the occurrence of deadlock, at least one of the necessary conditions discussed in the previous section should not hold true. Let us examine the possibility of any of these conditions being false:\nMutual Exclusion: In some cases, this condition can be false. For example, in a read-only file system, one or more processes can be granted sharable access. However, this condition can’t always be false. The reason being some resources are intrinsically non-sharable. For instance, a mutex lock is a non-sharable resource.\nHold and Wait: To ensure that the hold-and-wait condition never occurs, we need to guarantee that once a process requests for a resource it is not holding any other resource at that time. In general, a process should request all resources before it begins its execution.\nNo Preemption: To make this condition false, a process needs to make sure that it automatically releases all currently held resources if the newly requested resource is not available.\nCircular Wait: This condition can be made false by imposing a total ordering of all resource types and ensure that each process requests resources in increasing order of enumeration."
-  },
-  {
-    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#livelock",
-    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#livelock",
-    "title": "Deadlock-Livelock-Starvation",
-    "section": "",
-    "text": "In this section, we’ll discuss live lock which is similar to deadlock with a subtle difference.\n\n\nIn the case of a livelock, the states of the processes involved in a live lock scenario constantly change. On the other hand, the processes still depend on each other and can never finish their tasks.\n\nThe above figure shows an example of livelock. Both “process 1” and “process 2” need a common resource. Each process checks whether the other process is in an active state. If so, then it hands over the resource to the other process. However as both, the process is inactive status, both kept on handing over the resource to each other indefinitely.\nA real-world example of livelock occurs when two people make a telephone call to each other and both find the line is busy. Both gentlemen decide to hang up and attempt to call after the same time interval. Thus, in the next retry too, they ended up in the same situation. This is an example of a live lock as this can go on forever.\n\n\n\nAlthough similar in nature, deadlock, and live locks are not the same. In a deadlock, processes involved in a deadlock are stuck indefinitely and do not make any state change. However, in a live lock scenario, processes block each other and wait indefinitely but they change their resource state continuously. The notable point is that the resource state change has no effect and does not help the processes make any progress in their task."
-  },
-  {
-    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#starvation",
-    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#starvation",
-    "title": "Deadlock-Livelock-Starvation",
-    "section": "",
-    "text": "In this section, we’ll discuss starvation which generally occurs as a result of a deadlock, livelock, or caused by a greedy process.\n\n\nStarvation is an outcome of a process that is unable to gain regular access to the shared resources it requires to complete a task and thus, unable to make any progress.\n\nThe above figure shows an example of starvation of “process 2” and “process 3” for the CPU as “process 1” is occupying it for a long duration.\n\n\n\nStarvation can occur due to deadlock, livelock, or caused by another process.\nAs we have seen in the event of a deadlock or a live lock a process competes with another process to acquire the desired resource to complete its task. However, due to the deadlock or livelock scenario, it failed to acquire the resource and generally starved for the resource.\nFurther, it may occur that a process repeatedly gains access to a shared resource or use it for a longer duration while other processes wait for the same resource. Thus, the waiting processes are starved for the resource by the greedy process.\n\n\n\nOne of the possible solutions to prevent starvation is to use a resource scheduling algorithm with a priority queue that also uses the aging technique. Aging is a technique that periodically increases the priority of a waiting process. With this approach, any process waiting for a resource for a longer duration eventually gains a higher priority. And as the resource sharing is driven through the priority of the process, no process starves for a resource indefinitely.\nAnother solution to prevent starvation is to follow the round-robin pattern while allocating the resources to a process. In this pattern, the resource is fairly allocated to each process providing a chance to use the resource before it is allocated to another process again."
-  },
-  {
-    "objectID": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#conclusion",
-    "href": "posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html#conclusion",
-    "title": "Deadlock-Livelock-Starvation",
-    "section": "",
-    "text": "In this article, we discussed concepts of deadlock, livelock, and starvation which occur in a multi-processing operating system.\nA deadlock is a situation that occurs when processes block each other with resource acquisition and makes no further progress. Livelock is a deadlock-like situation in which processes block each other with a repeated state change yet make no progress. Starvation is the outcome of a deadlock, livelock, or as a result of continuous resource denial to a process."
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
-    "title": "Linux 内核设备和模块",
-    "section": "",
-    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
-    "title": "Linux 内核设备和模块",
-    "section": "",
-    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
-    "title": "Linux 内核设备和模块",
-    "section": "伪设备",
-    "text": "伪设备\n一些虚拟设备驱动，仅提供访问内核功能．\n\n内核随机数发生器\n空设备 /dev/null\n零设备 /dev/zero\n满设备 /dev/full\n内存设备 /dev/mem"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
-    "title": "Linux 内核设备和模块",
-    "section": "杂项设备",
-    "text": "杂项设备\n简写为miscdev，是对字符设备的封装，方便使用．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
-    "title": "Linux 内核设备和模块",
-    "section": "模块",
-    "text": "模块\n内核在运行时动态向其中插入或删除代码，这些代码以模块的形式组合在一个单独的二进制镜像．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
-    "title": "Linux 内核设备和模块",
-    "section": "构建模块",
-    "text": "构建模块\n\n放在内核源码树中\n\n字符设备存放在drivers/char/\n块设备存放在drivers/block \nUSE设备存放在 drivers/usb/ \n\n添加一个字符设备fishing , 编辑drivers/char/Makefile 并加入obj-m += fishing/\n在drivers/char/fishing/下,需要添加一个新的Makefile文件：\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n这样编译内核时，也会自动编译该模块，最终编译链接完的文件名为fishing.ko \n\n\n放在内核源码树外\n假设放在/home/dev/fishing/目录中，那么修改/home/dev/fishing/Makefile :\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n编译时需要在/home/dev/fishing/目录下，然后执行:\nmake -C /mnt/disk/kernelsrc/ SUBDIRS=$PWD modules\n其中/mnt/disk/kernelsrc/就是内核源码目录"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
-    "title": "Linux 内核设备和模块",
-    "section": "安装模块",
-    "text": "安装模块\n使用make modules_install"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
-    "title": "Linux 内核设备和模块",
-    "section": "模块依赖性",
-    "text": "模块依赖性\nLinux模块之间存在依赖性，依赖关系存放在/libmodules/}version}/modules.dep 文件．\n使用depmod 命令产生依赖信息，-A 参数表示仅更新新模块的依赖信息."
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
-    "title": "Linux 内核设备和模块",
-    "section": "载入模块",
-    "text": "载入模块\ninsmod fishing.ko\nrmmod fishing.ko\nmodprobe modules\nmodprobe -r modules"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
-    "title": "Linux 内核设备和模块",
-    "section": "模块参数",
-    "text": "模块参数\nLinux 允许驱动程序声明参数，从而用户可以在系统启动或者模块装载时再指定参数值，这些参数对于驱动程序属于全局变量。\n模块参数会载入sysfs文件系统中，变为文件.\nmodule_param(name, type, perm);"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
-    "title": "Linux 内核设备和模块",
-    "section": "导出符号表",
-    "text": "导出符号表\n模块被载入后，就会被动态地连接(link)到内核，连接过程需要借助内核导出的符号表来访问内核函数。\n只有被显式导出的内核函数，才能被模块调用（类似动态链接库）。\n使用 EXPORT_SYMBOL()和EXPORT_SYMBOL_GPL() 可以在内核源码中显式导出内核函数：\nint get_pirate_beard_color(struct pirate *p)\n{\n  return p-&gt;beard.color;\n}\nEXPORT_SYMBOL(get_pirate_beard_color);\n导出的内核符号表被看作导出的内核接口，称为内核API"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
-    "title": "Linux 内核设备和模块",
-    "section": "设备模型",
-    "text": "设备模型\n设备模型提供了一个独立的机制专门来表示设备，并描述其在系统中的拓扑结构，从而使得系统具有以下优点:\n\n代码重复最小化\n提供诸如引用计数等统一机制\n可以列举系统中所有的设备，观察它们的状态，并且查看它们连接的总线。\n可以将系统中的全部设备结构以树的形式完整、有效地展现出来——包括所有的总线和内部连接。\n可以将设备和其对应的驱动联系起来，反之亦然。\n可以将设备按照类型加以归类，比如分类为输入设备，而无需理解物理设备的拓扑结构。\n可以沿设备树的叶子向其根的方向依次遍历，以保证能以正确顺序关闭各设备的电源。\n\n\nkobject\nkobject 类似于面向对象中的基类，设备类继承该类\n// include/linux/kobject.h\nstruct kobject {\n  const char    *name;\n  struct list_head  entry;\n  struct kobject    *parent;// 父对象指针，用于表达设备树中的层次关系\n  struct kset    *kset;\n  struct kobj_type  *ktype;\n  struct sysfs_dirent  *sd; // sysfs的dirent对象指针，指向本对象(本对象在sysfs中其实是一个文件)\n  struct kref    kref;// 引用计数\n  unsigned int state_initialized:1;\n  unsigned int state_in_sysfs:1;\n  unsigned int state_add_uevent_sent:1;\n  unsigned int state_remove_uevent_sent:1;\n  unsigned int uevent_suppress:1;\n};\nkobject的一个派生类是cdev ,表示字符设备:\nstruct cdev\n{\n  struct kobject kobj; // 嵌入kobject表示继承，必须放在结构体开头实现多态\n  // 后面为该类的特有成员\n  struct module *owner;\n  const struct file_operations *ops;\n  struct list_head list;\n  dev_t dev;\n  unsigned int count;\n};\n\n\nktype\nkobject 的成员 ktype 表示本 kobject 的类型，多个 kobject 可以关联同一个 ktype，描述一类 kobject 所具有的普遍特性。\n// include/linux/kobject.h\nstruct kobj_type {\n  void (*release)(struct kobject *kobj); // 引用计数归0时的析构函数，也就是同类kobject通用\n  const struct sysfs_ops *sysfs_ops; // sysfs 的操作方法\n  struct attribute **default_attrs; // 属性，是个数组\n  const struct kobj_ns_type_operations *(*child_ns_type)(struct kobject *kobj);\n  const void *(*namespace)(struct kobject *kobj);\n};\n\n\nkset\nkset 用于对诸多 kobject 及其派生类对象进行分组（分组和 ktype 无关，即使 ktype 相同的也能分到不同组中）。分组依据比如“全部的块设备”，kset 的存在让分组更灵活，而不受限于相同或是不同的 ktype。\nkset 的存在是为了将 kobject 分组映射为 sysfs 中的目录关系信息.\n// include/linux/kobject.h\nstruct kset {\n  struct list_head list; // 链表，连接该kset管理的所有组内kobj，指向kobj链表上的第一个节点\n  spinlock_t list_lock; // 保护链表的自旋锁\n  struct kobject kobj; // 作为组内的所有kobject的基类,这是kset的一大功能\n  const struct kset_uevent_ops *uevent_ops; // 用于处理集合中kobject对象的热插拔操作\n};\nkset 对象作为链表头连接一组 kobject（kobj 之间通过 kobject 内的 entry 成员连接）："
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
-    "title": "Linux 内核设备和模块",
-    "section": "引用计数",
-    "text": "引用计数\n类似于高级语言的gc机制，当引用数为０时回收对象.\nkref结构：\n// include/linux/kref.h\nstruct kref {\n  atomic_t refcount;\n};\n引用计数操作方法：\nstruct kobject *kobject_get(struct kobject *kobj);\nvoid kobject_put(struct kobject *kobj);"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
-    "title": "Linux 内核设备和模块",
-    "section": "sysfs中添加和删除kobject",
-    "text": "sysfs中添加和删除kobject\nkobject默认初始化后并不关联到sysfs,需要使用kobject_add() ．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
-    "title": "Linux 内核设备和模块",
-    "section": "向sysfs中添加文件(attr)",
-    "text": "向sysfs中添加文件(attr)\nkobject对应sysfs中的目录，而kobject对象中的default_attr数组对应sysfs中的文件．\n该数组负责将内核数据映射成sysfs中的文件．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
-    "title": "Linux 内核设备和模块",
-    "section": "默认文件",
-    "text": "默认文件\nkobject对象中的成员default_attrs 数组表示目录下的默认文件，sysfs_ops成员则描述了如何使用这些文件：\n// include/linux/sysfs.h\nstruct sysfs_ops {\n  // 读取文件,从kobj（表示目录）和attr（表示文件）中，读取数据到buf中\n  ssize_t  (*show)(struct kobject *kobj, struct attribute *attr,char *buf);\n  // 写入文件\n  ssize_t  (*store)(struct kobject *,struct attribute *,const char *, size_t);\n  const void *(*namespace)(struct kobject *, const struct attribute *);\n};"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
-    "title": "Linux 内核设备和模块",
-    "section": "文件的创建与修改",
-    "text": "文件的创建与修改\n一般而言，相同 ktype 的 kobject 的 default_attrs 都是相同的，也就是这些目录下的文件组织结构(文件名，权限)都相同。\n//　创建文件\nint sysfs_create_file(struct kobject *kobj, const struct attribute tattr);\n//  创建符号链接\nint sysfs_create_link(struct kobject *kobj, struct kobject *target, char *name);\n//  删除新文件\nvoid sysfs_remove_file(struct kobject *kobj, const struct attribute *attr);\n//  删除符号链接\nvoid sysfs_remove_link(struct kobject *kobj, char *name) ;"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
-    "title": "Linux 内核设备和模块",
-    "section": "sysfs约定　",
-    "text": "sysfs约定　\n\n一值一文件：sysfs 属性应该保证每个文件只导出一个值，该值应该是文本形式而且映射为简单 C 类型。避免文件内容过于复杂，这样使用 shell 或 C 语言读取写入该文件就会简单得多。\n清晰的层次组织数据\nsysfs 提供内核到用户空间的服务\nsysfs 已经取代 ioctl() 和 procfs，尽可能得使用 sysfs 操作内核变量"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
-    "title": "Linux 内核设备和模块",
-    "section": "内核事件层",
-    "text": "内核事件层\n内核事件层实现了内核到用户的消息通知系统（通过 kobject 和 sysfs）\n事件是实现异步操作的必要组成部分，常见事件如硬盘满了，处理器过热了，分区挂载了。\n每个事件源都是一个 sysfs 路径，比如一个硬盘通知事件源为 /sys/block/hda。\n内核事件由内核空间传递到用户空间需要经过netlink（netlink 是一个用于传送网络信息的多点传送套接字）。使用示例：在用户空间实现一个系统后台服务用于监听套接字(socket)，处理任何读到的信息，并将事件传送到系统栈里，通过该方法也能实现将事件整合入 D-BUS。\n在内核代码中向用户空间发送信号使用函数kobject_uevent(), 最终事件就是包含 kobject 对应的 sysfs 路径和信号动作的字符串。"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "fywc’s Blog",
-    "section": "",
-    "text": "Linux 内核设备和模块\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDeadlock-Livelock-Starvation\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGDB命令集合\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n数据结构与算法\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nOct 2, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nRookieCore\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nHarlow Malloc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nCS6.175\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\n\n\nNo matching items"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "fywc",
-    "section": "",
-    "text": "About this blog hehehe"
-  },
-  {
-    "objectID": "about.html#education",
-    "href": "about.html#education",
-    "title": "fywc",
-    "section": "Education",
-    "text": "Education\nInstitute of Computing Technology | Bei jing, CN Master in Computer Science | Sept 2022 - June 2025\nBeijing Jiaotong University | Bei jing, CN Bachelor in Computer Science | Sept 2018 - June 2022"
-  },
-  {
-    "objectID": "posts/welcome/index.html",
-    "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
-  },
-  {
     "objectID": "posts/数据结构与算法/数据结构与算法.html",
     "href": "posts/数据结构与算法/数据结构与算法.html",
     "title": "数据结构与算法",
@@ -502,82 +607,5 @@
     "title": "RookieCore",
     "section": "",
     "text": "RookieCore 是一款简单的开源RISC-V处理器，采用三级流水:取指、译码、执行。 This is a post with executable code.\n\nif语句\nif语句每个分支都必须要使用 begin..end 包围起来，并且begin与if占同一行，end独占一行。\nif (a == 1'b1) begin\n    c &lt;= b;\nend\nelse begin\n    c &lt;= a;\nend\n\n\ncase语句\ncase语句每个分支中，如果只有一行语句则不包围，否则使用 begin..end包围起来，并且begin与分支语句占同一行，end独占一行。\ncase (a)\n    b: \n        c = d;\n    e: begin\n        c = f;\n        d = f;\n    end\n    default: begin\n        c = g;\n        d = g;\n    end\nendcase\n\n\nalways语句\nalways语句必须使用 begin..end 包围起来，并且begin与always语句占同一行，end独占一行。\nalways @ (posedge clk) begin\n    a &lt;= b;\nend"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html",
-    "href": "posts/CS6.175/index.html",
-    "title": "CS6.175",
-    "section": "",
-    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#四种fifo",
-    "href": "posts/CS6.175/index.html#四种fifo",
-    "title": "CS6.175",
-    "section": "",
-    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#ehr寄存器",
-    "href": "posts/CS6.175/index.html#ehr寄存器",
-    "title": "CS6.175",
-    "section": "EHR寄存器",
-    "text": "EHR寄存器\nEHR寄存器是一种特殊的寄存器，可以同时进行寄存器的读取和写入操作，而不需要任何同步或者锁定机制，适用于流水线设计。缺点是EHR会导致关键路径过长，而且难以跟踪具体路径。\n\n\n\n\nr0\nw0\nr1\nw1\n\n\n\n\nr0\nCF\n&lt;\nCF\n&lt;\n\n\nw0\n&gt;\nC\n&lt;\n&lt;\n\n\nr1\nCF\n&gt;\nCF\n&lt;\n\n\nw1\n&gt;\n&gt;\n&gt;\nC\n\n\n\n其中，优先级依次是w1 &gt; r1 &gt; w0 &gt; r0"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#单周期",
-    "href": "posts/CS6.175/index.html#单周期",
-    "title": "CS6.175",
-    "section": "单周期",
-    "text": "单周期"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#双周期",
-    "href": "posts/CS6.175/index.html#双周期",
-    "title": "CS6.175",
-    "section": "双周期",
-    "text": "双周期\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#四周期",
-    "href": "posts/CS6.175/index.html#四周期",
-    "title": "CS6.175",
-    "section": "四周期",
-    "text": "四周期\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[执行]\n  C --&gt; D[写回]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#二级流水线",
-    "href": "posts/CS6.175/index.html#二级流水线",
-    "title": "CS6.175",
-    "section": "二级流水线",
-    "text": "二级流水线\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#六级流水线",
-    "href": "posts/CS6.175/index.html#六级流水线",
-    "title": "CS6.175",
-    "section": "六级流水线",
-    "text": "六级流水线\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[读寄存器]\n  C --&gt; D[执行]\n  D --&gt; E[访存]\n  E --&gt; F[写回]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#btb",
-    "href": "posts/CS6.175/index.html#btb",
-    "title": "CS6.175",
-    "section": "BTB",
-    "text": "BTB\n包括当前指令的地址current_pc和预测地址predicted_pc. ## BHT\n通常采用二位饱和计数器，包括当前指令的地址current_pc和计数器taken_prediction\nBHT可以和BTB合并在一起保存，格式如：\n\n\n\ncurrent_pc\npredicted_pc\ntaken_prediction"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#ras",
-    "href": "posts/CS6.175/index.html#ras",
-    "title": "CS6.175",
-    "section": "RAS",
-    "text": "RAS\nRAS仅用于函数返回地址的预测。\n当程序执行到分支跳转指令时，RAS判断指令是否属于函数调用类型的分支跳转指令。若遇到rd = x1的JAL/JALR指令，则RAS将返回地址入栈; 若遇到rd = x0 && rs1 = x1的JALR指令，则从RAS出栈，作为函数返回地址使用。"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#cache",
-    "href": "posts/CS6.175/index.html#cache",
-    "title": "CS6.175",
-    "section": "Cache",
-    "text": "Cache\n\nBlocking Cache\n阻塞式缓存在未命中时会向内存发出请求，等待内存响应后才能继续处理后续请求。\n这种方式会导致处理器停顿，降低性能。\n\n\n\n\nflowchart LR\n  A[Ready] --&gt; B[StartMiss]\n  B --&gt; C[SendFillReq]\n  C --&gt; D[WaitFillResp]\n  D --&gt; E[Resp]\n\n\n\n\n\n\nReady: 处理器可以继续执行下一条指令\nStartMiss：处理器发出未命中请求\nSendFillReq：处理器发送访存请求到内存\nWaitFillResp：处理器等待内存响应\nResp：处理器接收到内存响应\n\n\n\nNonBlocking Cache\n非阻塞式缓存能够在接收到未命中请求后，无须空等就能继续处理其他请求。\n非阻塞式缓存的实现方式是MSHR。MSHR是一个队列，用于存储未命中的请求。\n非阻塞式缓存的miss有三种：\n\nprimary miss：某个块的第一次miss\nsecondary miss：对某个已经在fetch的block中又一次miss。\nstructural-stall miss：由于MSHR数量不够导致的miss，会发生阻塞。\n\n\n\nMSI\n\n\n\nMSI\n\n\n\n\nMESI\n\n\n\nMESI\n\n\n\n\nMOSI\n\n\n\nMOSI\n\n\n\n\nMOESI\n\n\n\nMOESI"
   }
 ]
