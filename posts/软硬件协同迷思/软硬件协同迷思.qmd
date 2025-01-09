@@ -1,3 +1,10 @@
+---
+title: "Welcome To My Blog"
+author: "Tristan O'Malley"
+date: "2023-02-03"
+categories: [news]
+---
+
 # 软硬件协同迷思
 
 ## 软硬件的技术隔阂
