@@ -1,0 +1,34 @@
+# 计算机顶会研究新趋势
+
+存档两篇介绍计算机顶会ISCA研究方向趋势的文章：
+
+\[1] Fifty Years of the International Symposium on Computer Architecture: A Data-Driven Retrospective
+
+\[2] A Retrospective Recount of Computer Architecture Research with a Data-Driven Study of Over Four Decades of ISCA Publications
+
+***
+
+# 分阶段趋势
+
+![](image/image_X1PkL8blhF.png)
+
+**第一阶段：**多处理器相关论文数量持续增长。这些论文涵盖networks/interconnects、故障诊断甚至关系数据库系统等多个主题——所有研究都围绕multiprocessor systems 或 using multiprocessors 。
+
+**第二阶段：**开始出现存储器和缓存架构研究，这段时期超长指令字（VLIW）和多发射multiple-issue等技术被提出，得益于这些并行计算技术，cache coherence 和 consistency 变得至关重要。例如Jouppi关于 victim caches和 prefetch buffers的论文，至今仍是计算机体系结构研究生课程的必读文献
+
+第三阶段：开始出现对功耗优化与建模技术的研究，在经历数十年技术微缩与功耗降低后，这一研究热潮预示着2000年代初登纳德缩放定律即将失效的早期信号。此外1995年的SMT论文也是重要事件。
+
+第四阶段：开始出现多核架构与互联技术的研究，出现大规模繁荣。
+
+第五阶段：开始出现GPU功耗建模与可重构架构、机器学习体系结构的研究，并且逐渐占据主导地位。
+
+2022-至今：主要有同态加密与加密数据加速器、大语言模型架构等研究。
+
+***
+
+# 分研究方向的走势
+
+![](image/1cfcd31e606acefd8b25728da7f606f6_4Ldlb_Uzmd.png)
+
+可以看出，GPU和神经网络方向的论文爆发式增长，其他方向都在逐渐走低。
+
