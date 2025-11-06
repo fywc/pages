@@ -1,367 +1,17 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "fywc’s Blog",
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "fywc",
     "section": "",
-    "text": "计算机顶会研究新趋势\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLinux 内核设备和模块\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGDB命令集合\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDeadlock-Livelock-Starvation\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nVFIO Description\n\n\n\nLinux\n\nVFIO\n\n\n\n\n\n\n\nfywc\n\n\nJan 11, 2025\n\n\n\n\n\n\n\n\n\n\n\n数据结构与算法\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nOct 2, 2023\n\n\n\n\n\n\n\n\n\n\n\nCS6.175\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\nRookieCore\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nHarlow Malloc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\nNo matching items"
+    "text": "About this blog hehehe"
   },
   {
-    "objectID": "posts/VFIO概述/VFIO概述.html",
-    "href": "posts/VFIO概述/VFIO概述.html",
-    "title": "VFIO Description",
-    "section": "",
-    "text": "在开始之前我们先要说一个东西就是 DMA，直接让设备访问内存，可以不通过 CPU 搬运数据。\n\n这是一个比较简单的体系结构图，设备 和 CPU 通过存储控制器访问存储器。一个简单的 case 是 CPU 向存储器写数据，然后设备从存储器读数据。这么快来一切都很正常。但是实际上 CPU 是有一层缓存的，例如下面这样。\n\nCPU 向内存写数据，但是先要清空到不一致的缓存，然后设备再去读数据，不然设备读到的数据和 CPU 实际的数据会不一致（因为缓存里的数据可能和存储器的不一致），而且实际上缓存也不只是一层，所以需要一个中间层来保证 从 CPU 的角度和从设备的角度内存都是一致的，所以就有了下面这个结构。\n\nCPU 和 设备都会走缓存验证一遍以后，再落到存储器上，这样带上缓存以后大家的一致性都是一样的了。所以从设备的角度，设备也拥有了缓存，实际上这个和 IOMMU 关系不是很大，接下来设备其实也可以和 CPU 一样有一层 MMU，也就是地址到存储器物理地址的转换。注意，这里我用了地址，因为对 CPU 来说是虚拟地址，但是对设备来说是一个总线域的地址。这里要明确区分一下，一个是总线地址，是从设备的角度来看的，一个是 CPU 的虚拟地址，这是从 CPU 角度来看的，两个是不同的东西。将总线域地址转换成存储器物理地址的设备就叫 IOMMU。\n\n如果没有 IOMMU，DMA 也能照常工作，IOMMU 的主要作用就是保护功能，防止使用 DMA 的设备访问任意存储器的物理地址。\nIOMMU 在不同架构上名字不太一样，AMD 叫 AMD-Vi，最开始针对的设备只是显卡，Intel 叫 VT-d，arm 叫 SMMU，具体对应的手册也不太一样，但是主要解决的问题是一致的。在 VTd 中，dmar (DMA remapping) 就是那个 IOMMU 设备，通过中断的方式实现类似 page fault 一样的内存分配行为。DMA 传输是由 CPU 发起的：CPU 会告诉 DMA 控制器，帮忙将 xxx 地方的数据搬到 xxx 地方。CPU 发完指令之后，就当甩手掌柜了。IOMMU 有点像 MMU 是一个将设备地址翻译到内存地址的页表体系，也会有对应的页表，这个东西在虚拟化中也非常有用，可以将原本有软件模拟的设备，用直接的硬件替代，而原本的隔离通过 IOMMU 来完成。如下图所示，原本需要通过软件模拟的驱动设备可以通过 IOMMU 以__安全__的方式来直接把硬件设备分配个用户态的 Guest OS。\n\n理论上讲没有 IOMMU 实际上是可以工作的，但是硬件的角度，设备就拥有了整个存储器的全局视图，这是无论如何都非常不合理的事情，不应该让设备拥有访问任意物理内存的能力。\n这里要提的另外一个功能就是对中断的隔离，类似于下面的通过在中断请求中添加标识来重定向中断到对应的中断回调上。\n\nVFIO 的作用就是通过 IOMMU 以安全的方式来将设备的访问直接暴露到用户空间，而不用专门完成某个驱动等待合并到上游或者使用之前的对 IOMMU 没有感知的 UIO 的框架。通过 VFIO 向用户态开放 IOMMU 的功能，编写用户态的驱动。\n对于 IOMMU 来说，隔离的级别不一定是单个设备，比如一个后面有几个设备的 PCI 桥，从 PCI 桥角度来说，都是来自 PCI 桥的总线事务。所以 IOMMU 有一个 iommu_group的概念，代表一组与其他设备隔离的设备的集合。\nIOMMU 根据手册上讲还有一个域的概念，可以简单理解为一段物理地址的抽象。\n在 iommu_group 的层级上，VFIO 封装了一层 container class，这个的作用对应于希望能够在不同的iommu_group 之间共享 TLB 和 page tables，这个就是一个集合的概念，跟容器的那个概念没啥关系，一个集合总归要有个名字。通过把 host 的 device 和 driver 解绑，然后绑定到 VFIO 的 driver 上，就会有个/dev/vfio/$GROUP/ 出现，然后这个 $GROUP代表的就是这个 device 的 iommu_group号，如果要使用 VFIO 就要把这个 group 下的所有 device 都解绑才可以。\n通过打开/dev/vfio/vfio就能创建一个 VFIO 的 container，然后再打开/dev/vfio/$GROUP用VFIO_GROUP_SET_CONTAINER ioctl 把文件描述传进去，就把 group 加进去了，如果支持多个 group 共享页表等结构，还可以把相应的 group 也加进去。（再强调一遍这个页表是总线地址到存储器物理地址，IOMMU 管理的那个页表）。\n下面举个官方的栗子，获取 PCI 设备 0000:06:0d.0 的 group_id （PCI 命名的规则是 domain:bus:slot.func）\n$ readlink /sys/bus/pci/devices/0000:06:0d.0/iommu_group\n../../../../kernel/iommu_groups/26\n解绑 PCI 设备，然后创建一个 container id\n$ lspci -n -s 0000:06:0d.0\n06:0d.0 0401: 1102:0002 (rev 08)\n# echo 0000:06:0d.0 &gt; /sys/bus/pci/devices/0000:06:0d.0/driver/unbind\n# echo 1102 0002 &gt; /sys/bus/pci/drivers/vfio-pci/new_id\n然后寻找其他同属于一个 group 的设备\n$ ls -l /sys/bus/pci/devices/0000:06:0d.0/iommu_group/devices\ntotal 0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:00:1e.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.1 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.1\nPCI 桥 0000:00:1e.0 后面挂了两个设备，一个是刚才加进去的 0000:06:0d.0，还有一个是 0000:06:0d.1，通过上面的步奏加进去就可以。\n最后一步是让用户有权限使用这个 group。\n# chown user:user /dev/vfio/26\n下面就是一个样例，从用户态使用 VFIO，整个的使用方式是通过 ioctl来获取中断相关信息，以及注册中断处理函数，然后也是通过 ioctl来获取region信息，然后调用相应的mmap函数，让 CPU 可以访问内存。\nint container, group, device, i;\nstruct vfio_group_status group_status =\n        { .argsz = sizeof(group_status) };\nstruct vfio_iommu_type1_info iommu_info = { .argsz = sizeof(iommu_info) };\nstruct vfio_iommu_type1_dma_map dma_map = { .argsz = sizeof(dma_map) };\nstruct vfio_device_info device_info = { .argsz = sizeof(device_info) };\n\n/* Create a new container */\ncontainer = open(\"/dev/vfio/vfio\", O_RDWR);\n\nif (ioctl(container, VFIO_GET_API_VERSION) != VFIO_API_VERSION)\n  /* Unknown API version */\n\nif (!ioctl(container, VFIO_CHECK_EXTENSION, VFIO_TYPE1_IOMMU))\n  /* Doesn't support the IOMMU driver we want. */\n\n/* Open the group */\ngroup = open(\"/dev/vfio/26\", O_RDWR);\n\n/* Test the group is viable and available */\nioctl(group, VFIO_GROUP_GET_STATUS, &group_status);\n\nif (!(group_status.flags & VFIO_GROUP_FLAGS_VIABLE))\n  /* Group is not viable (ie, not all devices bound for vfio) */\n\n/* Add the group to the container */\nioctl(group, VFIO_GROUP_SET_CONTAINER, &container);\n\n/* Enable the IOMMU model we want */\nioctl(container, VFIO_SET_IOMMU, VFIO_TYPE1_IOMMU);\n\n/* Get addition IOMMU info */\nioctl(container, VFIO_IOMMU_GET_INFO, &iommu_info);\n\n/* Allocate some space and setup a DMA mapping */\ndma_map.vaddr = mmap(0, 1024 * 1024, PROT_READ | PROT_WRITE,\n         MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);\ndma_map.size = 1024 * 1024;\ndma_map.iova = 0; /* 1MB starting at 0x0 from device view */\ndma_map.flags = VFIO_DMA_MAP_FLAG_READ | VFIO_DMA_MAP_FLAG_WRITE;\n\nioctl(container, VFIO_IOMMU_MAP_DMA, &dma_map);\n\n/* Get a file descriptor for the device */\ndevice = ioctl(group, VFIO_GROUP_GET_DEVICE_FD, \"0000:06:0d.0\");\n\n/* Test and setup the device */\nioctl(device, VFIO_DEVICE_GET_INFO, &device_info);\n\nfor (i = 0; i &lt; device_info.num_regions; i++) {\n  struct vfio_region_info reg = { .argsz = sizeof(reg) };\n\n  reg.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_REGION_INFO, &reg);\n\n  /* Setup mappings... read/write offsets, mmaps\n   * For PCI devices, config space is a region */\n}\n\nfor (i = 0; i &lt; device_info.num_irqs; i++) {\n  struct vfio_irq_info irq = { .argsz = sizeof(irq) };\n\n  irq.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_IRQ_INFO, &irq);\n\n  /* Setup IRQs... eventfds, VFIO_DEVICE_SET_IRQS */\n}\n\n/* Gratuitous device reset and go... */\nioctl(device, VFIO_DEVICE_RESET);\n在include/linux/vfio.h里面有完整的 API，这里就简单略过。\n在理解了一些基本原理和使用方式之后再来看 VFIO 的代码应该叫就比较容易理解了。\n首先是作为 PCI 设备的 probe。主要是通过 vfio_iommu_group_get 分配 iommu_group，然后调用vfio_add_group_dev初始化设备回调接口vfio_pci_ops，而remove就是反过来把对应的结构释放掉就可以。然后再看注册的回调函数结构体。\nstatic const struct vfio_device_ops vfio_pci_ops = {\n  .name    = \"vfio-pci\",\n  .open    = vfio_pci_open,\n  .release  = vfio_pci_release,\n  .ioctl    = vfio_pci_ioctl,\n  .read    = vfio_pci_read,\n  .write    = vfio_pci_write,\n  .mmap    = vfio_pci_mmap,\n  .request  = vfio_pci_request,\n};\n这里分析几个关键的函数，他们会通过file_operations vfio_fops被间接的调用。\n首先是 mmap，就是在调用vfio_pci_mmap的时候最终调用remap_pfn_range(vma, vma-&gt;vm_start, vma-&gt;vm_pgoff, req_len, vma-&gt;vm_page_prot); 来将物理内存映射到用户态空间，这就是上面的栗子中 mmap 系统调用的入口，而具体要映射的物理内存是通过一系列pci_resource_xxx宏从 PCI bar 空间读出来的配置。\n然后是 ioctl 接口，这个接口比较丰富，也简单的看一下。比如 VFIO_DEVICE_SET_IRQS会通过使用用户态传进来的结构体，调用vfio_pci_set_irqs_ioctl注册中断处理函数。而通过vfio_ioctl_set_iommu会设置 container 的 iommu_group 以及对应的 driver。read/write接口都是用于修改 PCI 配置信息的。\n简单的来说，VFIO 的主要工作是把设备通过 IOMMU 映射的 DMA 物理内存地址映射到用户态中，让用户态程序可以自行操纵设备的传输，并且可以保证一定程度的安全，另外可以自行注册中断处理函数，从而在用户态实现设备的驱动程序，通过这样的框架，可以在 DPDK 中充分发挥用户态协议栈的威力。\n\n\n\n\nPCI基本概念\n《PCI Express 体系结构导读》王齐著\nmastering the dma and iommu apis\nLinux Doc on VFIO\nIntel® Virtualization Technology for Directed I/O: Spec"
-  },
-  {
-    "objectID": "posts/VFIO概述/VFIO概述.html#vfio",
-    "href": "posts/VFIO概述/VFIO概述.html#vfio",
-    "title": "VFIO Description",
-    "section": "",
-    "text": "在开始之前我们先要说一个东西就是 DMA，直接让设备访问内存，可以不通过 CPU 搬运数据。\n\n这是一个比较简单的体系结构图，设备 和 CPU 通过存储控制器访问存储器。一个简单的 case 是 CPU 向存储器写数据，然后设备从存储器读数据。这么快来一切都很正常。但是实际上 CPU 是有一层缓存的，例如下面这样。\n\nCPU 向内存写数据，但是先要清空到不一致的缓存，然后设备再去读数据，不然设备读到的数据和 CPU 实际的数据会不一致（因为缓存里的数据可能和存储器的不一致），而且实际上缓存也不只是一层，所以需要一个中间层来保证 从 CPU 的角度和从设备的角度内存都是一致的，所以就有了下面这个结构。\n\nCPU 和 设备都会走缓存验证一遍以后，再落到存储器上，这样带上缓存以后大家的一致性都是一样的了。所以从设备的角度，设备也拥有了缓存，实际上这个和 IOMMU 关系不是很大，接下来设备其实也可以和 CPU 一样有一层 MMU，也就是地址到存储器物理地址的转换。注意，这里我用了地址，因为对 CPU 来说是虚拟地址，但是对设备来说是一个总线域的地址。这里要明确区分一下，一个是总线地址，是从设备的角度来看的，一个是 CPU 的虚拟地址，这是从 CPU 角度来看的，两个是不同的东西。将总线域地址转换成存储器物理地址的设备就叫 IOMMU。\n\n如果没有 IOMMU，DMA 也能照常工作，IOMMU 的主要作用就是保护功能，防止使用 DMA 的设备访问任意存储器的物理地址。\nIOMMU 在不同架构上名字不太一样，AMD 叫 AMD-Vi，最开始针对的设备只是显卡，Intel 叫 VT-d，arm 叫 SMMU，具体对应的手册也不太一样，但是主要解决的问题是一致的。在 VTd 中，dmar (DMA remapping) 就是那个 IOMMU 设备，通过中断的方式实现类似 page fault 一样的内存分配行为。DMA 传输是由 CPU 发起的：CPU 会告诉 DMA 控制器，帮忙将 xxx 地方的数据搬到 xxx 地方。CPU 发完指令之后，就当甩手掌柜了。IOMMU 有点像 MMU 是一个将设备地址翻译到内存地址的页表体系，也会有对应的页表，这个东西在虚拟化中也非常有用，可以将原本有软件模拟的设备，用直接的硬件替代，而原本的隔离通过 IOMMU 来完成。如下图所示，原本需要通过软件模拟的驱动设备可以通过 IOMMU 以__安全__的方式来直接把硬件设备分配个用户态的 Guest OS。\n\n理论上讲没有 IOMMU 实际上是可以工作的，但是硬件的角度，设备就拥有了整个存储器的全局视图，这是无论如何都非常不合理的事情，不应该让设备拥有访问任意物理内存的能力。\n这里要提的另外一个功能就是对中断的隔离，类似于下面的通过在中断请求中添加标识来重定向中断到对应的中断回调上。\n\nVFIO 的作用就是通过 IOMMU 以安全的方式来将设备的访问直接暴露到用户空间，而不用专门完成某个驱动等待合并到上游或者使用之前的对 IOMMU 没有感知的 UIO 的框架。通过 VFIO 向用户态开放 IOMMU 的功能，编写用户态的驱动。\n对于 IOMMU 来说，隔离的级别不一定是单个设备，比如一个后面有几个设备的 PCI 桥，从 PCI 桥角度来说，都是来自 PCI 桥的总线事务。所以 IOMMU 有一个 iommu_group的概念，代表一组与其他设备隔离的设备的集合。\nIOMMU 根据手册上讲还有一个域的概念，可以简单理解为一段物理地址的抽象。\n在 iommu_group 的层级上，VFIO 封装了一层 container class，这个的作用对应于希望能够在不同的iommu_group 之间共享 TLB 和 page tables，这个就是一个集合的概念，跟容器的那个概念没啥关系，一个集合总归要有个名字。通过把 host 的 device 和 driver 解绑，然后绑定到 VFIO 的 driver 上，就会有个/dev/vfio/$GROUP/ 出现，然后这个 $GROUP代表的就是这个 device 的 iommu_group号，如果要使用 VFIO 就要把这个 group 下的所有 device 都解绑才可以。\n通过打开/dev/vfio/vfio就能创建一个 VFIO 的 container，然后再打开/dev/vfio/$GROUP用VFIO_GROUP_SET_CONTAINER ioctl 把文件描述传进去，就把 group 加进去了，如果支持多个 group 共享页表等结构，还可以把相应的 group 也加进去。（再强调一遍这个页表是总线地址到存储器物理地址，IOMMU 管理的那个页表）。\n下面举个官方的栗子，获取 PCI 设备 0000:06:0d.0 的 group_id （PCI 命名的规则是 domain:bus:slot.func）\n$ readlink /sys/bus/pci/devices/0000:06:0d.0/iommu_group\n../../../../kernel/iommu_groups/26\n解绑 PCI 设备，然后创建一个 container id\n$ lspci -n -s 0000:06:0d.0\n06:0d.0 0401: 1102:0002 (rev 08)\n# echo 0000:06:0d.0 &gt; /sys/bus/pci/devices/0000:06:0d.0/driver/unbind\n# echo 1102 0002 &gt; /sys/bus/pci/drivers/vfio-pci/new_id\n然后寻找其他同属于一个 group 的设备\n$ ls -l /sys/bus/pci/devices/0000:06:0d.0/iommu_group/devices\ntotal 0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:00:1e.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.1 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.1\nPCI 桥 0000:00:1e.0 后面挂了两个设备，一个是刚才加进去的 0000:06:0d.0，还有一个是 0000:06:0d.1，通过上面的步奏加进去就可以。\n最后一步是让用户有权限使用这个 group。\n# chown user:user /dev/vfio/26\n下面就是一个样例，从用户态使用 VFIO，整个的使用方式是通过 ioctl来获取中断相关信息，以及注册中断处理函数，然后也是通过 ioctl来获取region信息，然后调用相应的mmap函数，让 CPU 可以访问内存。\nint container, group, device, i;\nstruct vfio_group_status group_status =\n        { .argsz = sizeof(group_status) };\nstruct vfio_iommu_type1_info iommu_info = { .argsz = sizeof(iommu_info) };\nstruct vfio_iommu_type1_dma_map dma_map = { .argsz = sizeof(dma_map) };\nstruct vfio_device_info device_info = { .argsz = sizeof(device_info) };\n\n/* Create a new container */\ncontainer = open(\"/dev/vfio/vfio\", O_RDWR);\n\nif (ioctl(container, VFIO_GET_API_VERSION) != VFIO_API_VERSION)\n  /* Unknown API version */\n\nif (!ioctl(container, VFIO_CHECK_EXTENSION, VFIO_TYPE1_IOMMU))\n  /* Doesn't support the IOMMU driver we want. */\n\n/* Open the group */\ngroup = open(\"/dev/vfio/26\", O_RDWR);\n\n/* Test the group is viable and available */\nioctl(group, VFIO_GROUP_GET_STATUS, &group_status);\n\nif (!(group_status.flags & VFIO_GROUP_FLAGS_VIABLE))\n  /* Group is not viable (ie, not all devices bound for vfio) */\n\n/* Add the group to the container */\nioctl(group, VFIO_GROUP_SET_CONTAINER, &container);\n\n/* Enable the IOMMU model we want */\nioctl(container, VFIO_SET_IOMMU, VFIO_TYPE1_IOMMU);\n\n/* Get addition IOMMU info */\nioctl(container, VFIO_IOMMU_GET_INFO, &iommu_info);\n\n/* Allocate some space and setup a DMA mapping */\ndma_map.vaddr = mmap(0, 1024 * 1024, PROT_READ | PROT_WRITE,\n         MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);\ndma_map.size = 1024 * 1024;\ndma_map.iova = 0; /* 1MB starting at 0x0 from device view */\ndma_map.flags = VFIO_DMA_MAP_FLAG_READ | VFIO_DMA_MAP_FLAG_WRITE;\n\nioctl(container, VFIO_IOMMU_MAP_DMA, &dma_map);\n\n/* Get a file descriptor for the device */\ndevice = ioctl(group, VFIO_GROUP_GET_DEVICE_FD, \"0000:06:0d.0\");\n\n/* Test and setup the device */\nioctl(device, VFIO_DEVICE_GET_INFO, &device_info);\n\nfor (i = 0; i &lt; device_info.num_regions; i++) {\n  struct vfio_region_info reg = { .argsz = sizeof(reg) };\n\n  reg.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_REGION_INFO, &reg);\n\n  /* Setup mappings... read/write offsets, mmaps\n   * For PCI devices, config space is a region */\n}\n\nfor (i = 0; i &lt; device_info.num_irqs; i++) {\n  struct vfio_irq_info irq = { .argsz = sizeof(irq) };\n\n  irq.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_IRQ_INFO, &irq);\n\n  /* Setup IRQs... eventfds, VFIO_DEVICE_SET_IRQS */\n}\n\n/* Gratuitous device reset and go... */\nioctl(device, VFIO_DEVICE_RESET);\n在include/linux/vfio.h里面有完整的 API，这里就简单略过。\n在理解了一些基本原理和使用方式之后再来看 VFIO 的代码应该叫就比较容易理解了。\n首先是作为 PCI 设备的 probe。主要是通过 vfio_iommu_group_get 分配 iommu_group，然后调用vfio_add_group_dev初始化设备回调接口vfio_pci_ops，而remove就是反过来把对应的结构释放掉就可以。然后再看注册的回调函数结构体。\nstatic const struct vfio_device_ops vfio_pci_ops = {\n  .name    = \"vfio-pci\",\n  .open    = vfio_pci_open,\n  .release  = vfio_pci_release,\n  .ioctl    = vfio_pci_ioctl,\n  .read    = vfio_pci_read,\n  .write    = vfio_pci_write,\n  .mmap    = vfio_pci_mmap,\n  .request  = vfio_pci_request,\n};\n这里分析几个关键的函数，他们会通过file_operations vfio_fops被间接的调用。\n首先是 mmap，就是在调用vfio_pci_mmap的时候最终调用remap_pfn_range(vma, vma-&gt;vm_start, vma-&gt;vm_pgoff, req_len, vma-&gt;vm_page_prot); 来将物理内存映射到用户态空间，这就是上面的栗子中 mmap 系统调用的入口，而具体要映射的物理内存是通过一系列pci_resource_xxx宏从 PCI bar 空间读出来的配置。\n然后是 ioctl 接口，这个接口比较丰富，也简单的看一下。比如 VFIO_DEVICE_SET_IRQS会通过使用用户态传进来的结构体，调用vfio_pci_set_irqs_ioctl注册中断处理函数。而通过vfio_ioctl_set_iommu会设置 container 的 iommu_group 以及对应的 driver。read/write接口都是用于修改 PCI 配置信息的。\n简单的来说，VFIO 的主要工作是把设备通过 IOMMU 映射的 DMA 物理内存地址映射到用户态中，让用户态程序可以自行操纵设备的传输，并且可以保证一定程度的安全，另外可以自行注册中断处理函数，从而在用户态实现设备的驱动程序，通过这样的框架，可以在 DPDK 中充分发挥用户态协议栈的威力。"
-  },
-  {
-    "objectID": "posts/VFIO概述/VFIO概述.html#参考链接",
-    "href": "posts/VFIO概述/VFIO概述.html#参考链接",
-    "title": "VFIO Description",
-    "section": "",
-    "text": "PCI基本概念\n《PCI Express 体系结构导读》王齐著\nmastering the dma and iommu apis\nLinux Doc on VFIO\nIntel® Virtualization Technology for Directed I/O: Spec"
-  },
-  {
-    "objectID": "posts/post-with-code/index.html",
-    "href": "posts/post-with-code/index.html",
-    "title": "Post With Code",
-    "section": "",
-    "text": "This is a post with executable code."
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html",
-    "href": "posts/数据结构与算法/数据结构与算法.html",
-    "title": "数据结构与算法",
-    "section": "",
-    "text": "Memory\n\nPhysical Layer\nVirtual Layer\n\nLocation:\n\nArrangement\n\nAlgorithm\n\nFundamental operations\n\nFundamental Algorithms\n\nSorting algorithms\n\nSearching Algorithm\n\nAlgorithm Design Techniques\n\nData Structures\n\nContiguous Memory Data Structures\nDiscontiguous Memory Data Structures\nCombination of CM and DCM\nLinear Data Structures\n\nArray\nDynamicArray\nRing Buffer\nLinkedList\nFreeList\nDouble Linked List\nCircularLinkedList\nCircularDoubleLinkedList\nStack\n\nStack via DynamicArray\nStack via LinkedList\nStack via Deque\n\nQueue\n\nQueue via DoubleLinkedList\nQueue via RingBuffer\nQueue via Double Stack\n\nDeque\n\nDeque via DoubleLinkedList\nDeque via Array\n\nPriority Queue\n\nPriorityQueue via DynamicArray\nPriorityQueue via LinkedList\nPriorityQueue via Deque\nPriorityQueue via BinaryHeap\n\nAssociative Collections\n\nUnorderedMap or HashTable\nSortedMap\nUnordered\nOrderedSet via HashTable and LinkedList\nOrderedSet via Self Balancing Tree\n\nStandard Library Data Structures\n\nCPP"
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#目录",
-    "href": "posts/数据结构与算法/数据结构与算法.html#目录",
-    "title": "数据结构与算法",
-    "section": "",
-    "text": "Memory\n\nPhysical Layer\nVirtual Layer\n\nLocation:\n\nArrangement\n\nAlgorithm\n\nFundamental operations\n\nFundamental Algorithms\n\nSorting algorithms\n\nSearching Algorithm\n\nAlgorithm Design Techniques\n\nData Structures\n\nContiguous Memory Data Structures\nDiscontiguous Memory Data Structures\nCombination of CM and DCM\nLinear Data Structures\n\nArray\nDynamicArray\nRing Buffer\nLinkedList\nFreeList\nDouble Linked List\nCircularLinkedList\nCircularDoubleLinkedList\nStack\n\nStack via DynamicArray\nStack via LinkedList\nStack via Deque\n\nQueue\n\nQueue via DoubleLinkedList\nQueue via RingBuffer\nQueue via Double Stack\n\nDeque\n\nDeque via DoubleLinkedList\nDeque via Array\n\nPriority Queue\n\nPriorityQueue via DynamicArray\nPriorityQueue via LinkedList\nPriorityQueue via Deque\nPriorityQueue via BinaryHeap\n\nAssociative Collections\n\nUnorderedMap or HashTable\nSortedMap\nUnordered\nOrderedSet via HashTable and LinkedList\nOrderedSet via Self Balancing Tree\n\nStandard Library Data Structures\n\nCPP"
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#physical-layer",
-    "href": "posts/数据结构与算法/数据结构与算法.html#physical-layer",
-    "title": "数据结构与算法",
-    "section": "Physical Layer",
-    "text": "Physical Layer\nThe physical layer of a computer system is responsible for the actual storage and retrieval of data in electronic or magnetic form. Memory in the physical layer is organized hierarchically, with different types and levels of memory. Types of Memory in the Physical Layer:\n\nRegisters\nCache Memory\nMain Memory(Random Access Memory: RAM)\nSecondary Memories: (HDD, SSD)\n\nPhysical memory is invisible to programs in virtual memory systems and as a programmer you’re not required to reason about it."
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#virtual-layer",
-    "href": "posts/数据结构与算法/数据结构与算法.html#virtual-layer",
-    "title": "数据结构与算法",
-    "section": "Virtual Layer",
-    "text": "Virtual Layer\n\nLocation:\n\nStack : Fast allocation. Faster access.\n\nMoving just an integer pointer for allocates/de-allocates memory.\n\nHeap : Slow Allocation. Slower access\n\nSearch Heap\nSync heap for other threads\nAllocate memory"
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#arrangement",
-    "href": "posts/数据结构与算法/数据结构与算法.html#arrangement",
-    "title": "数据结构与算法",
-    "section": "Arrangement",
-    "text": "Arrangement\n\nContiguous Bulk allocation in continuous memory block. (faster access).\nDiscontiguous Dynamic allocation in separated memory blocks.(slower access)."
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#fundamental-operations",
-    "href": "posts/数据结构与算法/数据结构与算法.html#fundamental-operations",
-    "title": "数据结构与算法",
-    "section": "Fundamental operations",
-    "text": "Fundamental operations\n\nread\n\naccessDataBySequence() (Either forward or backward)\ngetIndexingInformation(): getStartIndex(), getEndIndex(), getNextIndex(forIndex), getPreviousIndex(forIndex)\naccessDataAtRandomIndex(:): For Random access, time complexity should be of order O(1).\naccessDataAtFront()\naccessDataAtBack()\n\nwrite\n\ninsertDataAtRandomIndex(:)\ninsertDataAtFront()\ninsertDataAtBack()\nremoveDataAtRandomIndex(:)\nremoveDataAtFront()\nremoveDataAtBack()\nupdateDataAtRandomIndex(:)\nupdateDataAtFront()\nupdateDataAtBack()\n\n\nFor example, Linear search algorithm uses accessDataBySequence and compare each item with a specified value to find the answer while Binary search algorithm needs accessDataAtRandomIndex operation. \nA note on Random Access: In the context of data structures, random access refers to the ability to instantly access a specific location. With Array, for instance, if you select a random index, the Array data structure can immediately provide you with the address of that index. However, if you attempt to access a random index in a LinkedList, the data structure cannot instantaneously provide the address. Instead, it must iterate from the beginning (starting from head) until it reaches the desired index. Consequently, LinkedLists are considered to have a time complexity of O(n) (Upper bound) for random access operation. Most algorithms require O(1) random access, and languages such as Java have introduced a marker interface(with no methods) called RandomAccess. This interface serves as a reminder that certain algorithms rely on random access. To ensure that these algorithms perform efficiently with your data structure, it is necessary to make it compatible with random access. \n\nFundamental Algorithms\nFundamental operations form the building blocks upon which algorithms are constructed. Conversely, certain algorithms play fundamental rules for other algorithms. Take, for instance, the impact of input data order on the time efficiency of algorithms. Sorting the data beforehand can greatly simplify our lives, as it has a significant positive effect on the efficiency of numerous algorithms. Sorting can be accomplished through two methods. The first method involves utilizing a sorting algorithm to arrange an unsorted collection. The second method involves utilizing specific data structures, such as binary search trees, that facilitate the sorting of data through amortization.\n\nSorting algorithms\nAll sort algorithms need getIndexingInformation, accessDataAtRandomIndex(:) operations. Also items must be comparable.\n\nIn-place sorting algorithms: They need updateDataAtRandomIndex(:) operation.\n\nBubble sort\nSelection sor\nInsertion sort\nHeap sort\nQuick sort\n\nNot In-Place Sorting Algorithms:\n\nMerge sort\nRadix sort (non-comparison)\nBucket sort (non-comparison)\n\n\n\n\n\nSearching Algorithm\n\nLinear search: needs accessDataBySequence()\nBinary search: needs accessDataAtRandomIndex(:) with O(1)"
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#algorithm-design-techniques",
-    "href": "posts/数据结构与算法/数据结构与算法.html#algorithm-design-techniques",
-    "title": "数据结构与算法",
-    "section": "Algorithm Design Techniques",
-    "text": "Algorithm Design Techniques\n\nDivide and conquer\nRecursion\nRandomized algorithms: Input MUST be RANDOM.\nDynamic programming\nGreedy algorithms"
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#contiguous-memory-data-structures",
-    "href": "posts/数据结构与算法/数据结构与算法.html#contiguous-memory-data-structures",
-    "title": "数据结构与算法",
-    "section": "Contiguous Memory Data Structures",
-    "text": "Contiguous Memory Data Structures\n\nInit with fixed size. size stays fixed.\nAddress of each block can be calculated via: start + k * blocksize. Random access time complexity is O(1)\nBulk memory allocation\nSame size memory blocks (Same type)\nBase data Structure example: Array"
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#discontiguous-memory-data-structures",
-    "href": "posts/数据结构与算法/数据结构与算法.html#discontiguous-memory-data-structures",
-    "title": "数据结构与算法",
-    "section": "Discontiguous Memory Data Structures",
-    "text": "Discontiguous Memory Data Structures\n\nThis arrangement is a special kind of Graph (We can represent graphs using it).\nEach block contains the address of next block.\nTime complexity for random access operation is O(n)\nDynamic memory allocation\nMemory block sizes can be different (Different types).\nBase data structure example: LinkedList"
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#combination-of-cm-and-dcm",
-    "href": "posts/数据结构与算法/数据结构与算法.html#combination-of-cm-and-dcm",
-    "title": "数据结构与算法",
-    "section": "Combination of CM and DCM",
-    "text": "Combination of CM and DCM\n\nA contiguous-memory array of pointers to contiguous-memory or discontiguous-memory collection of objects.\nTime complexity for random access operations is O(1) (via array of pointers) but accessing objects in non-continuous memory have a little overhead.\nBulk memory allocation for address (pointer) array, dynamic memory allocation for objects.\nObjects can have different memory sizes (different types).\nBase data structure example: An array of referenced objects in most programming languages."
-  },
-  {
-    "objectID": "posts/数据结构与算法/数据结构与算法.html#linear-data-structures",
-    "href": "posts/数据结构与算法/数据结构与算法.html#linear-data-structures",
-    "title": "数据结构与算法",
-    "section": "Linear Data Structures",
-    "text": "Linear Data Structures\nBy employing one or a combination of the aforementioned concepts, basic data structures can be implemented, serving as the foundation for more intricate data structures. Additionally, the space and time complexities, as well as memory costs, can be readily analyzed by leveraging the complexities and costs associated with these fundamental concepts.\n\nArray\nIn Programming languages, Arrays are built-in types. Array of pointers (or array of reference types) acts like Combination of CM and DCM. For primitive types (or value types like Int, enum, struct in C#,Swift,…) if stored in stack, the behavior is like Contiguous Memory data structures. But if the primitives get boxed and be allocated in the heap, the behavior is like Combination of CM and DCM.\n\nBasic operations time complexity: Same as Contiguous Memory data structures\nGood:\n\naccessAtRandomIndex, insertAtBack, removeAtBack operations.\nBulk memory allocation (fast).\nContiguous memory. Fast access.\nIf used with primitive types (Value types), no dynamic memory allocation cost.\n\nNot good:\n\ninsertAtFront, insertAtMiddle, removeAtFront, removeAtMiddle Operations.\nFixed size.\n\nProgramming Languages implementations:\n\nCPP: Array size is compile-time constant.\n\n\n\n\n\nDynamicArray\nSimilar to array, but can grow at runtime. DynamicArray of pointers (or DynamicArray of reference types) acts like Combination of CM and DCM. For primitive types (or value types like Int, enum, struct in C#,Swift,…) the behavior is like Contiguous Memory data structures. Steps for resizing:\n\nallocate new array with new size\ncopy the old array values to the new array\ndelete the old array\n\n\nBasic operations time complexity: Same as Contiguous Memory data structures\nGood:\n\naccessAtRandomIndex, insertAtBack, removeAtBack operations.\nBulk memory allocation (fast).\nIf used with primitive types (Value types), no dynamic memory allocation cost.\n\nNot good:\n\ninsertAtFront, insertAtMiddle, removeAtFront, removeAtMiddle Operations.\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy. For example in Swift programming language, each time an array capacity is full, it double the capacity of the array.\n\nProgramming Languages implementations:\n\nCPP: Vector.\n\n\n\n\nRing Buffer\nA ring buffer is a specialized data structure implemented using an array. It is a static-sized buffer where read and write operations occur through two distinct pointers that iterate through the array in a circular manner.\n\n\nBasic operations time complexity: Same as Array with the following improvement:\n\ninsertAtFront is O(1)\nremoveAtFront is O(1)\n\nGood:\n\naccessAtRandomIndex, insert operation.\nBulk memory allocation (fast).\nIf used with primitive types (Value types), no dynamic memory allocation cost.\nAs it is fixed-size, we can map it to virtual memory layer memory page to make it super fast.\n\nNot good:\n\nFixed size.\nWrite operations may fail if the frequency of writes exceeds the frequency of reads.\n\nProgramming Languages implementations:\n\nCPP: Has no built-in implementation for LinkedList. Here is an implementation.\n\n\n\n\nLinkedList\n\n\nBasic operations time complexity: Same as Discontiguous Memory data structures with one improvement.\n\ninsertAtBack() becomes O(1) because we keep track of tail.\nremoveAtBack() stays O(n) because we have to iterate from head to index n-1 to remove n.\n\nGood:\n\ninsertAtFront, removeAtFront, insertAtBack operations.\n\nNot good:\n\naccessAtRandomIndex, removeAtBack, insertAtMiddle, removeAtMiddle Operations.\nDynamic memory allocation (slow).\n\nProgramming Languages implementations:\n\nCPP: forward_list.\n\n\n\n\n\nFreeList\nAs you have noticed, one of the Not Goods of a LinkedList data structure is dynamic memory allocation. It means, whenever you need a new node, you have to create a new one dynamically using new keyword. Dynamic memory allocation is a heavy task. One way of resolving this issue is to use FreeLists. FreeLists can be thought of as a reservoir for the LinkedList nodes. One approach is to initialize a FreeList with a sequence of nodes and whenever you need a Node for your LinkedList, you get one from the FreeList instance and when you remove a Node from the LinkedList, you will not free the memory, but return it to the FreeList reservoir to be used again later. Another approach is the following implementation for LinkedListNode with a private static freelist. In this implementation, the freelist is not initialized with an initial size but it grows as the new nodes are added.\nclass LinkListNode&lt;E&gt; {      // Singly linked list node with freelist support\n    // Extensions to support freelists\n    private static LinkListNode freelist = null;                  // Freelist for the class\n\n    private E value;       // Value for this node\n    private LinkListNode&lt;E&gt; next;    // Point to next node in list\n    // Constructors\n    LinkList(E it, LinkListNode&lt;E&gt; inn) { value = it; next = inn; }\n    LinkList(LinkListNode&lt;E&gt; inn) { value = null; next = inn; }\n\n    E element() { return value; }                        // Return the value\n    E setElement(E it) { return value = it; }            // Set element value\n    LinkListNode&lt;E&gt; next() { return next; }                     // Return next link\n    LinkListNode&lt;E&gt; setNext(LinkListNode&lt;E&gt; inn) { return next = inn; } // Set next link\n\n    // Return a new link, from freelist if possible\n    static &lt;E&gt; LinkListNode&lt;E&gt; get(E it, LinkListNode&lt;E&gt; inn) {\n      if (freelist == null) {\n        return new LinkListNode&lt;E&gt;(it, inn);                 // Get from \"new\"\n      }\n      LinkListNode&lt;E&gt; temp = freelist;                       // Get from freelist\n      freelist = freelist.next();\n      temp.setElement(it);\n      temp.setNext(inn);\n      return temp;\n    }\n\n    // Return a link node to the freelist\n    void release() {\n      value = null;   // Drop reference to the element\n      next = freelist;\n      freelist = this;\n    }\n  }\n\n\nDouble Linked List\n\n\nBasic operations time complexity: Same as Discontiguous Memory data structures with two improvements:\n\ninsertAtBack() becomes O(1).\nremoveAtBack() becomes O(1). Now we have access to n-1 from n and we can remove the pointer to n from n-1.\n\nGood:\n\ninsertAtFront, removeAtFront, insertAtBack, removeAtBack operations.\n\nNot good:\n\naccessAtRandomIndex, insertAtMiddle Operations.\nDynamic memory allocation (slow).\nHigh overhead of extra storage for the forward and back reference.\n\nProgramming Languages implementations:\n\nCPP: list is doubly linkedList.\n\n\n\n\n\nCircularLinkedList\n\n\nBasic operations time complexity: Same as LinkedList with some more capabilities.\n\nWe can traverse to a previous node\nWe can traverse in loop.\n\n\n\n\nCircularDoubleLinkedList\n\n\nBasic operations time complexity: Same as DoubleLinkedList with some more capabilities.\n\nWe can traverse to a previous node\nWe can traverse in loop in both direction.\n\n\n\n\nStack\nStack is a Last-In-First-Out(LIFO) data structure. Any data structure that is Good at insert/remove from one of the ends can be used as a container for Stack. Based on this, stacks can be implemented using DynamicArray (Good at add/remove from the back), LinkedList (Good at add/remove from front), DoubleLinkedList(Good at add/remove from both front and back) and Deque. Each implementation inherits Good and Not Good of the container data structure.\n\n\nStack via DynamicArray\n\nBasic operations time complexity: Same as DynamicArray:\nMethods:\n\npush(): insertAtBack on array container.\npop: removeAtBack on array container.\n\nGood:\n\npush() and pop() are O(1) operations.\nBulk memory allocation for pointers.\nIf used with primitive types (value types), no dynamic memory allocation cost.\n\nNot good:\n\nNew memory allocations and copy cost when internal array capacity is full.\nHas unused memory allocation based on growth strategy of the pointer array.\n\nProgramming Languages implementations:\n\nCPP: Stack. In CPP vector, deque and list(DoubleLinkedList) can be used as container for Stack.\n\n\n\n\n\nStack via LinkedList\n\nBasic operations time complexity: Same as LinkedList. We use Head of LinkedList to insert/remove.\nMethods:\n\npush(): insertAtFront on LinkedList container.\npop: removeAtFront on LinkedList container.\n\nGood:\n\npush() and pop() are O(1) operations.\n\nNot good:\n\naccessAtRandomIndex is O(n).\nDynamic memory allocation (slow).\n\n\n\n\n\nStack via Deque\nDeque data structure can be implemented using Deque via DoubleLinkedList or Deque via Array. The Deque can serve as a container for a Stack due to its behavior. C++ default container for Stack is deque.\n\n\n\nQueue\nQueue data structure is First-In-First-Out. Every data structure that is Good at addAtFront and removeAtBack or vice versa can be used as a container for Queue data structure. DoubleLinkedList(Good at add/remove at both ends) can be used as the containers for Queue data structure. Also RingBuffer can be used for fixed size queues. DynamicArray: is not a good container for queue data structure because of O(n) for insert operation. We can amortize this complexity using Queue via Double Stack (Stack via DynamicArray). Another approach is storing contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array or a LinkedList containing pointers to each of the smaller arrays. In this case, the cost of inserting reduced from O(n) to the O(small_array.length). This approach is used for deque.\n\n\nQueue via DoubleLinkedList\n\nBasic operations time complexity: DoubleLinkedList\nMethods:\n\nenqueue(): insertAtFront on DoubleLinkedList container.\ndequeue(): removeAtBack on DoubleLinkedList container.\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\n\nNot good:\n\naccessAtRandomIndex operation.\nExtra memory for forward/backward pointers.\nDynamic memory allocation (slow).\n\nProgramming Languages implementations:\n\nCPP: queue in cpp can has deque or list (DoubleLinkedList) as the container. the default container is deque.\n\n\n\n\n\nQueue via RingBuffer\n\nBasic operations time complexity: RingBuffer\nMethods:\n\nenqueue(): insertAtRandomIndex on Array container.\ndequeue(): accessAtRandomIndex on Array container.\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\nFixed size, enqueue() may fail.\n\n\n\n\n\nQueue via Double Stack\nIf we use DynamicArray as container for our queue, the dequeue() time complexity would be O(n) (Adding items to start of an array is an O(n) operation ). But we can amortize this complexity to O(1) using two stacks. LeftStack for enqueue() and the RightStack for dequeue(). Each time the LeftStack is empty, copy the RightStack contents to the LeftStack. This operation guarantees First-In-First-Out for the queue.\n\nBasic operations time complexity: Similar to Stack via DynamicArray.\nMethods:\n\nenqueue(): insertAtBack on left Array container (the enqueue stack).\ndequeue(): removeAtBack on right Array container (the dequeue stack).\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\n\n\n\n\n\nDeque\nDeque (Double-Ended Queue) are a type of Queue that enqueue() and dequeue() can happen at both ends. Every data structure that is Good at insert/remove from both ends can be used as a container for Deque data structure. The only data structure that fullfil this requirement is DoubleLinkedList. Array is not a good data structure for implementing Deque data structure directly. However we can use some tricks to use Array as a container for Deque data structure. See Deque via Array.\n\n\nDeque via DoubleLinkedList\nImplementing a Deque via DoubleLinkedList is straightforward as this data structure has O(1) for insertAtFront/removeAtFront and insertAtBack/removeAtBack operations.\n\nMethods:\n\npushBack(): insertAtBack of the DoubleLinkedList container.\npushFront(): insertAtFront of the DoubleLinkedList container.\npopBack(): removeAtBack of the DoubleLinkedList container.\npopFront(): removeAtFront of the DoubleLinkedList container.\n\nGood:\n\nEasy implementation\n\nNot Good:\n\nRandom access operation.\nDynamic memory allocation (slow).\nHigh overhead of extra storage for the forward and back references.\n\n\n\n\n\nDeque via Array\nAs it was the case for Queue data structure, Array cannot be used as a container for Deque data structure directly because insertAtFront/removeAtFront operations are not O(1) for Arrays. We can use one of the following techniques to use Array as a container:\n\nUsing a special RingBuffer.\nUsing an Array and allocating deque contents from the center of the underlying array, and resizing the underlying array when either end is reached.\nStoring contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array containing pointers to each of the smaller arrays. In this case, the cost of resizing the array in step 2 is eliminated but different small arrays are not allocated contiguously in memory.\n\n\nGood:\n\nRandom Access operation\n\nNot Good\n\nMore complex implementation\nNeed for array resize when filled\n\nProgramming Languages implementations:\n\nCPP: Deque uses approach 3 of above mentioned tricks to use Array as container for Deque. In this approach data is stored in smaller arrays and these arrays are linked using a doubleLinkedList or another array.\n\n\n\n\n\n\nPriority Queue\nPriorityQueue is the same as Queue with one difference. The dequeue operation is not for the first item that has been inserted. Instead the dequeue item is selected based on a priority criteria and the item may be at the front, the middle or the end of the collection. Any data structure that is Good at inserting at one of the ends can be used as a container for PriorityQueue. As finding the item to be dequeued includes a searching phase, for linear data structures as the container for PriorityQueue the time complexity of dequeue operation is O(n). In case of Heap data structure as the container, the time complexity reduces to O(log(n)) due to internal structure of the Heap.\n\n\nPriorityQueue via DynamicArray\n\nMethods:\n\nenqueue(): insertAtBack on Array container.\ndequeue(): iterate and then removeAtMiddle on Array container. Time complexity is O(n).\n\nGood:\n\nenqueue() is O(1) operation.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\ndequeue() operation is O(n).\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\nProgramming Languages implementations:\n\nCPP: priority_queue is using deque as a container by default. vector also can be used.\n\n\n\n\nPriorityQueue via LinkedList\n\nMethods:\n\nenqueue(): insertAtBack on Array container.\ndequeue(): iterate and then removeAtMiddle on Array container. Time complexity is O(n).\n\nGood:\n\nenqueue() is O(1) operation.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\ndequeue() operation is O(n).\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\nProgramming Languages implementations:\n\nCPP: priority_queue is using deque as a container by default. vector also can be used.\n\n\n\n\nPriorityQueue via Deque\nDeque data structure can be implemented using either Deque via DoubleLinkedList or Deque via Array and PriorityQueue can use it as a container.\n\n\nPriorityQueue via BinaryHeap\n\nMethods:\n\nenqueue(): insert on BinaryHeap container.\ndequeue(): delete on BinaryHeap container.\n\nGood:\n\ndequeue() is O(log(n)) operation.\n\nNot good:\n\nenqueue is O(log(n)) operation. In PriorityQueue via DynamicArray and PriorityQueue via LinkedList this operation is O(1).\n\n\n\n\n\nAssociative Collections\nAn associative collection is an abstract data type that stores a collection of (key, value) pairs, ensuring that each possible key appears at most once in the collection. However, there is no standardized naming convention for these types of data structures, leading to varying terminology across different programming languages, which can cause confusion. Some alternative names for associative collections include associative array, map, symbol table, or dictionary. See here.\n\nUnorderedMap or HashTable\nOther name is HashTable. The main idea behind a Hashtable is to use a hashing function to map keys to specific buckets or slots in an array. Each bucket can store one or more key-value pairs. Hash functions can occasionally generate the same index for different keys, resulting in a collision. To handle collisions efficiently, Hashtable data structures employ various strategies:\n\nEach bucket in the array is a LinkedList of key-value pairs.\nOpen addressing\nResizing the Array.\n\n‌For most data structures, a linear search is an O(n) or O(log(n)) operation. HashTable is a data structure with an amortized O(1) time complexity for searching. Length of arrays in a HashTable is a prime number.\n\n\nGood:\n\nO(1) for search operation.\n\nNot Good:\n\nCollection has no order. No Random access.\nIf LinkedList used for collision handling: Worst-case for search can be O(n) (All nodes collide). Average-case is not O(1).\n\nProgramming Languages implementations:\n\nCPP: unordered_map is an unordered collection created using HashTable. Another version is unordered_multimap that allows for repetitive keys. in the unordered_map version the keys are unique.\n\n\n\n\nSortedMap\nA collection of key-value pairs which is sorted by the key.\n\nGood:\n\nSearch is O(log(n))\nkeys are sorted.\n\nNot Good:\n\nRandom access is not O(1).\nSuitable for small number of data.\n\nProgramming Languages implementations:\n\nCPP: map uses Red-Black Tree for implementation. Another version is multimap which allows duplicate keys. In the map version, keys are unique.\n\n\n\n\nUnordered\nA collection of key-value pairs which is sorted by the key.\n\nGood:\n\nSearch is O(log(n))\nkeys are sorted.\n\nNot Good:\n\nRandom access is not O(1).\nSuitable for small number of data.\n\nProgramming Languages implementations:\n\nCPP: map uses Red-Black Tree for implementation. Another version is multimap which allows duplicate keys. In the map version, keys are unique.\n\n\n\n\nOrderedSet via HashTable and LinkedList\nIt is almost exactly like OrderedMap via HashTable and LinkedList with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.\n\nGood:\n\nOrder of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)\n\nNot Good:\n\nNo random access with O(1) because of LinkedList.\n\n\n\n\nOrderedSet via Self Balancing Tree\nIt is almost exactly like OrderedMap via HashTable and LinkedList with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.\n\nGood:\n\nOrder of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)\n\nNot Good:\n\nNo random access with O(1) because of LinkedList.\n\n\n\n\n\nStandard Library Data Structures\n\nCPP"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
-    "title": "Linux 内核设备和模块",
-    "section": "",
-    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
-    "title": "Linux 内核设备和模块",
-    "section": "",
-    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
-    "title": "Linux 内核设备和模块",
-    "section": "伪设备",
-    "text": "伪设备\n一些虚拟设备驱动，仅提供访问内核功能．\n\n内核随机数发生器\n空设备 /dev/null\n零设备 /dev/zero\n满设备 /dev/full\n内存设备 /dev/mem"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
-    "title": "Linux 内核设备和模块",
-    "section": "杂项设备",
-    "text": "杂项设备\n简写为miscdev，是对字符设备的封装，方便使用．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
-    "title": "Linux 内核设备和模块",
-    "section": "模块",
-    "text": "模块\n内核在运行时动态向其中插入或删除代码，这些代码以模块的形式组合在一个单独的二进制镜像．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
-    "title": "Linux 内核设备和模块",
-    "section": "构建模块",
-    "text": "构建模块\n\n放在内核源码树中\n\n字符设备存放在drivers/char/\n块设备存放在drivers/block \nUSE设备存放在 drivers/usb/ \n\n添加一个字符设备fishing , 编辑drivers/char/Makefile 并加入obj-m += fishing/\n在drivers/char/fishing/下,需要添加一个新的Makefile文件：\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n这样编译内核时，也会自动编译该模块，最终编译链接完的文件名为fishing.ko \n\n\n放在内核源码树外\n假设放在/home/dev/fishing/目录中，那么修改/home/dev/fishing/Makefile :\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n编译时需要在/home/dev/fishing/目录下，然后执行:\nmake -C /mnt/disk/kernelsrc/ SUBDIRS=$PWD modules\n其中/mnt/disk/kernelsrc/就是内核源码目录"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
-    "title": "Linux 内核设备和模块",
-    "section": "安装模块",
-    "text": "安装模块\n使用make modules_install"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
-    "title": "Linux 内核设备和模块",
-    "section": "模块依赖性",
-    "text": "模块依赖性\nLinux模块之间存在依赖性，依赖关系存放在/libmodules/}version}/modules.dep 文件．\n使用depmod 命令产生依赖信息，-A 参数表示仅更新新模块的依赖信息."
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
-    "title": "Linux 内核设备和模块",
-    "section": "载入模块",
-    "text": "载入模块\ninsmod fishing.ko\nrmmod fishing.ko\nmodprobe modules\nmodprobe -r modules"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
-    "title": "Linux 内核设备和模块",
-    "section": "模块参数",
-    "text": "模块参数\nLinux 允许驱动程序声明参数，从而用户可以在系统启动或者模块装载时再指定参数值，这些参数对于驱动程序属于全局变量。\n模块参数会载入sysfs文件系统中，变为文件.\nmodule_param(name, type, perm);"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
-    "title": "Linux 内核设备和模块",
-    "section": "导出符号表",
-    "text": "导出符号表\n模块被载入后，就会被动态地连接(link)到内核，连接过程需要借助内核导出的符号表来访问内核函数。\n只有被显式导出的内核函数，才能被模块调用（类似动态链接库）。\n使用 EXPORT_SYMBOL()和EXPORT_SYMBOL_GPL() 可以在内核源码中显式导出内核函数：\nint get_pirate_beard_color(struct pirate *p)\n{\n  return p-&gt;beard.color;\n}\nEXPORT_SYMBOL(get_pirate_beard_color);\n导出的内核符号表被看作导出的内核接口，称为内核API"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
-    "title": "Linux 内核设备和模块",
-    "section": "设备模型",
-    "text": "设备模型\n设备模型提供了一个独立的机制专门来表示设备，并描述其在系统中的拓扑结构，从而使得系统具有以下优点:\n\n代码重复最小化\n提供诸如引用计数等统一机制\n可以列举系统中所有的设备，观察它们的状态，并且查看它们连接的总线。\n可以将系统中的全部设备结构以树的形式完整、有效地展现出来——包括所有的总线和内部连接。\n可以将设备和其对应的驱动联系起来，反之亦然。\n可以将设备按照类型加以归类，比如分类为输入设备，而无需理解物理设备的拓扑结构。\n可以沿设备树的叶子向其根的方向依次遍历，以保证能以正确顺序关闭各设备的电源。\n\n\nkobject\nkobject 类似于面向对象中的基类，设备类继承该类\n// include/linux/kobject.h\nstruct kobject {\n  const char    *name;\n  struct list_head  entry;\n  struct kobject    *parent;// 父对象指针，用于表达设备树中的层次关系\n  struct kset    *kset;\n  struct kobj_type  *ktype;\n  struct sysfs_dirent  *sd; // sysfs的dirent对象指针，指向本对象(本对象在sysfs中其实是一个文件)\n  struct kref    kref;// 引用计数\n  unsigned int state_initialized:1;\n  unsigned int state_in_sysfs:1;\n  unsigned int state_add_uevent_sent:1;\n  unsigned int state_remove_uevent_sent:1;\n  unsigned int uevent_suppress:1;\n};\nkobject的一个派生类是cdev ,表示字符设备:\nstruct cdev\n{\n  struct kobject kobj; // 嵌入kobject表示继承，必须放在结构体开头实现多态\n  // 后面为该类的特有成员\n  struct module *owner;\n  const struct file_operations *ops;\n  struct list_head list;\n  dev_t dev;\n  unsigned int count;\n};\n\n\nktype\nkobject 的成员 ktype 表示本 kobject 的类型，多个 kobject 可以关联同一个 ktype，描述一类 kobject 所具有的普遍特性。\n// include/linux/kobject.h\nstruct kobj_type {\n  void (*release)(struct kobject *kobj); // 引用计数归0时的析构函数，也就是同类kobject通用\n  const struct sysfs_ops *sysfs_ops; // sysfs 的操作方法\n  struct attribute **default_attrs; // 属性，是个数组\n  const struct kobj_ns_type_operations *(*child_ns_type)(struct kobject *kobj);\n  const void *(*namespace)(struct kobject *kobj);\n};\n\n\nkset\nkset 用于对诸多 kobject 及其派生类对象进行分组（分组和 ktype 无关，即使 ktype 相同的也能分到不同组中）。分组依据比如“全部的块设备”，kset 的存在让分组更灵活，而不受限于相同或是不同的 ktype。\nkset 的存在是为了将 kobject 分组映射为 sysfs 中的目录关系信息.\n// include/linux/kobject.h\nstruct kset {\n  struct list_head list; // 链表，连接该kset管理的所有组内kobj，指向kobj链表上的第一个节点\n  spinlock_t list_lock; // 保护链表的自旋锁\n  struct kobject kobj; // 作为组内的所有kobject的基类,这是kset的一大功能\n  const struct kset_uevent_ops *uevent_ops; // 用于处理集合中kobject对象的热插拔操作\n};\nkset 对象作为链表头连接一组 kobject（kobj 之间通过 kobject 内的 entry 成员连接）："
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
-    "title": "Linux 内核设备和模块",
-    "section": "引用计数",
-    "text": "引用计数\n类似于高级语言的gc机制，当引用数为０时回收对象.\nkref结构：\n// include/linux/kref.h\nstruct kref {\n  atomic_t refcount;\n};\n引用计数操作方法：\nstruct kobject *kobject_get(struct kobject *kobj);\nvoid kobject_put(struct kobject *kobj);"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
-    "title": "Linux 内核设备和模块",
-    "section": "sysfs中添加和删除kobject",
-    "text": "sysfs中添加和删除kobject\nkobject默认初始化后并不关联到sysfs,需要使用kobject_add() ．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
-    "title": "Linux 内核设备和模块",
-    "section": "向sysfs中添加文件(attr)",
-    "text": "向sysfs中添加文件(attr)\nkobject对应sysfs中的目录，而kobject对象中的default_attr数组对应sysfs中的文件．\n该数组负责将内核数据映射成sysfs中的文件．"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
-    "title": "Linux 内核设备和模块",
-    "section": "默认文件",
-    "text": "默认文件\nkobject对象中的成员default_attrs 数组表示目录下的默认文件，sysfs_ops成员则描述了如何使用这些文件：\n// include/linux/sysfs.h\nstruct sysfs_ops {\n  // 读取文件,从kobj（表示目录）和attr（表示文件）中，读取数据到buf中\n  ssize_t  (*show)(struct kobject *kobj, struct attribute *attr,char *buf);\n  // 写入文件\n  ssize_t  (*store)(struct kobject *,struct attribute *,const char *, size_t);\n  const void *(*namespace)(struct kobject *, const struct attribute *);\n};"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
-    "title": "Linux 内核设备和模块",
-    "section": "文件的创建与修改",
-    "text": "文件的创建与修改\n一般而言，相同 ktype 的 kobject 的 default_attrs 都是相同的，也就是这些目录下的文件组织结构(文件名，权限)都相同。\n//　创建文件\nint sysfs_create_file(struct kobject *kobj, const struct attribute tattr);\n//  创建符号链接\nint sysfs_create_link(struct kobject *kobj, struct kobject *target, char *name);\n//  删除新文件\nvoid sysfs_remove_file(struct kobject *kobj, const struct attribute *attr);\n//  删除符号链接\nvoid sysfs_remove_link(struct kobject *kobj, char *name) ;"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
-    "title": "Linux 内核设备和模块",
-    "section": "sysfs约定　",
-    "text": "sysfs约定　\n\n一值一文件：sysfs 属性应该保证每个文件只导出一个值，该值应该是文本形式而且映射为简单 C 类型。避免文件内容过于复杂，这样使用 shell 或 C 语言读取写入该文件就会简单得多。\n清晰的层次组织数据\nsysfs 提供内核到用户空间的服务\nsysfs 已经取代 ioctl() 和 procfs，尽可能得使用 sysfs 操作内核变量"
-  },
-  {
-    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
-    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
-    "title": "Linux 内核设备和模块",
-    "section": "内核事件层",
-    "text": "内核事件层\n内核事件层实现了内核到用户的消息通知系统（通过 kobject 和 sysfs）\n事件是实现异步操作的必要组成部分，常见事件如硬盘满了，处理器过热了，分区挂载了。\n每个事件源都是一个 sysfs 路径，比如一个硬盘通知事件源为 /sys/block/hda。\n内核事件由内核空间传递到用户空间需要经过netlink（netlink 是一个用于传送网络信息的多点传送套接字）。使用示例：在用户空间实现一个系统后台服务用于监听套接字(socket)，处理任何读到的信息，并将事件传送到系统栈里，通过该方法也能实现将事件整合入 D-BUS。\n在内核代码中向用户空间发送信号使用函数kobject_uevent(), 最终事件就是包含 kobject 对应的 sysfs 路径和信号动作的字符串。"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html",
-    "href": "posts/CS6.175/index.html",
-    "title": "CS6.175",
-    "section": "",
-    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#四种fifo",
-    "href": "posts/CS6.175/index.html#四种fifo",
-    "title": "CS6.175",
-    "section": "",
-    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#ehr寄存器",
-    "href": "posts/CS6.175/index.html#ehr寄存器",
-    "title": "CS6.175",
-    "section": "EHR寄存器",
-    "text": "EHR寄存器\nEHR寄存器是一种特殊的寄存器，可以同时进行寄存器的读取和写入操作，而不需要任何同步或者锁定机制，适用于流水线设计。缺点是EHR会导致关键路径过长，而且难以跟踪具体路径。\n\n\n\n\nr0\nw0\nr1\nw1\n\n\n\n\nr0\nCF\n&lt;\nCF\n&lt;\n\n\nw0\n&gt;\nC\n&lt;\n&lt;\n\n\nr1\nCF\n&gt;\nCF\n&lt;\n\n\nw1\n&gt;\n&gt;\n&gt;\nC\n\n\n\n其中，优先级依次是w1 &gt; r1 &gt; w0 &gt; r0"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#单周期",
-    "href": "posts/CS6.175/index.html#单周期",
-    "title": "CS6.175",
-    "section": "单周期",
-    "text": "单周期"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#双周期",
-    "href": "posts/CS6.175/index.html#双周期",
-    "title": "CS6.175",
-    "section": "双周期",
-    "text": "双周期\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#四周期",
-    "href": "posts/CS6.175/index.html#四周期",
-    "title": "CS6.175",
-    "section": "四周期",
-    "text": "四周期\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[执行]\n  C --&gt; D[写回]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#二级流水线",
-    "href": "posts/CS6.175/index.html#二级流水线",
-    "title": "CS6.175",
-    "section": "二级流水线",
-    "text": "二级流水线\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#六级流水线",
-    "href": "posts/CS6.175/index.html#六级流水线",
-    "title": "CS6.175",
-    "section": "六级流水线",
-    "text": "六级流水线\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[读寄存器]\n  C --&gt; D[执行]\n  D --&gt; E[访存]\n  E --&gt; F[写回]"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#btb",
-    "href": "posts/CS6.175/index.html#btb",
-    "title": "CS6.175",
-    "section": "BTB",
-    "text": "BTB\n包括当前指令的地址current_pc和预测地址predicted_pc. ## BHT\n通常采用二位饱和计数器，包括当前指令的地址current_pc和计数器taken_prediction\nBHT可以和BTB合并在一起保存，格式如：\n\n\n\ncurrent_pc\npredicted_pc\ntaken_prediction"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#ras",
-    "href": "posts/CS6.175/index.html#ras",
-    "title": "CS6.175",
-    "section": "RAS",
-    "text": "RAS\nRAS仅用于函数返回地址的预测。\n当程序执行到分支跳转指令时，RAS判断指令是否属于函数调用类型的分支跳转指令。若遇到rd = x1的JAL/JALR指令，则RAS将返回地址入栈; 若遇到rd = x0 && rs1 = x1的JALR指令，则从RAS出栈，作为函数返回地址使用。"
-  },
-  {
-    "objectID": "posts/CS6.175/index.html#cache",
-    "href": "posts/CS6.175/index.html#cache",
-    "title": "CS6.175",
-    "section": "Cache",
-    "text": "Cache\n\nBlocking Cache\n阻塞式缓存在未命中时会向内存发出请求，等待内存响应后才能继续处理后续请求。\n这种方式会导致处理器停顿，降低性能。\n\n\n\n\n\nflowchart LR\n  A[Ready] --&gt; B[StartMiss]\n  B --&gt; C[SendFillReq]\n  C --&gt; D[WaitFillResp]\n  D --&gt; E[Resp]\n\n\n\n\n\n\n\nReady: 处理器可以继续执行下一条指令\nStartMiss：处理器发出未命中请求\nSendFillReq：处理器发送访存请求到内存\nWaitFillResp：处理器等待内存响应\nResp：处理器接收到内存响应\n\n\n\nNonBlocking Cache\n非阻塞式缓存能够在接收到未命中请求后，无须空等就能继续处理其他请求。\n非阻塞式缓存的实现方式是MSHR。MSHR是一个队列，用于存储未命中的请求。\n非阻塞式缓存的miss有三种：\n\nprimary miss：某个块的第一次miss\nsecondary miss：对某个已经在fetch的block中又一次miss。\nstructural-stall miss：由于MSHR数量不够导致的miss，会发生阻塞。\n\n\n\nMSI\n\n\n\nMSI\n\n\n\n\nMESI\n\n\n\nMESI\n\n\n\n\nMOSI\n\n\n\nMOSI\n\n\n\n\nMOESI\n\n\n\nMOESI"
-  },
-  {
-    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html",
-    "href": "posts/软硬件协同迷思/软硬件协同迷思.html",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "最初的出发点是用自动调优在软件性能优化和硬件设计间建立直接联系，与传统自动调优不同的是，这要基于一些硬件设计参数去建模，并计算程序性能，而不是用真机或机器学习的黑盒模型，因为这样才能获得硬件设计参数的直接反馈，例如哪些参数组合是均衡的，哪些存在瓶颈且瓶颈在哪。\n由此得出以下几个判断：\n\n从改硬件设计、kernel优化、瓶颈分析再回到硬件设计，这个反馈链太长，互动效率往往不高；\n手动优化汇编是落后的生产力，工作量大扩展性差；\n算力比人力更有竞争力，机器自动搜索比人力搜索适用性更强；\n问题复杂度增加时，算力比人力更容易扩展；\n\n根据上述判断，结合目前可行的技术分析，可以在现有编译器的基础上，只加入新功能的简单支持，然后用上层语言最多是IR实现自动调优。\n遇到的问题：\n\n硬件功能在设计时就没仔细考虑软件的用法和使用场景。同时具备“硬件工程师+了解具体使用场景和流程”的人很少，这是架构师的能力范围。每个功能的软硬件对接都需要慢慢调试，没有几代产品的相互磨合，是很难做好的。需要有人能够既懂软件应用，懂一点编译器，也懂一点硬件架构，承担技术串联的角色，才能打破技术壁垒，更流畅地实现从底层硬件到上层软件的功能输送。\n编译器的后端优化自动化程度远远不够，依然费时费力。如果只是使用x86和CUDA的编译器，因为这两家的编译器比较成熟，所以优化效果比较好，但是如果要支持新的ISA或者硬件架构，就需要自己去重新实现优化。LLVM中仅有tablegen+支持后端自动化优化，很多部分都要重新磨合；MLIR中有Table Driven Declarative Rewrite Rule，但自动化程度也有限；TVM中自动调优多数在LLVM以上，硬件后端优化不是重点。所以后端优化问题也需要解决。\n硬件建模还是有很多看不清的工作量。对于一些简单的算子和算法，其运算过程哪些硬件参数有影响，能够大致有谱，但像Cache Hit Rate的估计，就有些玄妙。大部分时候有统计规律可循，但也有严重偏离规律的情况发生。这时候，软硬协同的价值也体现出来了，提前对接有助于暴露问题。对于硬件设计的规律，多数情况是软件迁就硬件，软件一要补硬件的坑，二要发挥硬件的能力。并且软件更新迭代成本更小，所以要用软件去补足硬件短板。\n\n\n\n\n软硬件设计不是竞技，但有时候能做的事情选择不做，也是有一定考量的。在软件实现中，CUDA一些函数的corner case中会用到local memory，即使GPR充裕也不转存GPR，因为用local memory，只要不进入到这个corner 分支，那就几乎没有开销，最多费一点指令cache。而如果用GPR，那即使不进入这个分支，也会影响总GPR数，从而影响Occupancy。也就是说只要使用了额外的GPR，不管这部分代码有没有运行，它都有开销，即使有时候是无害的。\nNV的硬件运行逻辑上也有很多限制，比如64bit或128bit访存指令的地址必须对齐，操作64bit和128bit的GPR也必须对齐。NV也有一些常见的指令不支持，也有些指令会重复。所以，很多功能的做或不做，还是有诸多考虑的。\nNV的一些调度逻辑，例如control codes，也从硬件转移到了软件，这应该是因为编译器具有更全局的视野，可以更好地做依赖分析和指令调度，同时也简化硬件设计，节省面积。\n还有一些功能被直接舍弃了，例如NV中没有算数异常处理的功能，比如除0，移除之类的，L1 Cache之间也没有Coherence。这很难用软件弥补，所以干脆软件和硬件都不支持了。\n\n\n\n一个应用，从算法开始，到软件实现，再到编译的中间表示，再到机器指令，都是信息一级一级传递的过程。协同优化也是信息交互的过程，例如最常见的矩阵乘法，在算子曾可以用标准实现，也可以用快速矩阵乘法实现，如果知道是卷积或者其他特殊矩阵，就可以有特定的加速算法。普通的矩阵乘算法，有相应的矩阵乘加速器或是tensorcore，也可以做相应的加速。如果是矩阵连乘或可融合的操作，在上层也容易实现相应的优化。\n但是信息传递也存在很多困难，不管是C还是LLVM的IR，都有一些硬件操作难以表述，最终变成内置函数。内置函数多了，上层表示就难以理解和优化，最后会堆积到硬件后端，这其中会损失一些可能的优化。\n最后到指令集的问题，什么样的指令集方便优化呢？显然，每个指令都一样慢的最好优化，只要没有冗余就算是优化好了，但这显然与设计追求不相符。我认为好的指令集应该具有表述能力强（一个功能有多种独立实现），独立性好（类似函数式逻辑，相互干扰少），资源瓶颈少（例如各种barrier，carr flag都有多个选择，不会导致相关操作序列化）等特点。从上层看，就是指令调度和算数优化的可能性比较多，自由度大。另外一点是对信息的具体化能力较强，比如不同的依赖关系可以用不同的scoreboard保证次序，减少干扰。"
-  },
-  {
-    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的技术隔阂",
-    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的技术隔阂",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "最初的出发点是用自动调优在软件性能优化和硬件设计间建立直接联系，与传统自动调优不同的是，这要基于一些硬件设计参数去建模，并计算程序性能，而不是用真机或机器学习的黑盒模型，因为这样才能获得硬件设计参数的直接反馈，例如哪些参数组合是均衡的，哪些存在瓶颈且瓶颈在哪。\n由此得出以下几个判断：\n\n从改硬件设计、kernel优化、瓶颈分析再回到硬件设计，这个反馈链太长，互动效率往往不高；\n手动优化汇编是落后的生产力，工作量大扩展性差；\n算力比人力更有竞争力，机器自动搜索比人力搜索适用性更强；\n问题复杂度增加时，算力比人力更容易扩展；\n\n根据上述判断，结合目前可行的技术分析，可以在现有编译器的基础上，只加入新功能的简单支持，然后用上层语言最多是IR实现自动调优。\n遇到的问题：\n\n硬件功能在设计时就没仔细考虑软件的用法和使用场景。同时具备“硬件工程师+了解具体使用场景和流程”的人很少，这是架构师的能力范围。每个功能的软硬件对接都需要慢慢调试，没有几代产品的相互磨合，是很难做好的。需要有人能够既懂软件应用，懂一点编译器，也懂一点硬件架构，承担技术串联的角色，才能打破技术壁垒，更流畅地实现从底层硬件到上层软件的功能输送。\n编译器的后端优化自动化程度远远不够，依然费时费力。如果只是使用x86和CUDA的编译器，因为这两家的编译器比较成熟，所以优化效果比较好，但是如果要支持新的ISA或者硬件架构，就需要自己去重新实现优化。LLVM中仅有tablegen+支持后端自动化优化，很多部分都要重新磨合；MLIR中有Table Driven Declarative Rewrite Rule，但自动化程度也有限；TVM中自动调优多数在LLVM以上，硬件后端优化不是重点。所以后端优化问题也需要解决。\n硬件建模还是有很多看不清的工作量。对于一些简单的算子和算法，其运算过程哪些硬件参数有影响，能够大致有谱，但像Cache Hit Rate的估计，就有些玄妙。大部分时候有统计规律可循，但也有严重偏离规律的情况发生。这时候，软硬协同的价值也体现出来了，提前对接有助于暴露问题。对于硬件设计的规律，多数情况是软件迁就硬件，软件一要补硬件的坑，二要发挥硬件的能力。并且软件更新迭代成本更小，所以要用软件去补足硬件短板。"
-  },
-  {
-    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的分工和协作是难点",
-    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的分工和协作是难点",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "软硬件设计不是竞技，但有时候能做的事情选择不做，也是有一定考量的。在软件实现中，CUDA一些函数的corner case中会用到local memory，即使GPR充裕也不转存GPR，因为用local memory，只要不进入到这个corner 分支，那就几乎没有开销，最多费一点指令cache。而如果用GPR，那即使不进入这个分支，也会影响总GPR数，从而影响Occupancy。也就是说只要使用了额外的GPR，不管这部分代码有没有运行，它都有开销，即使有时候是无害的。\nNV的硬件运行逻辑上也有很多限制，比如64bit或128bit访存指令的地址必须对齐，操作64bit和128bit的GPR也必须对齐。NV也有一些常见的指令不支持，也有些指令会重复。所以，很多功能的做或不做，还是有诸多考虑的。\nNV的一些调度逻辑，例如control codes，也从硬件转移到了软件，这应该是因为编译器具有更全局的视野，可以更好地做依赖分析和指令调度，同时也简化硬件设计，节省面积。\n还有一些功能被直接舍弃了，例如NV中没有算数异常处理的功能，比如除0，移除之类的，L1 Cache之间也没有Coherence。这很难用软件弥补，所以干脆软件和硬件都不支持了。"
-  },
-  {
-    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的信息传递和协同优化密切相关",
-    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的信息传递和协同优化密切相关",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "一个应用，从算法开始，到软件实现，再到编译的中间表示，再到机器指令，都是信息一级一级传递的过程。协同优化也是信息交互的过程，例如最常见的矩阵乘法，在算子曾可以用标准实现，也可以用快速矩阵乘法实现，如果知道是卷积或者其他特殊矩阵，就可以有特定的加速算法。普通的矩阵乘算法，有相应的矩阵乘加速器或是tensorcore，也可以做相应的加速。如果是矩阵连乘或可融合的操作，在上层也容易实现相应的优化。\n但是信息传递也存在很多困难，不管是C还是LLVM的IR，都有一些硬件操作难以表述，最终变成内置函数。内置函数多了，上层表示就难以理解和优化，最后会堆积到硬件后端，这其中会损失一些可能的优化。\n最后到指令集的问题，什么样的指令集方便优化呢？显然，每个指令都一样慢的最好优化，只要没有冗余就算是优化好了，但这显然与设计追求不相符。我认为好的指令集应该具有表述能力强（一个功能有多种独立实现），独立性好（类似函数式逻辑，相互干扰少），资源瓶颈少（例如各种barrier，carr flag都有多个选择，不会导致相关操作序列化）等特点。从上层看，就是指令调度和算数优化的可能性比较多，自由度大。另外一点是对信息的具体化能力较强，比如不同的依赖关系可以用不同的scoreboard保证次序，减少干扰。"
-  },
-  {
-    "objectID": "posts/welcome/index.html",
-    "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
-  },
-  {
-    "objectID": "posts/计算机顶会研究趋势演变/计算机顶会研究趋势演变.html",
-    "href": "posts/计算机顶会研究趋势演变/计算机顶会研究趋势演变.html",
-    "title": "计算机顶会研究新趋势",
-    "section": "",
-    "text": "计算机顶会研究新趋势\n存档两篇介绍计算机顶会ISCA研究方向趋势的文章：\n[1] Fifty Years of the International Symposium on Computer Architecture: A Data-Driven Retrospective\n[2] A Retrospective Recount of Computer Architecture Research with a Data-Driven Study of Over Four Decades of ISCA Publications\n\n\n\n分阶段趋势\n\n第一阶段：多处理器相关论文数量持续增长。这些论文涵盖networks/interconnects、故障诊断甚至关系数据库系统等多个主题——所有研究都围绕multiprocessor systems 或 using multiprocessors 。\n第二阶段：开始出现存储器和缓存架构研究，这段时期超长指令字（VLIW）和多发射multiple-issue等技术被提出，得益于这些并行计算技术，cache coherence 和 consistency 变得至关重要。例如Jouppi关于 victim caches和 prefetch buffers的论文，至今仍是计算机体系结构研究生课程的必读文献\n第三阶段：开始出现对功耗优化与建模技术的研究，在经历数十年技术微缩与功耗降低后，这一研究热潮预示着2000年代初登纳德缩放定律即将失效的早期信号。此外1995年的SMT论文也是重要事件。\n第四阶段：开始出现多核架构与互联技术的研究，出现大规模繁荣。\n第五阶段：开始出现GPU功耗建模与可重构架构、机器学习体系结构的研究，并且逐渐占据主导地位。\n2022-至今：主要有同态加密与加密数据加速器、大语言模型架构等研究。\n\n\n\n分研究方向的走势\n\n可以看出，GPU和神经网络方向的论文爆发式增长，其他方向都在逐渐走低。"
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "fywc",
+    "section": "Education",
+    "text": "Education\nInstitute of Computing Technology | Bei jing, CN Master in Computer Science | Sept 2022 - June 2025\nBeijing Jiaotong University | Bei jing, CN Bachelor in Computer Science | Sept 2018 - June 2022"
   },
   {
     "objectID": "posts/gdb集合/GDB命令集合.html",
@@ -574,6 +224,13 @@
     "text": "强制调用函数\n(gdb) call &lt;expr&gt;\n# 表达式中可以一是函数，以此达到强制调用函数的目的。并显示函数的返回值，如果函数返回值是void，那么就不显示。\n# 另一个相似的命令也可以完成这一功能——print，print后面可以跟表达式，所以也可以用他来调用函数，print和call的不同是，如果函数返回void，call则不显示，print则显示函数返回值，并把该值存入历史数据中。"
   },
   {
+    "objectID": "posts/计算机顶会研究趋势演变/计算机顶会研究趋势演变.html",
+    "href": "posts/计算机顶会研究趋势演变/计算机顶会研究趋势演变.html",
+    "title": "计算机顶会研究新趋势",
+    "section": "",
+    "text": "计算机顶会研究新趋势\n存档两篇介绍计算机顶会ISCA研究方向趋势的文章：\n[1] Fifty Years of the International Symposium on Computer Architecture: A Data-Driven Retrospective\n[2] A Retrospective Recount of Computer Architecture Research with a Data-Driven Study of Over Four Decades of ISCA Publications\n\n\n\n分阶段趋势\n\n第一阶段：多处理器相关论文数量持续增长。这些论文涵盖networks/interconnects、故障诊断甚至关系数据库系统等多个主题——所有研究都围绕multiprocessor systems 或 using multiprocessors 。\n第二阶段：开始出现存储器和缓存架构研究，这段时期超长指令字（VLIW）和多发射multiple-issue等技术被提出，得益于这些并行计算技术，cache coherence 和 consistency 变得至关重要。例如Jouppi关于 victim caches和 prefetch buffers的论文，至今仍是计算机体系结构研究生课程的必读文献\n第三阶段：开始出现对功耗优化与建模技术的研究，在经历数十年技术微缩与功耗降低后，这一研究热潮预示着2000年代初登纳德缩放定律即将失效的早期信号。此外1995年的SMT论文也是重要事件。\n第四阶段：开始出现多核架构与互联技术的研究，出现大规模繁荣。\n第五阶段：开始出现GPU功耗建模与可重构架构、机器学习体系结构的研究，并且逐渐占据主导地位。\n2022-至今：主要有同态加密与加密数据加速器、大语言模型架构等研究。\n\n\n\n分研究方向的走势\n\n可以看出，GPU和神经网络方向的论文爆发式增长，其他方向都在逐渐走低。"
+  },
+  {
     "objectID": "posts/RookieCore/index.html",
     "href": "posts/RookieCore/index.html",
     "title": "RookieCore",
@@ -623,17 +280,381 @@
     "text": "In this article, we discussed concepts of deadlock, livelock, and starvation which occur in a multi-processing operating system.\nA deadlock is a situation that occurs when processes block each other with resource acquisition and makes no further progress. Livelock is a deadlock-like situation in which processes block each other with a repeated state change yet make no progress. Starvation is the outcome of a deadlock, livelock, or as a result of continuous resource denial to a process."
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "fywc",
+    "objectID": "posts/vLLM：V0到V1的核心升级/vLLM从V0到V1的核心升级.html",
+    "href": "posts/vLLM：V0到V1的核心升级/vLLM从V0到V1的核心升级.html",
+    "title": "vLLM从V0到V1的核心升级",
     "section": "",
-    "text": "About this blog hehehe"
+    "text": "vLLM在V1版本上进行了较大的代码重构，本文将分析架构演进的内容与原因。\n框架调整主要原因：\n\n性能问题：V0版本提升整体性能遇到瓶颈，其CPU侧计算问题较多，异步执行不够优秀，影响GPU性能发挥。\n扩展问题：V0版本历史负担太重，代码复杂度高，不利于功能扩展。"
   },
   {
-    "objectID": "about.html#education",
-    "href": "about.html#education",
-    "title": "fywc",
-    "section": "Education",
-    "text": "Education\nInstitute of Computing Technology | Bei jing, CN Master in Computer Science | Sept 2022 - June 2025\nBeijing Jiaotong University | Bei jing, CN Bachelor in Computer Science | Sept 2018 - June 2022"
+    "objectID": "posts/vLLM：V0到V1的核心升级/vLLM从V0到V1的核心升级.html#架构分析",
+    "href": "posts/vLLM：V0到V1的核心升级/vLLM从V0到V1的核心升级.html#架构分析",
+    "title": "vLLM从V0到V1的核心升级",
+    "section": "架构分析",
+    "text": "架构分析\n先回顾V0的整体：架构关键模块LLM Engine（异步模式：AsyncLLM Engine），负责处理前端传递过来的请求。\nEngine内部的处理一般流程：\n\nrequest先经过数据处理（input_processor），把字符序列转换成特定结构体(SequenceGroup)然后经由调度器(scheduler)进行统一的分配到执行器。\n执行器(executor)创建执行实例(worker)和任务分发；\nworker管理单个GPU硬件资源，通过模型运行器（ModelRunner）加载模型进行计算获得请求返回值。\n\n框架的几个特点：\n\nscheduler管理每个请求的状态（如，处于什么阶段、是否因为资源被换出）、为请求分配kv-cache；\nworker的命令执行（如，状态检查）由executor通过RPC通道完成；请求的处理则是由worker0进行广播；\n数据前后处理、调度、执行器都处于相同进程；\n\n\n框架搭建过程一般优先考虑基本功能实现，而非完整的架构规划，因此伴随了一些问题：\n1.单线程/进程计算开销过重。很多处理集中在一个线程内：\n\n输入处理 ：请求处理成模型所需的数据，比如准备kv、sampler处理、CPU密集型任务（多模态的模型）；\n请求广播处理：每个step处理都由scheduler发送请求到worker，状态的处理由scheduler完成；\n输出处理：Sampler开销，De-tokenization处理开销（尤其是当batch size大时）。\n\n一方面，这些操作基本是python代码，其执行效率不高，另一方面不能很好让GPU与CPU协同。\n\n当前prefix cache在命中为0时，性能会受影响；\n增量inputs的构建在GPU中（可以在CPU中完成）等。\n\n在代码可扩展方面也存在问题，如：\n\nscheduler负担过重：scheduler是有状态（stateful）的。scheduler需要记录请求的处理状态，记录prefill/decoder阶段、KV的传输情况；每个step执行都会涉及scheduler到worker的状态信息传递；\nconfig构建类型太多：不同模型/特性的入参不统一，需单独构建。"
+  },
+  {
+    "objectID": "posts/vLLM：V0到V1的核心升级/vLLM从V0到V1的核心升级.html#v1架构的变化",
+    "href": "posts/vLLM：V0到V1的核心升级/vLLM从V0到V1的核心升级.html#v1架构的变化",
+    "title": "vLLM从V0到V1的核心升级",
+    "section": "V1架构的变化",
+    "text": "V1架构的变化\nV1在原有基础上对LLM Engine模块功能进行了解耦拆分，将scheduler和executor用一个Engine Core的模块承载，数据的处理保留在上层，通过process0和process1分别运行（机器内进程编号不一定就是相邻），如下图所示，底层执行还是由executor负责。\n\n调度器scheduler的变化：把部分功能进行了下沉，且scheduler去状态化，worker则变为有状态化（stateful），需要记录请求相关信息。scheduler与work0不共线程，在TP场景下scheduler下发的请求广播不再由worker0进行，而是由scheduler所在进程执行，这样worker与executor的交互变得清晰。\n\n通过生产者/消费者队列的方式把上层（AsyncLLM Engine）与中间层（EngineCore）联系起来，Process0发送请求到Engine Core的等待队列，AsyncLLM层进行poll轮询查询请求结果，请求处理完成后Engine Core放入另一个队列中；Engine Core与worker的传递方式保持不变。队列处理细节上面，EngineCore队列和AsyncLLM Engine的输出处理上面都使用了”busy_loop”方式。\n\n框架其它改动：将beam search从vLLM engine内部移动到外层，增强了prefix-caching特性；代码优化方面也做了工作，比如，用numpy操作代替一些python操作。整体目标是使得框架迭代后结构清晰、更好扩展、性能更好。"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html",
+    "href": "posts/CS6.175/index.html",
+    "title": "CS6.175",
+    "section": "",
+    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#四种fifo",
+    "href": "posts/CS6.175/index.html#四种fifo",
+    "title": "CS6.175",
+    "section": "",
+    "text": "Lab4要求实现4种不同的FIFO，这些FIFO可以从不同程度上实现并发,也就是实现enqueue和dequeue方法。\n一般来说主要有三种FIFO，分别是Depth-1 Pipeline FIFO, Depth-1 Bypass FIFO, Depth-2 ConflictFree FIFO. 这三种FIFO所需的面积最小。\n与FIFO相比，FIFOF的优点是增加了notempty和notfull寄存器，可以很方便地判断空/满状态，缺点则是更多寄存器使得面积更大。\n\nConflict FIFO\n不可以同时enq和deq\nPipeline FIFO\n满时可以同时进行deq和enq\n {notEmpty, first, deq} &lt; {notFull, enq} &lt; clear\nBypass FIFO\n空时可以同时进行enq和deq\n {notFull, enq} &lt; {notEmpty, first, deq} &lt; clear\nConflict-Free FIFO 任何时候都可以同时进行 enq 和 deq\n\n    {notFull, notEmpty, deq, enq, first} &lt; clear"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#ehr寄存器",
+    "href": "posts/CS6.175/index.html#ehr寄存器",
+    "title": "CS6.175",
+    "section": "EHR寄存器",
+    "text": "EHR寄存器\nEHR寄存器是一种特殊的寄存器，可以同时进行寄存器的读取和写入操作，而不需要任何同步或者锁定机制，适用于流水线设计。缺点是EHR会导致关键路径过长，而且难以跟踪具体路径。\n\n\n\n\nr0\nw0\nr1\nw1\n\n\n\n\nr0\nCF\n&lt;\nCF\n&lt;\n\n\nw0\n&gt;\nC\n&lt;\n&lt;\n\n\nr1\nCF\n&gt;\nCF\n&lt;\n\n\nw1\n&gt;\n&gt;\n&gt;\nC\n\n\n\n其中，优先级依次是w1 &gt; r1 &gt; w0 &gt; r0"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#单周期",
+    "href": "posts/CS6.175/index.html#单周期",
+    "title": "CS6.175",
+    "section": "单周期",
+    "text": "单周期"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#双周期",
+    "href": "posts/CS6.175/index.html#双周期",
+    "title": "CS6.175",
+    "section": "双周期",
+    "text": "双周期\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#四周期",
+    "href": "posts/CS6.175/index.html#四周期",
+    "title": "CS6.175",
+    "section": "四周期",
+    "text": "四周期\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[执行]\n  C --&gt; D[写回]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#二级流水线",
+    "href": "posts/CS6.175/index.html#二级流水线",
+    "title": "CS6.175",
+    "section": "二级流水线",
+    "text": "二级流水线\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[执行]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#六级流水线",
+    "href": "posts/CS6.175/index.html#六级流水线",
+    "title": "CS6.175",
+    "section": "六级流水线",
+    "text": "六级流水线\n\n\n\n\n\nflowchart LR\n  A[取指] --&gt; B[译码]\n  B --&gt; C[读寄存器]\n  C --&gt; D[执行]\n  D --&gt; E[访存]\n  E --&gt; F[写回]"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#btb",
+    "href": "posts/CS6.175/index.html#btb",
+    "title": "CS6.175",
+    "section": "BTB",
+    "text": "BTB\n包括当前指令的地址current_pc和预测地址predicted_pc. ## BHT\n通常采用二位饱和计数器，包括当前指令的地址current_pc和计数器taken_prediction\nBHT可以和BTB合并在一起保存，格式如：\n\n\n\ncurrent_pc\npredicted_pc\ntaken_prediction"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#ras",
+    "href": "posts/CS6.175/index.html#ras",
+    "title": "CS6.175",
+    "section": "RAS",
+    "text": "RAS\nRAS仅用于函数返回地址的预测。\n当程序执行到分支跳转指令时，RAS判断指令是否属于函数调用类型的分支跳转指令。若遇到rd = x1的JAL/JALR指令，则RAS将返回地址入栈; 若遇到rd = x0 && rs1 = x1的JALR指令，则从RAS出栈，作为函数返回地址使用。"
+  },
+  {
+    "objectID": "posts/CS6.175/index.html#cache",
+    "href": "posts/CS6.175/index.html#cache",
+    "title": "CS6.175",
+    "section": "Cache",
+    "text": "Cache\n\nBlocking Cache\n阻塞式缓存在未命中时会向内存发出请求，等待内存响应后才能继续处理后续请求。\n这种方式会导致处理器停顿，降低性能。\n\n\n\n\n\nflowchart LR\n  A[Ready] --&gt; B[StartMiss]\n  B --&gt; C[SendFillReq]\n  C --&gt; D[WaitFillResp]\n  D --&gt; E[Resp]\n\n\n\n\n\n\n\nReady: 处理器可以继续执行下一条指令\nStartMiss：处理器发出未命中请求\nSendFillReq：处理器发送访存请求到内存\nWaitFillResp：处理器等待内存响应\nResp：处理器接收到内存响应\n\n\n\nNonBlocking Cache\n非阻塞式缓存能够在接收到未命中请求后，无须空等就能继续处理其他请求。\n非阻塞式缓存的实现方式是MSHR。MSHR是一个队列，用于存储未命中的请求。\n非阻塞式缓存的miss有三种：\n\nprimary miss：某个块的第一次miss\nsecondary miss：对某个已经在fetch的block中又一次miss。\nstructural-stall miss：由于MSHR数量不够导致的miss，会发生阻塞。\n\n\n\nMSI\n\n\n\nMSI\n\n\n\n\nMESI\n\n\n\nMESI\n\n\n\n\nMOSI\n\n\n\nMOSI\n\n\n\n\nMOESI\n\n\n\nMOESI"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "fywc’s Blog",
+    "section": "",
+    "text": "vLLM从V0到V1的核心升级\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDeadlock-Livelock-Starvation\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n计算机顶会研究新趋势\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGDB命令集合\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLinux 内核设备和模块\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nVFIO Description\n\n\n\nLinux\n\nVFIO\n\n\n\n\n\n\n\nfywc\n\n\nJan 11, 2025\n\n\n\n\n\n\n\n\n\n\n\n数据结构与算法\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nOct 2, 2023\n\n\n\n\n\n\n\n\n\n\n\nCS6.175\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\n\n\nPost With Code\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nHarlow Malloc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\nRookieCore\n\n\n\nnews\n\ncode\n\nanalysis\n\n\n\n\n\n\n\nfywc\n\n\nFeb 6, 2023\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\nnews\n\n\n\n\n\n\n\nTristan O’Malley\n\n\nFeb 3, 2023\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/post-with-code/index.html",
+    "href": "posts/post-with-code/index.html",
+    "title": "Post With Code",
+    "section": "",
+    "text": "This is a post with executable code."
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html",
+    "href": "posts/数据结构与算法/数据结构与算法.html",
+    "title": "数据结构与算法",
+    "section": "",
+    "text": "Memory\n\nPhysical Layer\nVirtual Layer\n\nLocation:\n\nArrangement\n\nAlgorithm\n\nFundamental operations\n\nFundamental Algorithms\n\nSorting algorithms\n\nSearching Algorithm\n\nAlgorithm Design Techniques\n\nData Structures\n\nContiguous Memory Data Structures\nDiscontiguous Memory Data Structures\nCombination of CM and DCM\nLinear Data Structures\n\nArray\nDynamicArray\nRing Buffer\nLinkedList\nFreeList\nDouble Linked List\nCircularLinkedList\nCircularDoubleLinkedList\nStack\n\nStack via DynamicArray\nStack via LinkedList\nStack via Deque\n\nQueue\n\nQueue via DoubleLinkedList\nQueue via RingBuffer\nQueue via Double Stack\n\nDeque\n\nDeque via DoubleLinkedList\nDeque via Array\n\nPriority Queue\n\nPriorityQueue via DynamicArray\nPriorityQueue via LinkedList\nPriorityQueue via Deque\nPriorityQueue via BinaryHeap\n\nAssociative Collections\n\nUnorderedMap or HashTable\nSortedMap\nUnordered\nOrderedSet via HashTable and LinkedList\nOrderedSet via Self Balancing Tree\n\nStandard Library Data Structures\n\nCPP"
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#目录",
+    "href": "posts/数据结构与算法/数据结构与算法.html#目录",
+    "title": "数据结构与算法",
+    "section": "",
+    "text": "Memory\n\nPhysical Layer\nVirtual Layer\n\nLocation:\n\nArrangement\n\nAlgorithm\n\nFundamental operations\n\nFundamental Algorithms\n\nSorting algorithms\n\nSearching Algorithm\n\nAlgorithm Design Techniques\n\nData Structures\n\nContiguous Memory Data Structures\nDiscontiguous Memory Data Structures\nCombination of CM and DCM\nLinear Data Structures\n\nArray\nDynamicArray\nRing Buffer\nLinkedList\nFreeList\nDouble Linked List\nCircularLinkedList\nCircularDoubleLinkedList\nStack\n\nStack via DynamicArray\nStack via LinkedList\nStack via Deque\n\nQueue\n\nQueue via DoubleLinkedList\nQueue via RingBuffer\nQueue via Double Stack\n\nDeque\n\nDeque via DoubleLinkedList\nDeque via Array\n\nPriority Queue\n\nPriorityQueue via DynamicArray\nPriorityQueue via LinkedList\nPriorityQueue via Deque\nPriorityQueue via BinaryHeap\n\nAssociative Collections\n\nUnorderedMap or HashTable\nSortedMap\nUnordered\nOrderedSet via HashTable and LinkedList\nOrderedSet via Self Balancing Tree\n\nStandard Library Data Structures\n\nCPP"
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#physical-layer",
+    "href": "posts/数据结构与算法/数据结构与算法.html#physical-layer",
+    "title": "数据结构与算法",
+    "section": "Physical Layer",
+    "text": "Physical Layer\nThe physical layer of a computer system is responsible for the actual storage and retrieval of data in electronic or magnetic form. Memory in the physical layer is organized hierarchically, with different types and levels of memory. Types of Memory in the Physical Layer:\n\nRegisters\nCache Memory\nMain Memory(Random Access Memory: RAM)\nSecondary Memories: (HDD, SSD)\n\nPhysical memory is invisible to programs in virtual memory systems and as a programmer you’re not required to reason about it."
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#virtual-layer",
+    "href": "posts/数据结构与算法/数据结构与算法.html#virtual-layer",
+    "title": "数据结构与算法",
+    "section": "Virtual Layer",
+    "text": "Virtual Layer\n\nLocation:\n\nStack : Fast allocation. Faster access.\n\nMoving just an integer pointer for allocates/de-allocates memory.\n\nHeap : Slow Allocation. Slower access\n\nSearch Heap\nSync heap for other threads\nAllocate memory"
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#arrangement",
+    "href": "posts/数据结构与算法/数据结构与算法.html#arrangement",
+    "title": "数据结构与算法",
+    "section": "Arrangement",
+    "text": "Arrangement\n\nContiguous Bulk allocation in continuous memory block. (faster access).\nDiscontiguous Dynamic allocation in separated memory blocks.(slower access)."
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#fundamental-operations",
+    "href": "posts/数据结构与算法/数据结构与算法.html#fundamental-operations",
+    "title": "数据结构与算法",
+    "section": "Fundamental operations",
+    "text": "Fundamental operations\n\nread\n\naccessDataBySequence() (Either forward or backward)\ngetIndexingInformation(): getStartIndex(), getEndIndex(), getNextIndex(forIndex), getPreviousIndex(forIndex)\naccessDataAtRandomIndex(:): For Random access, time complexity should be of order O(1).\naccessDataAtFront()\naccessDataAtBack()\n\nwrite\n\ninsertDataAtRandomIndex(:)\ninsertDataAtFront()\ninsertDataAtBack()\nremoveDataAtRandomIndex(:)\nremoveDataAtFront()\nremoveDataAtBack()\nupdateDataAtRandomIndex(:)\nupdateDataAtFront()\nupdateDataAtBack()\n\n\nFor example, Linear search algorithm uses accessDataBySequence and compare each item with a specified value to find the answer while Binary search algorithm needs accessDataAtRandomIndex operation. \nA note on Random Access: In the context of data structures, random access refers to the ability to instantly access a specific location. With Array, for instance, if you select a random index, the Array data structure can immediately provide you with the address of that index. However, if you attempt to access a random index in a LinkedList, the data structure cannot instantaneously provide the address. Instead, it must iterate from the beginning (starting from head) until it reaches the desired index. Consequently, LinkedLists are considered to have a time complexity of O(n) (Upper bound) for random access operation. Most algorithms require O(1) random access, and languages such as Java have introduced a marker interface(with no methods) called RandomAccess. This interface serves as a reminder that certain algorithms rely on random access. To ensure that these algorithms perform efficiently with your data structure, it is necessary to make it compatible with random access. \n\nFundamental Algorithms\nFundamental operations form the building blocks upon which algorithms are constructed. Conversely, certain algorithms play fundamental rules for other algorithms. Take, for instance, the impact of input data order on the time efficiency of algorithms. Sorting the data beforehand can greatly simplify our lives, as it has a significant positive effect on the efficiency of numerous algorithms. Sorting can be accomplished through two methods. The first method involves utilizing a sorting algorithm to arrange an unsorted collection. The second method involves utilizing specific data structures, such as binary search trees, that facilitate the sorting of data through amortization.\n\nSorting algorithms\nAll sort algorithms need getIndexingInformation, accessDataAtRandomIndex(:) operations. Also items must be comparable.\n\nIn-place sorting algorithms: They need updateDataAtRandomIndex(:) operation.\n\nBubble sort\nSelection sor\nInsertion sort\nHeap sort\nQuick sort\n\nNot In-Place Sorting Algorithms:\n\nMerge sort\nRadix sort (non-comparison)\nBucket sort (non-comparison)\n\n\n\n\n\nSearching Algorithm\n\nLinear search: needs accessDataBySequence()\nBinary search: needs accessDataAtRandomIndex(:) with O(1)"
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#algorithm-design-techniques",
+    "href": "posts/数据结构与算法/数据结构与算法.html#algorithm-design-techniques",
+    "title": "数据结构与算法",
+    "section": "Algorithm Design Techniques",
+    "text": "Algorithm Design Techniques\n\nDivide and conquer\nRecursion\nRandomized algorithms: Input MUST be RANDOM.\nDynamic programming\nGreedy algorithms"
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#contiguous-memory-data-structures",
+    "href": "posts/数据结构与算法/数据结构与算法.html#contiguous-memory-data-structures",
+    "title": "数据结构与算法",
+    "section": "Contiguous Memory Data Structures",
+    "text": "Contiguous Memory Data Structures\n\nInit with fixed size. size stays fixed.\nAddress of each block can be calculated via: start + k * blocksize. Random access time complexity is O(1)\nBulk memory allocation\nSame size memory blocks (Same type)\nBase data Structure example: Array"
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#discontiguous-memory-data-structures",
+    "href": "posts/数据结构与算法/数据结构与算法.html#discontiguous-memory-data-structures",
+    "title": "数据结构与算法",
+    "section": "Discontiguous Memory Data Structures",
+    "text": "Discontiguous Memory Data Structures\n\nThis arrangement is a special kind of Graph (We can represent graphs using it).\nEach block contains the address of next block.\nTime complexity for random access operation is O(n)\nDynamic memory allocation\nMemory block sizes can be different (Different types).\nBase data structure example: LinkedList"
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#combination-of-cm-and-dcm",
+    "href": "posts/数据结构与算法/数据结构与算法.html#combination-of-cm-and-dcm",
+    "title": "数据结构与算法",
+    "section": "Combination of CM and DCM",
+    "text": "Combination of CM and DCM\n\nA contiguous-memory array of pointers to contiguous-memory or discontiguous-memory collection of objects.\nTime complexity for random access operations is O(1) (via array of pointers) but accessing objects in non-continuous memory have a little overhead.\nBulk memory allocation for address (pointer) array, dynamic memory allocation for objects.\nObjects can have different memory sizes (different types).\nBase data structure example: An array of referenced objects in most programming languages."
+  },
+  {
+    "objectID": "posts/数据结构与算法/数据结构与算法.html#linear-data-structures",
+    "href": "posts/数据结构与算法/数据结构与算法.html#linear-data-structures",
+    "title": "数据结构与算法",
+    "section": "Linear Data Structures",
+    "text": "Linear Data Structures\nBy employing one or a combination of the aforementioned concepts, basic data structures can be implemented, serving as the foundation for more intricate data structures. Additionally, the space and time complexities, as well as memory costs, can be readily analyzed by leveraging the complexities and costs associated with these fundamental concepts.\n\nArray\nIn Programming languages, Arrays are built-in types. Array of pointers (or array of reference types) acts like Combination of CM and DCM. For primitive types (or value types like Int, enum, struct in C#,Swift,…) if stored in stack, the behavior is like Contiguous Memory data structures. But if the primitives get boxed and be allocated in the heap, the behavior is like Combination of CM and DCM.\n\nBasic operations time complexity: Same as Contiguous Memory data structures\nGood:\n\naccessAtRandomIndex, insertAtBack, removeAtBack operations.\nBulk memory allocation (fast).\nContiguous memory. Fast access.\nIf used with primitive types (Value types), no dynamic memory allocation cost.\n\nNot good:\n\ninsertAtFront, insertAtMiddle, removeAtFront, removeAtMiddle Operations.\nFixed size.\n\nProgramming Languages implementations:\n\nCPP: Array size is compile-time constant.\n\n\n\n\n\nDynamicArray\nSimilar to array, but can grow at runtime. DynamicArray of pointers (or DynamicArray of reference types) acts like Combination of CM and DCM. For primitive types (or value types like Int, enum, struct in C#,Swift,…) the behavior is like Contiguous Memory data structures. Steps for resizing:\n\nallocate new array with new size\ncopy the old array values to the new array\ndelete the old array\n\n\nBasic operations time complexity: Same as Contiguous Memory data structures\nGood:\n\naccessAtRandomIndex, insertAtBack, removeAtBack operations.\nBulk memory allocation (fast).\nIf used with primitive types (Value types), no dynamic memory allocation cost.\n\nNot good:\n\ninsertAtFront, insertAtMiddle, removeAtFront, removeAtMiddle Operations.\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy. For example in Swift programming language, each time an array capacity is full, it double the capacity of the array.\n\nProgramming Languages implementations:\n\nCPP: Vector.\n\n\n\n\nRing Buffer\nA ring buffer is a specialized data structure implemented using an array. It is a static-sized buffer where read and write operations occur through two distinct pointers that iterate through the array in a circular manner.\n\n\nBasic operations time complexity: Same as Array with the following improvement:\n\ninsertAtFront is O(1)\nremoveAtFront is O(1)\n\nGood:\n\naccessAtRandomIndex, insert operation.\nBulk memory allocation (fast).\nIf used with primitive types (Value types), no dynamic memory allocation cost.\nAs it is fixed-size, we can map it to virtual memory layer memory page to make it super fast.\n\nNot good:\n\nFixed size.\nWrite operations may fail if the frequency of writes exceeds the frequency of reads.\n\nProgramming Languages implementations:\n\nCPP: Has no built-in implementation for LinkedList. Here is an implementation.\n\n\n\n\nLinkedList\n\n\nBasic operations time complexity: Same as Discontiguous Memory data structures with one improvement.\n\ninsertAtBack() becomes O(1) because we keep track of tail.\nremoveAtBack() stays O(n) because we have to iterate from head to index n-1 to remove n.\n\nGood:\n\ninsertAtFront, removeAtFront, insertAtBack operations.\n\nNot good:\n\naccessAtRandomIndex, removeAtBack, insertAtMiddle, removeAtMiddle Operations.\nDynamic memory allocation (slow).\n\nProgramming Languages implementations:\n\nCPP: forward_list.\n\n\n\n\n\nFreeList\nAs you have noticed, one of the Not Goods of a LinkedList data structure is dynamic memory allocation. It means, whenever you need a new node, you have to create a new one dynamically using new keyword. Dynamic memory allocation is a heavy task. One way of resolving this issue is to use FreeLists. FreeLists can be thought of as a reservoir for the LinkedList nodes. One approach is to initialize a FreeList with a sequence of nodes and whenever you need a Node for your LinkedList, you get one from the FreeList instance and when you remove a Node from the LinkedList, you will not free the memory, but return it to the FreeList reservoir to be used again later. Another approach is the following implementation for LinkedListNode with a private static freelist. In this implementation, the freelist is not initialized with an initial size but it grows as the new nodes are added.\nclass LinkListNode&lt;E&gt; {      // Singly linked list node with freelist support\n    // Extensions to support freelists\n    private static LinkListNode freelist = null;                  // Freelist for the class\n\n    private E value;       // Value for this node\n    private LinkListNode&lt;E&gt; next;    // Point to next node in list\n    // Constructors\n    LinkList(E it, LinkListNode&lt;E&gt; inn) { value = it; next = inn; }\n    LinkList(LinkListNode&lt;E&gt; inn) { value = null; next = inn; }\n\n    E element() { return value; }                        // Return the value\n    E setElement(E it) { return value = it; }            // Set element value\n    LinkListNode&lt;E&gt; next() { return next; }                     // Return next link\n    LinkListNode&lt;E&gt; setNext(LinkListNode&lt;E&gt; inn) { return next = inn; } // Set next link\n\n    // Return a new link, from freelist if possible\n    static &lt;E&gt; LinkListNode&lt;E&gt; get(E it, LinkListNode&lt;E&gt; inn) {\n      if (freelist == null) {\n        return new LinkListNode&lt;E&gt;(it, inn);                 // Get from \"new\"\n      }\n      LinkListNode&lt;E&gt; temp = freelist;                       // Get from freelist\n      freelist = freelist.next();\n      temp.setElement(it);\n      temp.setNext(inn);\n      return temp;\n    }\n\n    // Return a link node to the freelist\n    void release() {\n      value = null;   // Drop reference to the element\n      next = freelist;\n      freelist = this;\n    }\n  }\n\n\nDouble Linked List\n\n\nBasic operations time complexity: Same as Discontiguous Memory data structures with two improvements:\n\ninsertAtBack() becomes O(1).\nremoveAtBack() becomes O(1). Now we have access to n-1 from n and we can remove the pointer to n from n-1.\n\nGood:\n\ninsertAtFront, removeAtFront, insertAtBack, removeAtBack operations.\n\nNot good:\n\naccessAtRandomIndex, insertAtMiddle Operations.\nDynamic memory allocation (slow).\nHigh overhead of extra storage for the forward and back reference.\n\nProgramming Languages implementations:\n\nCPP: list is doubly linkedList.\n\n\n\n\n\nCircularLinkedList\n\n\nBasic operations time complexity: Same as LinkedList with some more capabilities.\n\nWe can traverse to a previous node\nWe can traverse in loop.\n\n\n\n\nCircularDoubleLinkedList\n\n\nBasic operations time complexity: Same as DoubleLinkedList with some more capabilities.\n\nWe can traverse to a previous node\nWe can traverse in loop in both direction.\n\n\n\n\nStack\nStack is a Last-In-First-Out(LIFO) data structure. Any data structure that is Good at insert/remove from one of the ends can be used as a container for Stack. Based on this, stacks can be implemented using DynamicArray (Good at add/remove from the back), LinkedList (Good at add/remove from front), DoubleLinkedList(Good at add/remove from both front and back) and Deque. Each implementation inherits Good and Not Good of the container data structure.\n\n\nStack via DynamicArray\n\nBasic operations time complexity: Same as DynamicArray:\nMethods:\n\npush(): insertAtBack on array container.\npop: removeAtBack on array container.\n\nGood:\n\npush() and pop() are O(1) operations.\nBulk memory allocation for pointers.\nIf used with primitive types (value types), no dynamic memory allocation cost.\n\nNot good:\n\nNew memory allocations and copy cost when internal array capacity is full.\nHas unused memory allocation based on growth strategy of the pointer array.\n\nProgramming Languages implementations:\n\nCPP: Stack. In CPP vector, deque and list(DoubleLinkedList) can be used as container for Stack.\n\n\n\n\n\nStack via LinkedList\n\nBasic operations time complexity: Same as LinkedList. We use Head of LinkedList to insert/remove.\nMethods:\n\npush(): insertAtFront on LinkedList container.\npop: removeAtFront on LinkedList container.\n\nGood:\n\npush() and pop() are O(1) operations.\n\nNot good:\n\naccessAtRandomIndex is O(n).\nDynamic memory allocation (slow).\n\n\n\n\n\nStack via Deque\nDeque data structure can be implemented using Deque via DoubleLinkedList or Deque via Array. The Deque can serve as a container for a Stack due to its behavior. C++ default container for Stack is deque.\n\n\n\nQueue\nQueue data structure is First-In-First-Out. Every data structure that is Good at addAtFront and removeAtBack or vice versa can be used as a container for Queue data structure. DoubleLinkedList(Good at add/remove at both ends) can be used as the containers for Queue data structure. Also RingBuffer can be used for fixed size queues. DynamicArray: is not a good container for queue data structure because of O(n) for insert operation. We can amortize this complexity using Queue via Double Stack (Stack via DynamicArray). Another approach is storing contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array or a LinkedList containing pointers to each of the smaller arrays. In this case, the cost of inserting reduced from O(n) to the O(small_array.length). This approach is used for deque.\n\n\nQueue via DoubleLinkedList\n\nBasic operations time complexity: DoubleLinkedList\nMethods:\n\nenqueue(): insertAtFront on DoubleLinkedList container.\ndequeue(): removeAtBack on DoubleLinkedList container.\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\n\nNot good:\n\naccessAtRandomIndex operation.\nExtra memory for forward/backward pointers.\nDynamic memory allocation (slow).\n\nProgramming Languages implementations:\n\nCPP: queue in cpp can has deque or list (DoubleLinkedList) as the container. the default container is deque.\n\n\n\n\n\nQueue via RingBuffer\n\nBasic operations time complexity: RingBuffer\nMethods:\n\nenqueue(): insertAtRandomIndex on Array container.\ndequeue(): accessAtRandomIndex on Array container.\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\nFixed size, enqueue() may fail.\n\n\n\n\n\nQueue via Double Stack\nIf we use DynamicArray as container for our queue, the dequeue() time complexity would be O(n) (Adding items to start of an array is an O(n) operation ). But we can amortize this complexity to O(1) using two stacks. LeftStack for enqueue() and the RightStack for dequeue(). Each time the LeftStack is empty, copy the RightStack contents to the LeftStack. This operation guarantees First-In-First-Out for the queue.\n\nBasic operations time complexity: Similar to Stack via DynamicArray.\nMethods:\n\nenqueue(): insertAtBack on left Array container (the enqueue stack).\ndequeue(): removeAtBack on right Array container (the dequeue stack).\n\nGood:\n\nenqueue() and dequeue() are O(1) operations.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\n\n\n\n\n\nDeque\nDeque (Double-Ended Queue) are a type of Queue that enqueue() and dequeue() can happen at both ends. Every data structure that is Good at insert/remove from both ends can be used as a container for Deque data structure. The only data structure that fullfil this requirement is DoubleLinkedList. Array is not a good data structure for implementing Deque data structure directly. However we can use some tricks to use Array as a container for Deque data structure. See Deque via Array.\n\n\nDeque via DoubleLinkedList\nImplementing a Deque via DoubleLinkedList is straightforward as this data structure has O(1) for insertAtFront/removeAtFront and insertAtBack/removeAtBack operations.\n\nMethods:\n\npushBack(): insertAtBack of the DoubleLinkedList container.\npushFront(): insertAtFront of the DoubleLinkedList container.\npopBack(): removeAtBack of the DoubleLinkedList container.\npopFront(): removeAtFront of the DoubleLinkedList container.\n\nGood:\n\nEasy implementation\n\nNot Good:\n\nRandom access operation.\nDynamic memory allocation (slow).\nHigh overhead of extra storage for the forward and back references.\n\n\n\n\n\nDeque via Array\nAs it was the case for Queue data structure, Array cannot be used as a container for Deque data structure directly because insertAtFront/removeAtFront operations are not O(1) for Arrays. We can use one of the following techniques to use Array as a container:\n\nUsing a special RingBuffer.\nUsing an Array and allocating deque contents from the center of the underlying array, and resizing the underlying array when either end is reached.\nStoring contents in multiple smaller arrays, allocating additional arrays at the beginning or end as needed. Indexing is implemented by keeping a dynamic array containing pointers to each of the smaller arrays. In this case, the cost of resizing the array in step 2 is eliminated but different small arrays are not allocated contiguously in memory.\n\n\nGood:\n\nRandom Access operation\n\nNot Good\n\nMore complex implementation\nNeed for array resize when filled\n\nProgramming Languages implementations:\n\nCPP: Deque uses approach 3 of above mentioned tricks to use Array as container for Deque. In this approach data is stored in smaller arrays and these arrays are linked using a doubleLinkedList or another array.\n\n\n\n\n\n\nPriority Queue\nPriorityQueue is the same as Queue with one difference. The dequeue operation is not for the first item that has been inserted. Instead the dequeue item is selected based on a priority criteria and the item may be at the front, the middle or the end of the collection. Any data structure that is Good at inserting at one of the ends can be used as a container for PriorityQueue. As finding the item to be dequeued includes a searching phase, for linear data structures as the container for PriorityQueue the time complexity of dequeue operation is O(n). In case of Heap data structure as the container, the time complexity reduces to O(log(n)) due to internal structure of the Heap.\n\n\nPriorityQueue via DynamicArray\n\nMethods:\n\nenqueue(): insertAtBack on Array container.\ndequeue(): iterate and then removeAtMiddle on Array container. Time complexity is O(n).\n\nGood:\n\nenqueue() is O(1) operation.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\ndequeue() operation is O(n).\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\nProgramming Languages implementations:\n\nCPP: priority_queue is using deque as a container by default. vector also can be used.\n\n\n\n\nPriorityQueue via LinkedList\n\nMethods:\n\nenqueue(): insertAtBack on Array container.\ndequeue(): iterate and then removeAtMiddle on Array container. Time complexity is O(n).\n\nGood:\n\nenqueue() is O(1) operation.\nIf used for primitive types (value types), No dynamic allocation.\n\nNot good:\n\ndequeue() operation is O(n).\nNew memory allocations and copy cost when capacity is full.\nHas unused memory allocation based on growth strategy.\n\nProgramming Languages implementations:\n\nCPP: priority_queue is using deque as a container by default. vector also can be used.\n\n\n\n\nPriorityQueue via Deque\nDeque data structure can be implemented using either Deque via DoubleLinkedList or Deque via Array and PriorityQueue can use it as a container.\n\n\nPriorityQueue via BinaryHeap\n\nMethods:\n\nenqueue(): insert on BinaryHeap container.\ndequeue(): delete on BinaryHeap container.\n\nGood:\n\ndequeue() is O(log(n)) operation.\n\nNot good:\n\nenqueue is O(log(n)) operation. In PriorityQueue via DynamicArray and PriorityQueue via LinkedList this operation is O(1).\n\n\n\n\n\nAssociative Collections\nAn associative collection is an abstract data type that stores a collection of (key, value) pairs, ensuring that each possible key appears at most once in the collection. However, there is no standardized naming convention for these types of data structures, leading to varying terminology across different programming languages, which can cause confusion. Some alternative names for associative collections include associative array, map, symbol table, or dictionary. See here.\n\nUnorderedMap or HashTable\nOther name is HashTable. The main idea behind a Hashtable is to use a hashing function to map keys to specific buckets or slots in an array. Each bucket can store one or more key-value pairs. Hash functions can occasionally generate the same index for different keys, resulting in a collision. To handle collisions efficiently, Hashtable data structures employ various strategies:\n\nEach bucket in the array is a LinkedList of key-value pairs.\nOpen addressing\nResizing the Array.\n\n‌For most data structures, a linear search is an O(n) or O(log(n)) operation. HashTable is a data structure with an amortized O(1) time complexity for searching. Length of arrays in a HashTable is a prime number.\n\n\nGood:\n\nO(1) for search operation.\n\nNot Good:\n\nCollection has no order. No Random access.\nIf LinkedList used for collision handling: Worst-case for search can be O(n) (All nodes collide). Average-case is not O(1).\n\nProgramming Languages implementations:\n\nCPP: unordered_map is an unordered collection created using HashTable. Another version is unordered_multimap that allows for repetitive keys. in the unordered_map version the keys are unique.\n\n\n\n\nSortedMap\nA collection of key-value pairs which is sorted by the key.\n\nGood:\n\nSearch is O(log(n))\nkeys are sorted.\n\nNot Good:\n\nRandom access is not O(1).\nSuitable for small number of data.\n\nProgramming Languages implementations:\n\nCPP: map uses Red-Black Tree for implementation. Another version is multimap which allows duplicate keys. In the map version, keys are unique.\n\n\n\n\nUnordered\nA collection of key-value pairs which is sorted by the key.\n\nGood:\n\nSearch is O(log(n))\nkeys are sorted.\n\nNot Good:\n\nRandom access is not O(1).\nSuitable for small number of data.\n\nProgramming Languages implementations:\n\nCPP: map uses Red-Black Tree for implementation. Another version is multimap which allows duplicate keys. In the map version, keys are unique.\n\n\n\n\nOrderedSet via HashTable and LinkedList\nIt is almost exactly like OrderedMap via HashTable and LinkedList with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.\n\nGood:\n\nOrder of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)\n\nNot Good:\n\nNo random access with O(1) because of LinkedList.\n\n\n\n\nOrderedSet via Self Balancing Tree\nIt is almost exactly like OrderedMap via HashTable and LinkedList with the distinction that the node has only a key and no value exists. In Java, it is implemented using HashTable and the values for the nodes are set to a fixed value.\n\nGood:\n\nOrder of the insertion is preserved. (Unlike SortedSet, the keys are not sorted.)\n\nNot Good:\n\nNo random access with O(1) because of LinkedList.\n\n\n\n\n\nStandard Library Data Structures\n\nCPP"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "最初的出发点是用自动调优在软件性能优化和硬件设计间建立直接联系，与传统自动调优不同的是，这要基于一些硬件设计参数去建模，并计算程序性能，而不是用真机或机器学习的黑盒模型，因为这样才能获得硬件设计参数的直接反馈，例如哪些参数组合是均衡的，哪些存在瓶颈且瓶颈在哪。\n由此得出以下几个判断：\n\n从改硬件设计、kernel优化、瓶颈分析再回到硬件设计，这个反馈链太长，互动效率往往不高；\n手动优化汇编是落后的生产力，工作量大扩展性差；\n算力比人力更有竞争力，机器自动搜索比人力搜索适用性更强；\n问题复杂度增加时，算力比人力更容易扩展；\n\n根据上述判断，结合目前可行的技术分析，可以在现有编译器的基础上，只加入新功能的简单支持，然后用上层语言最多是IR实现自动调优。\n遇到的问题：\n\n硬件功能在设计时就没仔细考虑软件的用法和使用场景。同时具备“硬件工程师+了解具体使用场景和流程”的人很少，这是架构师的能力范围。每个功能的软硬件对接都需要慢慢调试，没有几代产品的相互磨合，是很难做好的。需要有人能够既懂软件应用，懂一点编译器，也懂一点硬件架构，承担技术串联的角色，才能打破技术壁垒，更流畅地实现从底层硬件到上层软件的功能输送。\n编译器的后端优化自动化程度远远不够，依然费时费力。如果只是使用x86和CUDA的编译器，因为这两家的编译器比较成熟，所以优化效果比较好，但是如果要支持新的ISA或者硬件架构，就需要自己去重新实现优化。LLVM中仅有tablegen+支持后端自动化优化，很多部分都要重新磨合；MLIR中有Table Driven Declarative Rewrite Rule，但自动化程度也有限；TVM中自动调优多数在LLVM以上，硬件后端优化不是重点。所以后端优化问题也需要解决。\n硬件建模还是有很多看不清的工作量。对于一些简单的算子和算法，其运算过程哪些硬件参数有影响，能够大致有谱，但像Cache Hit Rate的估计，就有些玄妙。大部分时候有统计规律可循，但也有严重偏离规律的情况发生。这时候，软硬协同的价值也体现出来了，提前对接有助于暴露问题。对于硬件设计的规律，多数情况是软件迁就硬件，软件一要补硬件的坑，二要发挥硬件的能力。并且软件更新迭代成本更小，所以要用软件去补足硬件短板。\n\n\n\n\n软硬件设计不是竞技，但有时候能做的事情选择不做，也是有一定考量的。在软件实现中，CUDA一些函数的corner case中会用到local memory，即使GPR充裕也不转存GPR，因为用local memory，只要不进入到这个corner 分支，那就几乎没有开销，最多费一点指令cache。而如果用GPR，那即使不进入这个分支，也会影响总GPR数，从而影响Occupancy。也就是说只要使用了额外的GPR，不管这部分代码有没有运行，它都有开销，即使有时候是无害的。\nNV的硬件运行逻辑上也有很多限制，比如64bit或128bit访存指令的地址必须对齐，操作64bit和128bit的GPR也必须对齐。NV也有一些常见的指令不支持，也有些指令会重复。所以，很多功能的做或不做，还是有诸多考虑的。\nNV的一些调度逻辑，例如control codes，也从硬件转移到了软件，这应该是因为编译器具有更全局的视野，可以更好地做依赖分析和指令调度，同时也简化硬件设计，节省面积。\n还有一些功能被直接舍弃了，例如NV中没有算数异常处理的功能，比如除0，移除之类的，L1 Cache之间也没有Coherence。这很难用软件弥补，所以干脆软件和硬件都不支持了。\n\n\n\n一个应用，从算法开始，到软件实现，再到编译的中间表示，再到机器指令，都是信息一级一级传递的过程。协同优化也是信息交互的过程，例如最常见的矩阵乘法，在算子曾可以用标准实现，也可以用快速矩阵乘法实现，如果知道是卷积或者其他特殊矩阵，就可以有特定的加速算法。普通的矩阵乘算法，有相应的矩阵乘加速器或是tensorcore，也可以做相应的加速。如果是矩阵连乘或可融合的操作，在上层也容易实现相应的优化。\n但是信息传递也存在很多困难，不管是C还是LLVM的IR，都有一些硬件操作难以表述，最终变成内置函数。内置函数多了，上层表示就难以理解和优化，最后会堆积到硬件后端，这其中会损失一些可能的优化。\n最后到指令集的问题，什么样的指令集方便优化呢？显然，每个指令都一样慢的最好优化，只要没有冗余就算是优化好了，但这显然与设计追求不相符。我认为好的指令集应该具有表述能力强（一个功能有多种独立实现），独立性好（类似函数式逻辑，相互干扰少），资源瓶颈少（例如各种barrier，carr flag都有多个选择，不会导致相关操作序列化）等特点。从上层看，就是指令调度和算数优化的可能性比较多，自由度大。另外一点是对信息的具体化能力较强，比如不同的依赖关系可以用不同的scoreboard保证次序，减少干扰。"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的技术隔阂",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的技术隔阂",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "最初的出发点是用自动调优在软件性能优化和硬件设计间建立直接联系，与传统自动调优不同的是，这要基于一些硬件设计参数去建模，并计算程序性能，而不是用真机或机器学习的黑盒模型，因为这样才能获得硬件设计参数的直接反馈，例如哪些参数组合是均衡的，哪些存在瓶颈且瓶颈在哪。\n由此得出以下几个判断：\n\n从改硬件设计、kernel优化、瓶颈分析再回到硬件设计，这个反馈链太长，互动效率往往不高；\n手动优化汇编是落后的生产力，工作量大扩展性差；\n算力比人力更有竞争力，机器自动搜索比人力搜索适用性更强；\n问题复杂度增加时，算力比人力更容易扩展；\n\n根据上述判断，结合目前可行的技术分析，可以在现有编译器的基础上，只加入新功能的简单支持，然后用上层语言最多是IR实现自动调优。\n遇到的问题：\n\n硬件功能在设计时就没仔细考虑软件的用法和使用场景。同时具备“硬件工程师+了解具体使用场景和流程”的人很少，这是架构师的能力范围。每个功能的软硬件对接都需要慢慢调试，没有几代产品的相互磨合，是很难做好的。需要有人能够既懂软件应用，懂一点编译器，也懂一点硬件架构，承担技术串联的角色，才能打破技术壁垒，更流畅地实现从底层硬件到上层软件的功能输送。\n编译器的后端优化自动化程度远远不够，依然费时费力。如果只是使用x86和CUDA的编译器，因为这两家的编译器比较成熟，所以优化效果比较好，但是如果要支持新的ISA或者硬件架构，就需要自己去重新实现优化。LLVM中仅有tablegen+支持后端自动化优化，很多部分都要重新磨合；MLIR中有Table Driven Declarative Rewrite Rule，但自动化程度也有限；TVM中自动调优多数在LLVM以上，硬件后端优化不是重点。所以后端优化问题也需要解决。\n硬件建模还是有很多看不清的工作量。对于一些简单的算子和算法，其运算过程哪些硬件参数有影响，能够大致有谱，但像Cache Hit Rate的估计，就有些玄妙。大部分时候有统计规律可循，但也有严重偏离规律的情况发生。这时候，软硬协同的价值也体现出来了，提前对接有助于暴露问题。对于硬件设计的规律，多数情况是软件迁就硬件，软件一要补硬件的坑，二要发挥硬件的能力。并且软件更新迭代成本更小，所以要用软件去补足硬件短板。"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的分工和协作是难点",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的分工和协作是难点",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "软硬件设计不是竞技，但有时候能做的事情选择不做，也是有一定考量的。在软件实现中，CUDA一些函数的corner case中会用到local memory，即使GPR充裕也不转存GPR，因为用local memory，只要不进入到这个corner 分支，那就几乎没有开销，最多费一点指令cache。而如果用GPR，那即使不进入这个分支，也会影响总GPR数，从而影响Occupancy。也就是说只要使用了额外的GPR，不管这部分代码有没有运行，它都有开销，即使有时候是无害的。\nNV的硬件运行逻辑上也有很多限制，比如64bit或128bit访存指令的地址必须对齐，操作64bit和128bit的GPR也必须对齐。NV也有一些常见的指令不支持，也有些指令会重复。所以，很多功能的做或不做，还是有诸多考虑的。\nNV的一些调度逻辑，例如control codes，也从硬件转移到了软件，这应该是因为编译器具有更全局的视野，可以更好地做依赖分析和指令调度，同时也简化硬件设计，节省面积。\n还有一些功能被直接舍弃了，例如NV中没有算数异常处理的功能，比如除0，移除之类的，L1 Cache之间也没有Coherence。这很难用软件弥补，所以干脆软件和硬件都不支持了。"
+  },
+  {
+    "objectID": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的信息传递和协同优化密切相关",
+    "href": "posts/软硬件协同迷思/软硬件协同迷思.html#软硬件的信息传递和协同优化密切相关",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "一个应用，从算法开始，到软件实现，再到编译的中间表示，再到机器指令，都是信息一级一级传递的过程。协同优化也是信息交互的过程，例如最常见的矩阵乘法，在算子曾可以用标准实现，也可以用快速矩阵乘法实现，如果知道是卷积或者其他特殊矩阵，就可以有特定的加速算法。普通的矩阵乘算法，有相应的矩阵乘加速器或是tensorcore，也可以做相应的加速。如果是矩阵连乘或可融合的操作，在上层也容易实现相应的优化。\n但是信息传递也存在很多困难，不管是C还是LLVM的IR，都有一些硬件操作难以表述，最终变成内置函数。内置函数多了，上层表示就难以理解和优化，最后会堆积到硬件后端，这其中会损失一些可能的优化。\n最后到指令集的问题，什么样的指令集方便优化呢？显然，每个指令都一样慢的最好优化，只要没有冗余就算是优化好了，但这显然与设计追求不相符。我认为好的指令集应该具有表述能力强（一个功能有多种独立实现），独立性好（类似函数式逻辑，相互干扰少），资源瓶颈少（例如各种barrier，carr flag都有多个选择，不会导致相关操作序列化）等特点。从上层看，就是指令调度和算数优化的可能性比较多，自由度大。另外一点是对信息的具体化能力较强，比如不同的依赖关系可以用不同的scoreboard保证次序，减少干扰。"
+  },
+  {
+    "objectID": "posts/VFIO概述/VFIO概述.html",
+    "href": "posts/VFIO概述/VFIO概述.html",
+    "title": "VFIO Description",
+    "section": "",
+    "text": "在开始之前我们先要说一个东西就是 DMA，直接让设备访问内存，可以不通过 CPU 搬运数据。\n\n这是一个比较简单的体系结构图，设备 和 CPU 通过存储控制器访问存储器。一个简单的 case 是 CPU 向存储器写数据，然后设备从存储器读数据。这么快来一切都很正常。但是实际上 CPU 是有一层缓存的，例如下面这样。\n\nCPU 向内存写数据，但是先要清空到不一致的缓存，然后设备再去读数据，不然设备读到的数据和 CPU 实际的数据会不一致（因为缓存里的数据可能和存储器的不一致），而且实际上缓存也不只是一层，所以需要一个中间层来保证 从 CPU 的角度和从设备的角度内存都是一致的，所以就有了下面这个结构。\n\nCPU 和 设备都会走缓存验证一遍以后，再落到存储器上，这样带上缓存以后大家的一致性都是一样的了。所以从设备的角度，设备也拥有了缓存，实际上这个和 IOMMU 关系不是很大，接下来设备其实也可以和 CPU 一样有一层 MMU，也就是地址到存储器物理地址的转换。注意，这里我用了地址，因为对 CPU 来说是虚拟地址，但是对设备来说是一个总线域的地址。这里要明确区分一下，一个是总线地址，是从设备的角度来看的，一个是 CPU 的虚拟地址，这是从 CPU 角度来看的，两个是不同的东西。将总线域地址转换成存储器物理地址的设备就叫 IOMMU。\n\n如果没有 IOMMU，DMA 也能照常工作，IOMMU 的主要作用就是保护功能，防止使用 DMA 的设备访问任意存储器的物理地址。\nIOMMU 在不同架构上名字不太一样，AMD 叫 AMD-Vi，最开始针对的设备只是显卡，Intel 叫 VT-d，arm 叫 SMMU，具体对应的手册也不太一样，但是主要解决的问题是一致的。在 VTd 中，dmar (DMA remapping) 就是那个 IOMMU 设备，通过中断的方式实现类似 page fault 一样的内存分配行为。DMA 传输是由 CPU 发起的：CPU 会告诉 DMA 控制器，帮忙将 xxx 地方的数据搬到 xxx 地方。CPU 发完指令之后，就当甩手掌柜了。IOMMU 有点像 MMU 是一个将设备地址翻译到内存地址的页表体系，也会有对应的页表，这个东西在虚拟化中也非常有用，可以将原本有软件模拟的设备，用直接的硬件替代，而原本的隔离通过 IOMMU 来完成。如下图所示，原本需要通过软件模拟的驱动设备可以通过 IOMMU 以__安全__的方式来直接把硬件设备分配个用户态的 Guest OS。\n\n理论上讲没有 IOMMU 实际上是可以工作的，但是硬件的角度，设备就拥有了整个存储器的全局视图，这是无论如何都非常不合理的事情，不应该让设备拥有访问任意物理内存的能力。\n这里要提的另外一个功能就是对中断的隔离，类似于下面的通过在中断请求中添加标识来重定向中断到对应的中断回调上。\n\nVFIO 的作用就是通过 IOMMU 以安全的方式来将设备的访问直接暴露到用户空间，而不用专门完成某个驱动等待合并到上游或者使用之前的对 IOMMU 没有感知的 UIO 的框架。通过 VFIO 向用户态开放 IOMMU 的功能，编写用户态的驱动。\n对于 IOMMU 来说，隔离的级别不一定是单个设备，比如一个后面有几个设备的 PCI 桥，从 PCI 桥角度来说，都是来自 PCI 桥的总线事务。所以 IOMMU 有一个 iommu_group的概念，代表一组与其他设备隔离的设备的集合。\nIOMMU 根据手册上讲还有一个域的概念，可以简单理解为一段物理地址的抽象。\n在 iommu_group 的层级上，VFIO 封装了一层 container class，这个的作用对应于希望能够在不同的iommu_group 之间共享 TLB 和 page tables，这个就是一个集合的概念，跟容器的那个概念没啥关系，一个集合总归要有个名字。通过把 host 的 device 和 driver 解绑，然后绑定到 VFIO 的 driver 上，就会有个/dev/vfio/$GROUP/ 出现，然后这个 $GROUP代表的就是这个 device 的 iommu_group号，如果要使用 VFIO 就要把这个 group 下的所有 device 都解绑才可以。\n通过打开/dev/vfio/vfio就能创建一个 VFIO 的 container，然后再打开/dev/vfio/$GROUP用VFIO_GROUP_SET_CONTAINER ioctl 把文件描述传进去，就把 group 加进去了，如果支持多个 group 共享页表等结构，还可以把相应的 group 也加进去。（再强调一遍这个页表是总线地址到存储器物理地址，IOMMU 管理的那个页表）。\n下面举个官方的栗子，获取 PCI 设备 0000:06:0d.0 的 group_id （PCI 命名的规则是 domain:bus:slot.func）\n$ readlink /sys/bus/pci/devices/0000:06:0d.0/iommu_group\n../../../../kernel/iommu_groups/26\n解绑 PCI 设备，然后创建一个 container id\n$ lspci -n -s 0000:06:0d.0\n06:0d.0 0401: 1102:0002 (rev 08)\n# echo 0000:06:0d.0 &gt; /sys/bus/pci/devices/0000:06:0d.0/driver/unbind\n# echo 1102 0002 &gt; /sys/bus/pci/drivers/vfio-pci/new_id\n然后寻找其他同属于一个 group 的设备\n$ ls -l /sys/bus/pci/devices/0000:06:0d.0/iommu_group/devices\ntotal 0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:00:1e.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.1 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.1\nPCI 桥 0000:00:1e.0 后面挂了两个设备，一个是刚才加进去的 0000:06:0d.0，还有一个是 0000:06:0d.1，通过上面的步奏加进去就可以。\n最后一步是让用户有权限使用这个 group。\n# chown user:user /dev/vfio/26\n下面就是一个样例，从用户态使用 VFIO，整个的使用方式是通过 ioctl来获取中断相关信息，以及注册中断处理函数，然后也是通过 ioctl来获取region信息，然后调用相应的mmap函数，让 CPU 可以访问内存。\nint container, group, device, i;\nstruct vfio_group_status group_status =\n        { .argsz = sizeof(group_status) };\nstruct vfio_iommu_type1_info iommu_info = { .argsz = sizeof(iommu_info) };\nstruct vfio_iommu_type1_dma_map dma_map = { .argsz = sizeof(dma_map) };\nstruct vfio_device_info device_info = { .argsz = sizeof(device_info) };\n\n/* Create a new container */\ncontainer = open(\"/dev/vfio/vfio\", O_RDWR);\n\nif (ioctl(container, VFIO_GET_API_VERSION) != VFIO_API_VERSION)\n  /* Unknown API version */\n\nif (!ioctl(container, VFIO_CHECK_EXTENSION, VFIO_TYPE1_IOMMU))\n  /* Doesn't support the IOMMU driver we want. */\n\n/* Open the group */\ngroup = open(\"/dev/vfio/26\", O_RDWR);\n\n/* Test the group is viable and available */\nioctl(group, VFIO_GROUP_GET_STATUS, &group_status);\n\nif (!(group_status.flags & VFIO_GROUP_FLAGS_VIABLE))\n  /* Group is not viable (ie, not all devices bound for vfio) */\n\n/* Add the group to the container */\nioctl(group, VFIO_GROUP_SET_CONTAINER, &container);\n\n/* Enable the IOMMU model we want */\nioctl(container, VFIO_SET_IOMMU, VFIO_TYPE1_IOMMU);\n\n/* Get addition IOMMU info */\nioctl(container, VFIO_IOMMU_GET_INFO, &iommu_info);\n\n/* Allocate some space and setup a DMA mapping */\ndma_map.vaddr = mmap(0, 1024 * 1024, PROT_READ | PROT_WRITE,\n         MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);\ndma_map.size = 1024 * 1024;\ndma_map.iova = 0; /* 1MB starting at 0x0 from device view */\ndma_map.flags = VFIO_DMA_MAP_FLAG_READ | VFIO_DMA_MAP_FLAG_WRITE;\n\nioctl(container, VFIO_IOMMU_MAP_DMA, &dma_map);\n\n/* Get a file descriptor for the device */\ndevice = ioctl(group, VFIO_GROUP_GET_DEVICE_FD, \"0000:06:0d.0\");\n\n/* Test and setup the device */\nioctl(device, VFIO_DEVICE_GET_INFO, &device_info);\n\nfor (i = 0; i &lt; device_info.num_regions; i++) {\n  struct vfio_region_info reg = { .argsz = sizeof(reg) };\n\n  reg.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_REGION_INFO, &reg);\n\n  /* Setup mappings... read/write offsets, mmaps\n   * For PCI devices, config space is a region */\n}\n\nfor (i = 0; i &lt; device_info.num_irqs; i++) {\n  struct vfio_irq_info irq = { .argsz = sizeof(irq) };\n\n  irq.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_IRQ_INFO, &irq);\n\n  /* Setup IRQs... eventfds, VFIO_DEVICE_SET_IRQS */\n}\n\n/* Gratuitous device reset and go... */\nioctl(device, VFIO_DEVICE_RESET);\n在include/linux/vfio.h里面有完整的 API，这里就简单略过。\n在理解了一些基本原理和使用方式之后再来看 VFIO 的代码应该叫就比较容易理解了。\n首先是作为 PCI 设备的 probe。主要是通过 vfio_iommu_group_get 分配 iommu_group，然后调用vfio_add_group_dev初始化设备回调接口vfio_pci_ops，而remove就是反过来把对应的结构释放掉就可以。然后再看注册的回调函数结构体。\nstatic const struct vfio_device_ops vfio_pci_ops = {\n  .name    = \"vfio-pci\",\n  .open    = vfio_pci_open,\n  .release  = vfio_pci_release,\n  .ioctl    = vfio_pci_ioctl,\n  .read    = vfio_pci_read,\n  .write    = vfio_pci_write,\n  .mmap    = vfio_pci_mmap,\n  .request  = vfio_pci_request,\n};\n这里分析几个关键的函数，他们会通过file_operations vfio_fops被间接的调用。\n首先是 mmap，就是在调用vfio_pci_mmap的时候最终调用remap_pfn_range(vma, vma-&gt;vm_start, vma-&gt;vm_pgoff, req_len, vma-&gt;vm_page_prot); 来将物理内存映射到用户态空间，这就是上面的栗子中 mmap 系统调用的入口，而具体要映射的物理内存是通过一系列pci_resource_xxx宏从 PCI bar 空间读出来的配置。\n然后是 ioctl 接口，这个接口比较丰富，也简单的看一下。比如 VFIO_DEVICE_SET_IRQS会通过使用用户态传进来的结构体，调用vfio_pci_set_irqs_ioctl注册中断处理函数。而通过vfio_ioctl_set_iommu会设置 container 的 iommu_group 以及对应的 driver。read/write接口都是用于修改 PCI 配置信息的。\n简单的来说，VFIO 的主要工作是把设备通过 IOMMU 映射的 DMA 物理内存地址映射到用户态中，让用户态程序可以自行操纵设备的传输，并且可以保证一定程度的安全，另外可以自行注册中断处理函数，从而在用户态实现设备的驱动程序，通过这样的框架，可以在 DPDK 中充分发挥用户态协议栈的威力。\n\n\n\n\nPCI基本概念\n《PCI Express 体系结构导读》王齐著\nmastering the dma and iommu apis\nLinux Doc on VFIO\nIntel® Virtualization Technology for Directed I/O: Spec"
+  },
+  {
+    "objectID": "posts/VFIO概述/VFIO概述.html#vfio",
+    "href": "posts/VFIO概述/VFIO概述.html#vfio",
+    "title": "VFIO Description",
+    "section": "",
+    "text": "在开始之前我们先要说一个东西就是 DMA，直接让设备访问内存，可以不通过 CPU 搬运数据。\n\n这是一个比较简单的体系结构图，设备 和 CPU 通过存储控制器访问存储器。一个简单的 case 是 CPU 向存储器写数据，然后设备从存储器读数据。这么快来一切都很正常。但是实际上 CPU 是有一层缓存的，例如下面这样。\n\nCPU 向内存写数据，但是先要清空到不一致的缓存，然后设备再去读数据，不然设备读到的数据和 CPU 实际的数据会不一致（因为缓存里的数据可能和存储器的不一致），而且实际上缓存也不只是一层，所以需要一个中间层来保证 从 CPU 的角度和从设备的角度内存都是一致的，所以就有了下面这个结构。\n\nCPU 和 设备都会走缓存验证一遍以后，再落到存储器上，这样带上缓存以后大家的一致性都是一样的了。所以从设备的角度，设备也拥有了缓存，实际上这个和 IOMMU 关系不是很大，接下来设备其实也可以和 CPU 一样有一层 MMU，也就是地址到存储器物理地址的转换。注意，这里我用了地址，因为对 CPU 来说是虚拟地址，但是对设备来说是一个总线域的地址。这里要明确区分一下，一个是总线地址，是从设备的角度来看的，一个是 CPU 的虚拟地址，这是从 CPU 角度来看的，两个是不同的东西。将总线域地址转换成存储器物理地址的设备就叫 IOMMU。\n\n如果没有 IOMMU，DMA 也能照常工作，IOMMU 的主要作用就是保护功能，防止使用 DMA 的设备访问任意存储器的物理地址。\nIOMMU 在不同架构上名字不太一样，AMD 叫 AMD-Vi，最开始针对的设备只是显卡，Intel 叫 VT-d，arm 叫 SMMU，具体对应的手册也不太一样，但是主要解决的问题是一致的。在 VTd 中，dmar (DMA remapping) 就是那个 IOMMU 设备，通过中断的方式实现类似 page fault 一样的内存分配行为。DMA 传输是由 CPU 发起的：CPU 会告诉 DMA 控制器，帮忙将 xxx 地方的数据搬到 xxx 地方。CPU 发完指令之后，就当甩手掌柜了。IOMMU 有点像 MMU 是一个将设备地址翻译到内存地址的页表体系，也会有对应的页表，这个东西在虚拟化中也非常有用，可以将原本有软件模拟的设备，用直接的硬件替代，而原本的隔离通过 IOMMU 来完成。如下图所示，原本需要通过软件模拟的驱动设备可以通过 IOMMU 以__安全__的方式来直接把硬件设备分配个用户态的 Guest OS。\n\n理论上讲没有 IOMMU 实际上是可以工作的，但是硬件的角度，设备就拥有了整个存储器的全局视图，这是无论如何都非常不合理的事情，不应该让设备拥有访问任意物理内存的能力。\n这里要提的另外一个功能就是对中断的隔离，类似于下面的通过在中断请求中添加标识来重定向中断到对应的中断回调上。\n\nVFIO 的作用就是通过 IOMMU 以安全的方式来将设备的访问直接暴露到用户空间，而不用专门完成某个驱动等待合并到上游或者使用之前的对 IOMMU 没有感知的 UIO 的框架。通过 VFIO 向用户态开放 IOMMU 的功能，编写用户态的驱动。\n对于 IOMMU 来说，隔离的级别不一定是单个设备，比如一个后面有几个设备的 PCI 桥，从 PCI 桥角度来说，都是来自 PCI 桥的总线事务。所以 IOMMU 有一个 iommu_group的概念，代表一组与其他设备隔离的设备的集合。\nIOMMU 根据手册上讲还有一个域的概念，可以简单理解为一段物理地址的抽象。\n在 iommu_group 的层级上，VFIO 封装了一层 container class，这个的作用对应于希望能够在不同的iommu_group 之间共享 TLB 和 page tables，这个就是一个集合的概念，跟容器的那个概念没啥关系，一个集合总归要有个名字。通过把 host 的 device 和 driver 解绑，然后绑定到 VFIO 的 driver 上，就会有个/dev/vfio/$GROUP/ 出现，然后这个 $GROUP代表的就是这个 device 的 iommu_group号，如果要使用 VFIO 就要把这个 group 下的所有 device 都解绑才可以。\n通过打开/dev/vfio/vfio就能创建一个 VFIO 的 container，然后再打开/dev/vfio/$GROUP用VFIO_GROUP_SET_CONTAINER ioctl 把文件描述传进去，就把 group 加进去了，如果支持多个 group 共享页表等结构，还可以把相应的 group 也加进去。（再强调一遍这个页表是总线地址到存储器物理地址，IOMMU 管理的那个页表）。\n下面举个官方的栗子，获取 PCI 设备 0000:06:0d.0 的 group_id （PCI 命名的规则是 domain:bus:slot.func）\n$ readlink /sys/bus/pci/devices/0000:06:0d.0/iommu_group\n../../../../kernel/iommu_groups/26\n解绑 PCI 设备，然后创建一个 container id\n$ lspci -n -s 0000:06:0d.0\n06:0d.0 0401: 1102:0002 (rev 08)\n# echo 0000:06:0d.0 &gt; /sys/bus/pci/devices/0000:06:0d.0/driver/unbind\n# echo 1102 0002 &gt; /sys/bus/pci/drivers/vfio-pci/new_id\n然后寻找其他同属于一个 group 的设备\n$ ls -l /sys/bus/pci/devices/0000:06:0d.0/iommu_group/devices\ntotal 0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:00:1e.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.0 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.0\nlrwxrwxrwx. 1 root root 0 Apr 23 16:13 0000:06:0d.1 -&gt;\n  ../../../../devices/pci0000:00/0000:00:1e.0/0000:06:0d.1\nPCI 桥 0000:00:1e.0 后面挂了两个设备，一个是刚才加进去的 0000:06:0d.0，还有一个是 0000:06:0d.1，通过上面的步奏加进去就可以。\n最后一步是让用户有权限使用这个 group。\n# chown user:user /dev/vfio/26\n下面就是一个样例，从用户态使用 VFIO，整个的使用方式是通过 ioctl来获取中断相关信息，以及注册中断处理函数，然后也是通过 ioctl来获取region信息，然后调用相应的mmap函数，让 CPU 可以访问内存。\nint container, group, device, i;\nstruct vfio_group_status group_status =\n        { .argsz = sizeof(group_status) };\nstruct vfio_iommu_type1_info iommu_info = { .argsz = sizeof(iommu_info) };\nstruct vfio_iommu_type1_dma_map dma_map = { .argsz = sizeof(dma_map) };\nstruct vfio_device_info device_info = { .argsz = sizeof(device_info) };\n\n/* Create a new container */\ncontainer = open(\"/dev/vfio/vfio\", O_RDWR);\n\nif (ioctl(container, VFIO_GET_API_VERSION) != VFIO_API_VERSION)\n  /* Unknown API version */\n\nif (!ioctl(container, VFIO_CHECK_EXTENSION, VFIO_TYPE1_IOMMU))\n  /* Doesn't support the IOMMU driver we want. */\n\n/* Open the group */\ngroup = open(\"/dev/vfio/26\", O_RDWR);\n\n/* Test the group is viable and available */\nioctl(group, VFIO_GROUP_GET_STATUS, &group_status);\n\nif (!(group_status.flags & VFIO_GROUP_FLAGS_VIABLE))\n  /* Group is not viable (ie, not all devices bound for vfio) */\n\n/* Add the group to the container */\nioctl(group, VFIO_GROUP_SET_CONTAINER, &container);\n\n/* Enable the IOMMU model we want */\nioctl(container, VFIO_SET_IOMMU, VFIO_TYPE1_IOMMU);\n\n/* Get addition IOMMU info */\nioctl(container, VFIO_IOMMU_GET_INFO, &iommu_info);\n\n/* Allocate some space and setup a DMA mapping */\ndma_map.vaddr = mmap(0, 1024 * 1024, PROT_READ | PROT_WRITE,\n         MAP_PRIVATE | MAP_ANONYMOUS, 0, 0);\ndma_map.size = 1024 * 1024;\ndma_map.iova = 0; /* 1MB starting at 0x0 from device view */\ndma_map.flags = VFIO_DMA_MAP_FLAG_READ | VFIO_DMA_MAP_FLAG_WRITE;\n\nioctl(container, VFIO_IOMMU_MAP_DMA, &dma_map);\n\n/* Get a file descriptor for the device */\ndevice = ioctl(group, VFIO_GROUP_GET_DEVICE_FD, \"0000:06:0d.0\");\n\n/* Test and setup the device */\nioctl(device, VFIO_DEVICE_GET_INFO, &device_info);\n\nfor (i = 0; i &lt; device_info.num_regions; i++) {\n  struct vfio_region_info reg = { .argsz = sizeof(reg) };\n\n  reg.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_REGION_INFO, &reg);\n\n  /* Setup mappings... read/write offsets, mmaps\n   * For PCI devices, config space is a region */\n}\n\nfor (i = 0; i &lt; device_info.num_irqs; i++) {\n  struct vfio_irq_info irq = { .argsz = sizeof(irq) };\n\n  irq.index = i;\n\n  ioctl(device, VFIO_DEVICE_GET_IRQ_INFO, &irq);\n\n  /* Setup IRQs... eventfds, VFIO_DEVICE_SET_IRQS */\n}\n\n/* Gratuitous device reset and go... */\nioctl(device, VFIO_DEVICE_RESET);\n在include/linux/vfio.h里面有完整的 API，这里就简单略过。\n在理解了一些基本原理和使用方式之后再来看 VFIO 的代码应该叫就比较容易理解了。\n首先是作为 PCI 设备的 probe。主要是通过 vfio_iommu_group_get 分配 iommu_group，然后调用vfio_add_group_dev初始化设备回调接口vfio_pci_ops，而remove就是反过来把对应的结构释放掉就可以。然后再看注册的回调函数结构体。\nstatic const struct vfio_device_ops vfio_pci_ops = {\n  .name    = \"vfio-pci\",\n  .open    = vfio_pci_open,\n  .release  = vfio_pci_release,\n  .ioctl    = vfio_pci_ioctl,\n  .read    = vfio_pci_read,\n  .write    = vfio_pci_write,\n  .mmap    = vfio_pci_mmap,\n  .request  = vfio_pci_request,\n};\n这里分析几个关键的函数，他们会通过file_operations vfio_fops被间接的调用。\n首先是 mmap，就是在调用vfio_pci_mmap的时候最终调用remap_pfn_range(vma, vma-&gt;vm_start, vma-&gt;vm_pgoff, req_len, vma-&gt;vm_page_prot); 来将物理内存映射到用户态空间，这就是上面的栗子中 mmap 系统调用的入口，而具体要映射的物理内存是通过一系列pci_resource_xxx宏从 PCI bar 空间读出来的配置。\n然后是 ioctl 接口，这个接口比较丰富，也简单的看一下。比如 VFIO_DEVICE_SET_IRQS会通过使用用户态传进来的结构体，调用vfio_pci_set_irqs_ioctl注册中断处理函数。而通过vfio_ioctl_set_iommu会设置 container 的 iommu_group 以及对应的 driver。read/write接口都是用于修改 PCI 配置信息的。\n简单的来说，VFIO 的主要工作是把设备通过 IOMMU 映射的 DMA 物理内存地址映射到用户态中，让用户态程序可以自行操纵设备的传输，并且可以保证一定程度的安全，另外可以自行注册中断处理函数，从而在用户态实现设备的驱动程序，通过这样的框架，可以在 DPDK 中充分发挥用户态协议栈的威力。"
+  },
+  {
+    "objectID": "posts/VFIO概述/VFIO概述.html#参考链接",
+    "href": "posts/VFIO概述/VFIO概述.html#参考链接",
+    "title": "VFIO Description",
+    "section": "",
+    "text": "PCI基本概念\n《PCI Express 体系结构导读》王齐著\nmastering the dma and iommu apis\nLinux Doc on VFIO\nIntel® Virtualization Technology for Directed I/O: Spec"
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html",
+    "title": "Linux 内核设备和模块",
+    "section": "",
+    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#目录",
+    "title": "Linux 内核设备和模块",
+    "section": "",
+    "text": "设备类型\n\n伪设备\n杂项设备\n模块\n构建模块\n\n放在内核源码树中\n放在内核源码树外\n\n安装模块\n模块依赖性\n载入模块\n模块参数\n导出符号表\n设备模型\n\nkobject\nktype\nkset\n\n引用计数\n\nsysfs\n\nsysfs中添加和删除kobject\n向sysfs中添加文件(attr)\n默认文件\n文件的创建与修改\nsysfs约定　\n内核事件层\n\nNext Section"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#伪设备",
+    "title": "Linux 内核设备和模块",
+    "section": "伪设备",
+    "text": "伪设备\n一些虚拟设备驱动，仅提供访问内核功能．\n\n内核随机数发生器\n空设备 /dev/null\n零设备 /dev/zero\n满设备 /dev/full\n内存设备 /dev/mem"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#杂项设备",
+    "title": "Linux 内核设备和模块",
+    "section": "杂项设备",
+    "text": "杂项设备\n简写为miscdev，是对字符设备的封装，方便使用．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块",
+    "title": "Linux 内核设备和模块",
+    "section": "模块",
+    "text": "模块\n内核在运行时动态向其中插入或删除代码，这些代码以模块的形式组合在一个单独的二进制镜像．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#构建模块",
+    "title": "Linux 内核设备和模块",
+    "section": "构建模块",
+    "text": "构建模块\n\n放在内核源码树中\n\n字符设备存放在drivers/char/\n块设备存放在drivers/block \nUSE设备存放在 drivers/usb/ \n\n添加一个字符设备fishing , 编辑drivers/char/Makefile 并加入obj-m += fishing/\n在drivers/char/fishing/下,需要添加一个新的Makefile文件：\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n这样编译内核时，也会自动编译该模块，最终编译链接完的文件名为fishing.ko \n\n\n放在内核源码树外\n假设放在/home/dev/fishing/目录中，那么修改/home/dev/fishing/Makefile :\nobj-m += fishing.o\nfishing-objs := fishing-main.o fishing-line.o\n编译时需要在/home/dev/fishing/目录下，然后执行:\nmake -C /mnt/disk/kernelsrc/ SUBDIRS=$PWD modules\n其中/mnt/disk/kernelsrc/就是内核源码目录"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#安装模块",
+    "title": "Linux 内核设备和模块",
+    "section": "安装模块",
+    "text": "安装模块\n使用make modules_install"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块依赖性",
+    "title": "Linux 内核设备和模块",
+    "section": "模块依赖性",
+    "text": "模块依赖性\nLinux模块之间存在依赖性，依赖关系存放在/libmodules/}version}/modules.dep 文件．\n使用depmod 命令产生依赖信息，-A 参数表示仅更新新模块的依赖信息."
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#载入模块",
+    "title": "Linux 内核设备和模块",
+    "section": "载入模块",
+    "text": "载入模块\ninsmod fishing.ko\nrmmod fishing.ko\nmodprobe modules\nmodprobe -r modules"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#模块参数",
+    "title": "Linux 内核设备和模块",
+    "section": "模块参数",
+    "text": "模块参数\nLinux 允许驱动程序声明参数，从而用户可以在系统启动或者模块装载时再指定参数值，这些参数对于驱动程序属于全局变量。\n模块参数会载入sysfs文件系统中，变为文件.\nmodule_param(name, type, perm);"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#导出符号表",
+    "title": "Linux 内核设备和模块",
+    "section": "导出符号表",
+    "text": "导出符号表\n模块被载入后，就会被动态地连接(link)到内核，连接过程需要借助内核导出的符号表来访问内核函数。\n只有被显式导出的内核函数，才能被模块调用（类似动态链接库）。\n使用 EXPORT_SYMBOL()和EXPORT_SYMBOL_GPL() 可以在内核源码中显式导出内核函数：\nint get_pirate_beard_color(struct pirate *p)\n{\n  return p-&gt;beard.color;\n}\nEXPORT_SYMBOL(get_pirate_beard_color);\n导出的内核符号表被看作导出的内核接口，称为内核API"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#设备模型",
+    "title": "Linux 内核设备和模块",
+    "section": "设备模型",
+    "text": "设备模型\n设备模型提供了一个独立的机制专门来表示设备，并描述其在系统中的拓扑结构，从而使得系统具有以下优点:\n\n代码重复最小化\n提供诸如引用计数等统一机制\n可以列举系统中所有的设备，观察它们的状态，并且查看它们连接的总线。\n可以将系统中的全部设备结构以树的形式完整、有效地展现出来——包括所有的总线和内部连接。\n可以将设备和其对应的驱动联系起来，反之亦然。\n可以将设备按照类型加以归类，比如分类为输入设备，而无需理解物理设备的拓扑结构。\n可以沿设备树的叶子向其根的方向依次遍历，以保证能以正确顺序关闭各设备的电源。\n\n\nkobject\nkobject 类似于面向对象中的基类，设备类继承该类\n// include/linux/kobject.h\nstruct kobject {\n  const char    *name;\n  struct list_head  entry;\n  struct kobject    *parent;// 父对象指针，用于表达设备树中的层次关系\n  struct kset    *kset;\n  struct kobj_type  *ktype;\n  struct sysfs_dirent  *sd; // sysfs的dirent对象指针，指向本对象(本对象在sysfs中其实是一个文件)\n  struct kref    kref;// 引用计数\n  unsigned int state_initialized:1;\n  unsigned int state_in_sysfs:1;\n  unsigned int state_add_uevent_sent:1;\n  unsigned int state_remove_uevent_sent:1;\n  unsigned int uevent_suppress:1;\n};\nkobject的一个派生类是cdev ,表示字符设备:\nstruct cdev\n{\n  struct kobject kobj; // 嵌入kobject表示继承，必须放在结构体开头实现多态\n  // 后面为该类的特有成员\n  struct module *owner;\n  const struct file_operations *ops;\n  struct list_head list;\n  dev_t dev;\n  unsigned int count;\n};\n\n\nktype\nkobject 的成员 ktype 表示本 kobject 的类型，多个 kobject 可以关联同一个 ktype，描述一类 kobject 所具有的普遍特性。\n// include/linux/kobject.h\nstruct kobj_type {\n  void (*release)(struct kobject *kobj); // 引用计数归0时的析构函数，也就是同类kobject通用\n  const struct sysfs_ops *sysfs_ops; // sysfs 的操作方法\n  struct attribute **default_attrs; // 属性，是个数组\n  const struct kobj_ns_type_operations *(*child_ns_type)(struct kobject *kobj);\n  const void *(*namespace)(struct kobject *kobj);\n};\n\n\nkset\nkset 用于对诸多 kobject 及其派生类对象进行分组（分组和 ktype 无关，即使 ktype 相同的也能分到不同组中）。分组依据比如“全部的块设备”，kset 的存在让分组更灵活，而不受限于相同或是不同的 ktype。\nkset 的存在是为了将 kobject 分组映射为 sysfs 中的目录关系信息.\n// include/linux/kobject.h\nstruct kset {\n  struct list_head list; // 链表，连接该kset管理的所有组内kobj，指向kobj链表上的第一个节点\n  spinlock_t list_lock; // 保护链表的自旋锁\n  struct kobject kobj; // 作为组内的所有kobject的基类,这是kset的一大功能\n  const struct kset_uevent_ops *uevent_ops; // 用于处理集合中kobject对象的热插拔操作\n};\nkset 对象作为链表头连接一组 kobject（kobj 之间通过 kobject 内的 entry 成员连接）："
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#引用计数",
+    "title": "Linux 内核设备和模块",
+    "section": "引用计数",
+    "text": "引用计数\n类似于高级语言的gc机制，当引用数为０时回收对象.\nkref结构：\n// include/linux/kref.h\nstruct kref {\n  atomic_t refcount;\n};\n引用计数操作方法：\nstruct kobject *kobject_get(struct kobject *kobj);\nvoid kobject_put(struct kobject *kobj);"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs中添加和删除kobject",
+    "title": "Linux 内核设备和模块",
+    "section": "sysfs中添加和删除kobject",
+    "text": "sysfs中添加和删除kobject\nkobject默认初始化后并不关联到sysfs,需要使用kobject_add() ．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#向sysfs中添加文件attr",
+    "title": "Linux 内核设备和模块",
+    "section": "向sysfs中添加文件(attr)",
+    "text": "向sysfs中添加文件(attr)\nkobject对应sysfs中的目录，而kobject对象中的default_attr数组对应sysfs中的文件．\n该数组负责将内核数据映射成sysfs中的文件．"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#默认文件",
+    "title": "Linux 内核设备和模块",
+    "section": "默认文件",
+    "text": "默认文件\nkobject对象中的成员default_attrs 数组表示目录下的默认文件，sysfs_ops成员则描述了如何使用这些文件：\n// include/linux/sysfs.h\nstruct sysfs_ops {\n  // 读取文件,从kobj（表示目录）和attr（表示文件）中，读取数据到buf中\n  ssize_t  (*show)(struct kobject *kobj, struct attribute *attr,char *buf);\n  // 写入文件\n  ssize_t  (*store)(struct kobject *,struct attribute *,const char *, size_t);\n  const void *(*namespace)(struct kobject *, const struct attribute *);\n};"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#文件的创建与修改",
+    "title": "Linux 内核设备和模块",
+    "section": "文件的创建与修改",
+    "text": "文件的创建与修改\n一般而言，相同 ktype 的 kobject 的 default_attrs 都是相同的，也就是这些目录下的文件组织结构(文件名，权限)都相同。\n//　创建文件\nint sysfs_create_file(struct kobject *kobj, const struct attribute tattr);\n//  创建符号链接\nint sysfs_create_link(struct kobject *kobj, struct kobject *target, char *name);\n//  删除新文件\nvoid sysfs_remove_file(struct kobject *kobj, const struct attribute *attr);\n//  删除符号链接\nvoid sysfs_remove_link(struct kobject *kobj, char *name) ;"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#sysfs约定",
+    "title": "Linux 内核设备和模块",
+    "section": "sysfs约定　",
+    "text": "sysfs约定　\n\n一值一文件：sysfs 属性应该保证每个文件只导出一个值，该值应该是文本形式而且映射为简单 C 类型。避免文件内容过于复杂，这样使用 shell 或 C 语言读取写入该文件就会简单得多。\n清晰的层次组织数据\nsysfs 提供内核到用户空间的服务\nsysfs 已经取代 ioctl() 和 procfs，尽可能得使用 sysfs 操作内核变量"
+  },
+  {
+    "objectID": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
+    "href": "posts/Linux内核设备与模块/Linux 内核设备和模块.html#内核事件层",
+    "title": "Linux 内核设备和模块",
+    "section": "内核事件层",
+    "text": "内核事件层\n内核事件层实现了内核到用户的消息通知系统（通过 kobject 和 sysfs）\n事件是实现异步操作的必要组成部分，常见事件如硬盘满了，处理器过热了，分区挂载了。\n每个事件源都是一个 sysfs 路径，比如一个硬盘通知事件源为 /sys/block/hda。\n内核事件由内核空间传递到用户空间需要经过netlink（netlink 是一个用于传送网络信息的多点传送套接字）。使用示例：在用户空间实现一个系统后台服务用于监听套接字(socket)，处理任何读到的信息，并将事件传送到系统栈里，通过该方法也能实现将事件整合入 D-BUS。\n在内核代码中向用户空间发送信号使用函数kobject_uevent(), 最终事件就是包含 kobject 对应的 sysfs 路径和信号动作的字符串。"
   }
 ]

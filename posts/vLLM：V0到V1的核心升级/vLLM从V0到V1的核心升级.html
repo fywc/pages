@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>quarto-inputcad19df80bc71b2b – fywc's Blog</title>
+<title>vllm从v0到v1的核心升级 – fywc's Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -124,28 +124,118 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="计算机顶会研究新趋势" class="level1">
-<h1>计算机顶会研究新趋势</h1>
-<p>存档两篇介绍计算机顶会ISCA研究方向趋势的文章：</p>
-<p>[1] Fifty Years of the International Symposium on Computer Architecture: A Data-Driven Retrospective</p>
-<p>[2] A Retrospective Recount of Computer Architecture Research with a Data-Driven Study of Over Four Decades of ISCA Publications</p>
-<hr>
+<section id="vllm从v0到v1的核心升级" class="level1">
+<h1>vLLM从V0到V1的核心升级</h1>
+<p>vLLM在V1版本上进行了较大的代码重构，本文将分析架构演进的内容与原因。</p>
+<p>框架调整主要原因：</p>
+<ul>
+<li>性能问题：V0版本提升整体性能遇到瓶颈，其CPU侧计算问题较多，异步执行不够优秀，影响GPU性能发挥。</li>
+<li>扩展问题：V0版本历史负担太重，代码复杂度高，不利于功能扩展。</li>
+</ul>
 </section>
-<section id="分阶段趋势" class="level1">
-<h1>分阶段趋势</h1>
-<p><img src="image/image_X1PkL8blhF.png" class="img-fluid"></p>
-<p><strong>第一阶段：</strong>多处理器相关论文数量持续增长。这些论文涵盖networks/interconnects、故障诊断甚至关系数据库系统等多个主题——所有研究都围绕multiprocessor systems 或 using multiprocessors 。</p>
-<p><strong>第二阶段：</strong>开始出现存储器和缓存架构研究，这段时期超长指令字（VLIW）和多发射multiple-issue等技术被提出，得益于这些并行计算技术，cache coherence 和 consistency 变得至关重要。例如Jouppi关于 victim caches和 prefetch buffers的论文，至今仍是计算机体系结构研究生课程的必读文献</p>
-<p>第三阶段：开始出现对功耗优化与建模技术的研究，在经历数十年技术微缩与功耗降低后，这一研究热潮预示着2000年代初登纳德缩放定律即将失效的早期信号。此外1995年的SMT论文也是重要事件。</p>
-<p>第四阶段：开始出现多核架构与互联技术的研究，出现大规模繁荣。</p>
-<p>第五阶段：开始出现GPU功耗建模与可重构架构、机器学习体系结构的研究，并且逐渐占据主导地位。</p>
-<p>2022-至今：主要有同态加密与加密数据加速器、大语言模型架构等研究。</p>
-<hr>
+<section id="整体架构" class="level1">
+<h1>整体架构</h1>
+<p><img src="image/image_rzhCHyCOcw.png" class="img-fluid"></p>
+<p>vLLM的0.6.x及之前版本中使用V0引擎，其支持多种模型与特性，但在0.7.x版本开始更新了V1版本。目前V1和V0版本并存，通过环境变量<code>VLLM_USE_V1</code>来设置，默认使用V1版本引擎。</p>
+<section id="架构分析" class="level2">
+<h2 class="anchored" data-anchor-id="架构分析">架构分析</h2>
+<p>先回顾V0的整体：架构关键模块LLM Engine（异步模式：AsyncLLM Engine），负责处理前端传递过来的请求。</p>
+<p>Engine内部的处理一般流程：</p>
+<ul>
+<li>request先经过数据处理（input_processor），把字符序列转换成特定结构体(SequenceGroup)然后经由调度器(scheduler)进行统一的分配到执行器。</li>
+<li>执行器(executor)创建执行实例(worker)和任务分发；</li>
+<li>worker管理单个GPU硬件资源，通过模型运行器（ModelRunner）加载模型进行计算获得请求返回值。</li>
+</ul>
+<p>框架的几个特点：</p>
+<ul>
+<li>scheduler管理每个请求的状态（如，处于什么阶段、是否因为资源被换出）、为请求分配kv-cache；</li>
+<li>worker的命令执行（如，状态检查）由executor通过RPC通道完成；请求的处理则是由worker0进行广播；</li>
+<li>数据前后处理、调度、执行器都处于相同进程；</li>
+</ul>
+<p><img src="image/aa34a1c75e392913fd3142286ef6e8fd_aJ5XKlbNoa.png" class="img-fluid"></p>
+<p>框架搭建过程一般优先考虑基本功能实现，而非完整的架构规划，因此伴随了一些问题：</p>
+<p>1.单线程/进程计算开销过重。很多处理集中在一个线程内：</p>
+<ul>
+<li>输入处理 ：请求处理成模型所需的数据，比如准备kv、sampler处理、CPU密集型任务（多模态的模型）；</li>
+<li>请求广播处理：每个step处理都由scheduler发送请求到worker，状态的处理由scheduler完成；</li>
+<li>输出处理：Sampler开销，De-tokenization处理开销（尤其是当batch size大时）。</li>
+</ul>
+<p>一方面，这些操作基本是python代码，其执行效率不高，另一方面不能很好让GPU与CPU协同。</p>
+<ol type="1">
+<li>当前prefix cache在命中为0时，性能会受影响；</li>
+<li>增量inputs的构建在GPU中（可以在CPU中完成）等。</li>
+</ol>
+<p>在代码可扩展方面也存在问题，如：</p>
+<ul>
+<li>scheduler负担过重：scheduler是有状态（stateful）的。scheduler需要记录请求的处理状态，记录prefill/decoder阶段、KV的传输情况；每个step执行都会涉及scheduler到worker的状态信息传递；</li>
+<li>config构建类型太多：不同模型/特性的入参不统一，需单独构建。</li>
+</ul>
 </section>
-<section id="分研究方向的走势" class="level1">
-<h1>分研究方向的走势</h1>
-<p><img src="image/1cfcd31e606acefd8b25728da7f606f6_4Ldlb_Uzmd.png" class="img-fluid"></p>
-<p>可以看出，GPU和神经网络方向的论文爆发式增长，其他方向都在逐渐走低。</p>
+<section id="v1架构的变化" class="level2">
+<h2 class="anchored" data-anchor-id="v1架构的变化">V1架构的变化</h2>
+<p>V1在原有基础上对LLM Engine模块功能进行了解耦拆分，将scheduler和executor用一个Engine Core的模块承载，数据的处理保留在上层，通过process0和process1分别运行（机器内进程编号不一定就是相邻），如下图所示，底层执行还是由executor负责。</p>
+<p><img src="image/d20aab145b60ab64646147a53894651b_cgte1-4ouc.png" class="img-fluid"></p>
+<p>调度器scheduler的变化：把部分功能进行了下沉，且scheduler去状态化，worker则变为有状态化（stateful），需要记录请求相关信息。scheduler与work0不共线程，在TP场景下scheduler下发的请求广播不再由worker0进行，而是由scheduler所在进程执行，这样worker与executor的交互变得清晰。</p>
+<p><img src="image/42fd5ac1e6ce929d931e7a0601341ac6_Fhg6ZB-aNF.png" class="img-fluid"></p>
+<p>通过生产者/消费者队列的方式把上层（AsyncLLM Engine）与中间层（EngineCore）联系起来，Process0发送请求到Engine Core的等待队列，AsyncLLM层进行poll轮询查询请求结果，请求处理完成后Engine Core放入另一个队列中；Engine Core与worker的传递方式保持不变。队列处理细节上面，EngineCore队列和AsyncLLM Engine的输出处理上面都使用了”busy_loop”方式。</p>
+<p><img src="image/37c3d4578a3f648562226eeb03c30e97_CzqQAv-7CG.png" class="img-fluid"></p>
+<p>框架其它改动：将beam search从vLLM engine内部移动到外层，增强了prefix-caching特性；代码优化方面也做了工作，比如，用numpy操作代替一些python操作。整体目标是使得框架迭代后结构清晰、更好扩展、性能更好。</p>
+</section>
+</section>
+<section id="scheduler模块" class="level1">
+<h1>Scheduler模块</h1>
+<p>Scheduler模块作为vLLM的一个核心模块，主要负责请求调度。</p>
+<p>V0版本的scheduler需要记录请求状态、区分prefill/decoder阶段，根据调度优先级、GPU资源负载情况对请求进行换入换出（swap）。 scheduler记录的请求体的格式是sequenceGroup，scheduler通过三个队列管理请求处理流程：</p>
+<ul>
+<li>waiting队列：等待处理的请求，仅包含prefill阶段的请求；</li>
+<li>running队列：在运行的decode阶段的请求（开启了chunked模式可包含prefill）；</li>
+<li>swapped队列：存放running队列里面因为系统资源或者优先级的原因被换出的请求，实现调度均衡。</li>
+</ul>
+<p><img src="image/f8ee5434af067cec57f0bdd990bea936_SHFbE6XzI0.png" class="img-fluid"></p>
+<p>内存的block的管理工作也在scheduler完成，通过block manager -&gt; block allocator完成KV cache的分配。&nbsp;</p>
+<p>V0的scheduler任务处理工作比较重，而且代码实现比较混杂（扩展性不好），比如需要支持prefill chunked特性时需要耦合修改，逻辑变得更加复杂（代码引入大量if-else，圈复杂度增加）。</p>
+<p>V1上则让scheduler去状态化（stateless），请求体内容上不区分P/D；scheduler的输出格式也做了改变，调度器输格式：{request_id: num_tokens}&nbsp;，指定某个请求id和对应处理的长度，多个请求可以混合执行。</p>
+<p>如下展示了一个三个请求混合执行的例子，请求R1/2/3在不同step的计算处理长度不同。对于单个请求而言，其处于什么状态（P阶段/D阶段），scheduler output里面未做区分。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/46fe11cc9bb0049291221d21525b5847_soOs8INypS.png" title="R1和R2在step0完成prefill计算，R3到step2才完成。 R1和R2在step0完成prefill计算，R3到step2才完成。" class="img-fluid figure-img"></p>
+<figcaption>R1和R2在step0完成prefill计算，R3到step2才完成。 R1和R2在step0完成prefill计算，R3到step2才完成。</figcaption>
+</figure>
+</div>
+<p>在V0版本上scheduler每个step都要重新构建输入tensor以及metadata，V1的只需要传递差异下发信息更加简单：在P阶段需要把token IDs、block IDs、采样信息等传递下去，到了D阶段只需要传递请求IDs和新的blocks IDs。&nbsp;</p>
+<p>V1 scheduler的队列变化上只需要保留waiting和running队列、删除了swapped，即使没有swapped队列同样能够完成优先级调度、以及系统资源压力缓解等处理工作。</p>
+<p>![ Scheduler的变化 Scheduler的变化 ](image/7d86cab464d1ed190d530f915f187361_eqVJNYjh9k.png ” Scheduler的变化 Scheduler的变化 “)</p>
+</section>
+<section id="kv-cache-manager模块" class="level1">
+<h1>KV Cache Manager模块</h1>
+<p>kv cache的管理模块主要是完成内存分配/使用/释放（原理参看PagedAttention），该模块需要给sequence的计算提供足够的存储空间，并且负责跟踪KV cache的状态，模块由scheduler调用。</p>
+<p>在V0版本中BlockManager模块的搭建层次如下图所示，在scheduler初始化时会调用BlockSpaceManager来创建实例，BlockTable完成内存块到sequence的映射，底层主要是用allocator进行内存的申请与释放，内存用块（block）为单位管理。</p>
+<p><img src="image/890b23b6ff255f035080a72aeadd7c41_Q64vovHox_.png" class="img-fluid"></p>
+<p>BlockManager支持的功能：</p>
+<ul>
+<li>Copy-on-write（COW，写时复制）：当多个逻辑块映射到同一个物理块时，物理块的引用计数会增加；当需要对物理块进行写操作时，如果该物理块的引用计数大于 1，则会触发COW；</li>
+<li>Swapping KV（存储切换）：GPU/CPU之间内存换入/换出；</li>
+<li>Lookahead scheduling（预测调度）：为decode阶段提供相匹配的kv存储；</li>
+</ul>
+<p>还有prefix caching和Sliding window等。</p>
+<p>V1上面，由于scheduler的管理方式以及输出的内容进行了调整，所以BlockManager也进行相应修改。在V1中BlockManager的工作由KVCacheManager替代，KVCacheManager结构更加的简单。</p>
+<p>block table替换成了req_to_blocks，它是一个字典，完成request到KVCacheBlock映射；在KVCacheManager里面有一个BlockPool负责内存块的管理，里面有一个空闲block管理队列（FreeKVCacheBlockQueue）以及一个映射字典（block哈希值到block的映射）。FreeKVCacheBlockQueue通过LRU策略管理队列中的block，队列移除block的操作复杂度是O(1)。</p>
+<p><img src="image/e28a7f6da1416c0f15091752f6cd6001_ZfoOsYnnEf.png" class="img-fluid"></p>
+<p>结合kv管理机制和部分优化（降低python对象创建开销）在prefix caching特性上面V1性能优化较大，这里给出社区的一个测试结果：</p>
+<p><img src="image/361d14c07d2ac7248505a4254e76be45_zKZuWYvsif.png" class="img-fluid"></p>
+</section>
+<section id="其他" class="level1">
+<h1>其他</h1>
+<p>值得注意的是框架的升级不一定都是最优解，要考虑新引入的问题。比如，以前位于同一个线程/进程内的模块，在V1中拆分到多个进程中，这增加了信息传递成本，可能会降低系统的可靠性；还需要考虑对于高并发流量的处理场景，相比进程内数据传递，新增一个生产者/消费者队列是否性能最优，诸如此类。</p>
+<p>当然V1框架目前在开发完善中，还没达到完全取代V0的状态，有些特性正在适配中（user_guide）：</p>
+<p><img src="image/f55e8e51bc0dd99821add0e988fb1a1f_rKE9A0Ao-b.png" class="img-fluid"></p>
+<p>除了上述，V1框架里面值得关注的更新点：</p>
+<ul>
+<li>torch.compile + piecewise CUDA graphs&nbsp;</li>
+<li>整图编译以单kernel下发，能降低CPU端处理时间但灵活度不够；</li>
+<li>piecewise方式CPU端开销增加但灵活度变高，可结合一些现有优化模块减少自定义算子编写。</li>
+<li>PD分离</li>
+</ul>
 
 
 </section>
