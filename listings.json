@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/NVIDIA历代芯片架构简述/NVIDIA历代芯片架构简述.html",
       "/posts/vLLM：V0到V1的核心升级/vLLM从V0到V1的核心升级.html",
       "/posts/死锁活锁饥饿/Deadlock-Livelock-Starvation.html",
       "/posts/PD分离架构简述/prefill-decode-p-d-disaggregated-architectures.html",

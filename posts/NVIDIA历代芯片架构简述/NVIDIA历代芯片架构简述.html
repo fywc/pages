@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>prefill-decode-p-d-disaggregated-architectures – fywc's Blog</title>
+<title>nvidia历代芯片架构简述 – fywc's Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -69,35 +69,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -151,181 +122,95 @@ window.Quarto = {
 
 
 
-<section id="prefill-decode-disaggregated-architectures" class="level1">
-<h1>Prefill-Decode Disaggregated Architectures</h1>
-<p>Prefill-Decode (P/D) Disaggregated Architectures constitute a leading paradigm for optimizing large language model (LLM) inference at scale. By decoupling the compute-intensive prefill (prompt/context processing) stage from the memory-intensive decode (tokenwise autoregressive generation) stage, these architectures allow for separate, phase-aware hardware allocation, minimizing resource contention and enabling throughput and latency optimizations subject to diverse service-level objectives (SLOs). The following sections survey the defining principles, architectural variants, resource management strategies, scheduling solutions, and empirical findings from key research threads, with a focus on the most impactful methods, metrics, and trade-offs.</p>
-<section id="architectural-principles-and-variants" class="level2">
-<h2 class="anchored" data-anchor-id="architectural-principles-and-variants">1. Architectural Principles and Variants</h2>
-<p>P/D disaggregated architectures physically or logically separate the prefill and decode stages of LLM inference, typically assigning each phase to distinct GPU (or accelerator) pools, hardware configurations, or temporal resource partitions. The fundamental rationale is the orthogonality of resource bottlenecks: prefill is compute-FLOPs bound (requiring peak GPU arithmetic throughput), whereas decode is usually memory bandwidth and working set bound, due to the need for holding long KV caches and streaming tokens sequentially.</p>
-<p>Major architectural variants include:</p>
+<section id="nvidia历代芯片架构简述" class="level1">
+<h1>NVIDIA历代芯片架构简述</h1>
+<p>1999 年，英伟达发明了 GPU（graphics processing unit），英伟达 GPU 从 Fermi 到 Blackwell 共 9 代架构，时间跨度从 2010 年至 2024 年，具体包括费米（Feimi）、开普勒（Kepler）、麦克斯韦（Maxwell）、帕斯卡（Pashcal）、伏特（Volt）、图灵（Turing）、安培（Ampere）和赫柏（Hopper）和布莱克韦尔（Blackwell）架构。经过 15 年的发展，CUDA 已成为英伟达的技术“护城河”，Tensor Core5.0，NVLink5.0，NVswitch4.0，Transformer Engine2.0 等技术迭代更新，正如英伟达公司官方宣传语所言：人工智能计算领域的领导者，推动了 AI、HPC、游戏、创意设计、自动驾驶汽车和机器人开发领域的进步。 ​</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 28%">
-<col style="width: 38%">
-<col style="width: 32%">
+<col style="width: 7%">
+<col style="width: 3%">
+<col style="width: 50%">
+<col style="width: 39%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Variant</th>
-<th>Disaggregation Dimension</th>
-<th>Characteristic Features</th>
+<th>架构</th>
+<th>发布时间</th>
+<th>核心参数</th>
+<th>特点&amp;优势</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Classical P/D</td>
-<td>Resource (node or device-level)</td>
-<td>Prefill and decode on separate devices; KVCache transfer via RDMA or NVLink</td>
+<td>Fermi</td>
+<td>2010</td>
+<td>16 个 SM，每个 SM 包含 32 个 CUDA Cores，一共 512 CUDA Cores</td>
+<td>首个完整 GPU 计算架构，支持与共享存储结合的 Cache 层次 GPU 架构，支持 ECC GPU 架构</td>
 </tr>
 <tr class="even">
-<td>Temporal (PaDG, TD-Pipe)</td>
-<td>Time (intra-instance time-sharing)</td>
-<td>Single device alternates prefill and decode in rolling slots or pipeline phases</td>
+<td>Kepler</td>
+<td>2012</td>
+<td>16 个 SM，每个 SM 包含 32 个 CUDA Cores，一共 512 CUDA Cores</td>
+<td>游戏性能大幅提升，首次支持 GPU Direct 技术</td>
 </tr>
 <tr class="odd">
-<td>Intra-GPU (Nexus, semi-PD)</td>
-<td>Hardware partitioning (SM-level)</td>
-<td>Dynamic allocation of GPU SMs or logical cores per phase, decoupling prefill/decode computation within a device</td>
+<td>Maxwell</td>
+<td>2014</td>
+<td>16 个 SM，每个 SM 包括 4 个处理块，每个处理块包括 32 个 CUDA Cores+8 个 LD/ST Unit + 8 SFU</td>
+<td>每组 SM 单元从 192 个减少到每组 128 个，每个 SMM 单元拥有更多逻辑控制电路</td>
 </tr>
 <tr class="even">
-<td>Multi-stage (EPD, HydraInfer)</td>
-<td>Functional (encode, prefill, decode)</td>
-<td>Explicit splitting for multimodal models: image/audio encode, textual prefill, token decode, possibly run on separate heterogeneous clusters</td>
+<td>Pascal</td>
+<td>2016</td>
+<td>GP100 有 60 个 SM，每个 SM 包括 64 个 CUDA Cores，32 个 DP Cores</td>
+<td>NVLink 第一代，双向互联带宽 160GB/s，P100 拥有 56 个 SM HBM</td>
+</tr>
+<tr class="odd">
+<td>Volta</td>
+<td>2017</td>
+<td>80 个 SM，每个 SM 包括 32 个 FP64+64 Int32+64 FP32+8 个 Tensor Cores</td>
+<td>NVLink2.0，Tensor Cores 第一代，支持 AI 运算，NVSwitch1.0</td>
+</tr>
+<tr class="even">
+<td>Turing</td>
+<td>2018</td>
+<td>102 核心 92 个 SM，SM 重新设计，每个 SM 包含 64 个 Int32+64 个 FP32+8 个 Tensor Cores</td>
+<td>Tensor Core2.0，RT Core 第一代</td>
+</tr>
+<tr class="odd">
+<td>Ampere</td>
+<td>2020</td>
+<td>108 个 SM，每个 SM 包含 64 个 FP32+64 个 INT32+32 个 FP64+4 个 Tensor Cores</td>
+<td>Tensor Core3.0，RT Core2.0，NVLink3.0，结构稀疏性矩阵 MIG1.0</td>
+</tr>
+<tr class="even">
+<td>Hopper</td>
+<td>2022</td>
+<td>132 个 SM，每个 SM 包含 128 个 FP32+64 个 INT32+64 个 FP64+4 个 Tensor Cores</td>
+<td>Tensor Core4.0，NVLink4.0，结构稀疏性矩阵 MIG2.0</td>
+</tr>
+<tr class="odd">
+<td>Blackwell</td>
+<td>2024</td>
+<td>160个SM</td>
+<td>Tensor Core5.0，NVLink5.0, 第二代 Transformer 引擎，支持 RAS</td>
 </tr>
 </tbody>
 </table>
-<p>Innovations such as KVCache-centric buffering (Mooncake), block-contiguous D2D KVCache transfer (P/D-Serve, FlowKV), homomorphic KVCache quantization (HACK), and hierarchical scheduling/control (TD-Pipe, Arrow) are tailored to reduce phase interference, resource underutilization, and communication bottlenecks [2407.00079][2408.08147][2502.03589][2504.03775][2506.10470].</p>
-</section>
-<section id="phase-decoupling-and-resource-management" class="level2">
-<h2 class="anchored" data-anchor-id="phase-decoupling-and-resource-management">2. Phase Decoupling and Resource Management</h2>
-<p>Successful P/D disaggregation requires tightly coordinated resource management:</p>
+<p>Hopper 架构是第一个真正的异构加速平台，适用于高性能计算（HPC）和 AI 工作负载。英伟达 Grace CPU 和英伟达 Hopper GPU 实现英伟达 NVLink-C2C 互连，高达 900 GB/s 的总带宽的同时支持 CPU 内存寻址为 GPU 内存。NVLink4.0 连接多达 256 个英伟达 Grace Hopper 超级芯片，最高可达 150 TB 的 GPU 可寻址内存。</p>
+<p>H100 一共有 8 组 GPC、66 组 TPC、132 组 SM，总计有 16896 个 CUDA 核心、528 个 Tensor 核心、50MB 二级缓存。显存为新一代 HBM3，容量 80 GB，位宽 5120-bit，带宽高达 3 TB/s。</p>
+<p>2024 年 3 月，英伟达发布 Blackwell 架构，专门用于处理数据中心规模的生成式 AI 工作流，能效是 Hopper 的 25 倍，新一代架构在以下方面做了创新：</p>
 <ul>
-<li><strong>KVCache Handling:</strong> Effective reuse, remote retrieval, or cross-node migration of key-value caches is central. Designs such as Mooncake feature disaggregated KVCache that resides in CPU/DRAM/SSD, accessible via GPUDirect-RDMA, supporting cache prefix sharing across requests.</li>
-<li><strong>Fine-grained Partitioning:</strong> Partitioning computational or memory resources at sub-device (SM/block/core) granularity enables adaptive response to phase-specific workload (semi-PD, Nexus). For instance, semi-PD partitions streaming multiprocessors between phases using CUDA MPS, supporting asynchronous workers with unified memory pointers and atomic allocation to prevent write-after-read hazards [2504.19867][2507.06608].</li>
-<li><strong>Topology-aware Deployment:</strong> In large heterogeneous clusters, intelligent partitioning and placement (HexGen-2, HeteroScale) optimize the mapping of prefill and decode groups onto GPUs and network subgroups to match bandwidth and compute requirements and minimize cross-switch contention [2502.07903][2508.19559].</li>
+<li><strong>新型 AI 超级芯片</strong>：Blackwell 架构 GPU 具有 2080 亿个晶体管，采用专门定制的台积电 4NP 工艺制造。所有 Blackwell 产品均采用双倍光刻极限尺寸的裸片，通过 10 TB/s 的片间互联技术连接成一块统一的 GPU。</li>
+<li><strong>第二代 Transformer 引擎</strong>：将定制的 Blackwell Tensor Core 技术与英伟达 TensorRT-LLM 和 NeMo 框架创新相结合，加速大语言模型 (LLM) 和专家混合模型 (MoE) 的推理和训练。</li>
+<li><strong>第五代 NVLink</strong>：为了加速万亿参数和混合专家模型的性能，新一代 NVLink 为每个 GPU 提供 1.8TB/s 双向带宽，支持多达 576 个 GPU 间的无缝高速通信，适用于复杂大语言模型。</li>
+<li><strong>RAS 引擎</strong>：Blackwell 通过专用的可靠性、可用性和可服务性 (RAS) 引擎增加了智能恢复能力，以识别早期可能发生的潜在故障，从而更大限度地减少停机时间。</li>
+<li><strong>安全 AI</strong>：内置英伟达机密计算技术，可通过基于硬件的强大安全性保护敏感数据和 AI 模型，使其免遭未经授权的访问。</li>
+<li><strong>解压缩引擎</strong>：拥有解压缩引擎以及通过 900GB/s 双向带宽的高速链路访问英伟达 Grace CPU 中大量内存的能力，可加速整个数据库查询工作流，从而在数据分析和数据科学方面实现更高性能。</li>
 </ul>
-</section>
-<section id="scheduling-load-balancing-and-autoscaling" class="level2">
-<h2 class="anchored" data-anchor-id="scheduling-load-balancing-and-autoscaling">3. Scheduling, Load Balancing, and Autoscaling</h2>
-<p>Dynamic and predictive scheduling is essential to meet latency objectives and maximize throughput in the face of varying workloads and phase imbalances.</p>
-<ul>
-<li><p><strong>KVCache-aware Scheduling:</strong> Schedulers (e.g., Mooncake’s Conductor) analyze cache prefix overlaps, queue delays (<span class="math inline">\(T_{queue}\)</span>), prefill compute times (<span class="math inline">\(T_{prefill}\)</span>), and transfer latencies (<span class="math inline">\(T_{transfer}\)</span>), selecting instance pairs that minimize time-to-first-token (TTFT) and inter-token decode time (TBT), subject to kvcache_balancing_thresholds:</p>
-<p><span class="math display">\[
-\text{TTFT} = T_\text{queue} + T_\text{prefill} \quad \text{or} \quad T_\text{transfer} + T_\text{queue} + T_\text{prefill}
-\]</span></p></li>
-<li><p><strong>Early Rejection and Load Prediction:</strong> Imposing SLOs, systems like Mooncake and P/D-Serve employ early rejection by predicting whether a request would cause downstream SLO violation, often using rolling predictions of average decoding time per token ((t_d)) and comparing predicted ratios to SLO thresholds:</p>
-<p><span class="math display">\[
-\text{Predicted TBT Ratio} = \frac{\text{Average decoding time per token}}{l_\text{tbt}}
-\]</span></p>
-<p>If the ratio exceeds threshold, requests are dropped preemptively.</p></li>
-<li><p><strong>Decoupled and Elastic Scheduling:</strong> Arrow, DynaServe, and HyperFlexis dynamically flip instance roles (prefill/decode), size task/batch pools, and enable real-time resource reallocation under SLOs. Arrow, for instance, treats prefill/decode as per-request attributes and maintains multiple elastic pools, using minimal-load greedy assignment to predict and bound TTFT/TPOT per request [2505.11916][2504.09285][2508.15919].</p></li>
-<li><p><strong>Autoscaling Policies:</strong> HeteroScale demonstrates that decode phase tokens-per-second (TPS) is the robust metric for coordinated scaling, leading to significant GPU utilization gains over naive SM or tail-latency signals. The autoscaling logic maintains the P/D pool ratio within empirically determined ranges and uses proportional controllers and topology-aware schedulers to maximize token throughput even in hardware-diverse and network-constrained environments [2508.19559].</p></li>
-</ul>
-</section>
-<section id="kvcache-transfer-and-compression-strategies" class="level2">
-<h2 class="anchored" data-anchor-id="kvcache-transfer-and-compression-strategies">4. KVCache Transfer and Compression Strategies</h2>
-<p>Transmission of KVCache between prefill and decode stages can be a principal bottleneck in P/D architectures, especially under long-context scenarios:</p>
-<ul>
-<li><p><strong>Contiguous and Block-free KVCache Transfer:</strong> Systems such as FlowKV and P/D-Serve restructure KVCache memory layouts to enable merging of layer-wise blocks into large segments, reducing per-request NVLink/NCCL transfer calls by up to <span class="math inline">\(L \times 2\)</span> and cutting transmission latency by nearly 96% [2504.03775][2408.08147].</p></li>
-<li><p><strong>Pull-based Tensor-Centric RPC:</strong> KVDirect eliminates heavy synchronization by letting decode workers “pull” required KV cache blocks in coalesced RDMA reads, thus decoupling memory reservation/provision and reducing per-request latency by up to 55% over push-mode baselines [2501.14743].</p></li>
-<li><p><strong>Lossy and Lossless Compression:</strong> HACK applies asymmetric 2-bit quantization to KV data and directly performs homomorphic matrix multiplications—approximate attention—on the quantized data, circumventing costly dequantization. The key approximation is:</p>
-<p><span class="math display">\[
-\sum_{z} a_{iz} b_{zj} \approx s_{a_i} s_{b_j} \sum_z a'_{iz} b'_{zj}
-+ m_{b_j} s_{a_i} \sum_z a'_{iz}
-+ m_{a_i} s_{b_j} \sum_z b'_{zj}
-+ Z m_{a_i} m_{b_j}
-\]</span></p>
-<p>This achieves JCT reductions of up to 70.9% over uncompressed baselines [2502.03589].</p></li>
-</ul>
-</section>
-<section id="specializations-multimodal-and-heterogeneous-deployments" class="level2">
-<h2 class="anchored" data-anchor-id="specializations-multimodal-and-heterogeneous-deployments">5. Specializations: Multimodal and Heterogeneous Deployments</h2>
-<p>Adapting P/D architectures for heterogeneous hardware and multimodal input increases system complexity but yields notable performance improvements.</p>
-<ul>
-<li><strong>Multimodal EPD Disaggregation:</strong> For large multimodal models, the EPD architecture (HydraInfer, EPD Disaggregation) inserts an explicit “encode” stage (for images/audio/video), allocating it to dedicated GPUs and separating prefill/decode to maximize batch size and minimize memory contention. Caching multimedia tokens, parallelization of intra-request image patch encodings, and black-box resource optimization improve memory efficiency by up to 15× and batch size by up to 22× [2505.12658][2501.05460].</li>
-<li><strong>Heterogeneous GPU Scheduling:</strong> HexGen-2 formalizes scheduling as a constraint optimization problem, partitioning the GPU communication topology graph via spectral partitioning and max-flow algorithms to assign heterogeneous GPUs to prefill or decode, considering distinct parallelism strategies (tensor, pipeline) per group [2502.07903]. HeteroScale’s topology-aware scheduler ensures that prefill and decode groups are assigned to network-affine subgroups (RDMA affinity) for minimal transfer bottlenecks.</li>
-</ul>
-</section>
-<section id="comparative-metrics-and-empirical-outcomes" class="level2">
-<h2 class="anchored" data-anchor-id="comparative-metrics-and-empirical-outcomes">6. Comparative Metrics and Empirical Outcomes</h2>
-<p>Experimental results across the literature consistently report:</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 10%">
-<col style="width: 19%">
-<col style="width: 28%">
-<col style="width: 42%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>System</th>
-<th>Throughput Gain</th>
-<th>TTFT / TPOT Improvements</th>
-<th>Additional Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Mooncake</td>
-<td>up to 525% (simulated)</td>
-<td>75% more requests at SLO</td>
-<td>Long-context, early rejection, KVCache reuse [2407.00079]</td>
-</tr>
-<tr class="even">
-<td>P/D-Serve</td>
-<td>6.7× over aggregation</td>
-<td>42% TTFT reduction, 46% transfer</td>
-<td>8+ month prod deployment, fine-group RoCE [2408.08147]</td>
-</tr>
-<tr class="odd">
-<td>FlowKV</td>
-<td>15.2–48.9% over baseline</td>
-<td>96% lower KVCache transfer latency</td>
-<td>Heterogeneous GPU support, segment management [2504.03775]</td>
-</tr>
-<tr class="even">
-<td>TD-Pipe</td>
-<td>1.91–2.73× over pipeline</td>
-<td>Pipeline bubble minimization</td>
-<td>Hierarchical controller, prefill predicting [2506.10470]</td>
-</tr>
-<tr class="odd">
-<td>Arrow</td>
-<td>5.62–7.78× request rate</td>
-<td>TTFT predictively bounded</td>
-<td>Stateless instances, elastic pools [2505.11916]</td>
-</tr>
-<tr class="even">
-<td>Nexus</td>
-<td>2.2× throughput vs vLLM</td>
-<td>20× TTFT, 2.5× TBT reductions</td>
-<td>Intra-GPU SM partitioning, cost model [2507.06608]</td>
-</tr>
-<tr class="odd">
-<td>TaiChi</td>
-<td>Up to 77% more goodput</td>
-<td>13.2× TTFT, 1.69× TPOT reductions</td>
-<td>Hybrid PD (aggreg/disagg), per-request scheduling [2508.01989]</td>
-</tr>
-</tbody>
-</table>
-<p>These results demonstrate dramatic improvements in both throughput and SLO adherence, especially under diverse prompt lengths, tidal (burst) request patterns, and heterogeneous infrastructures.</p>
-</section>
-<section id="practical-considerations-and-trade-offs" class="level2">
-<h2 class="anchored" data-anchor-id="practical-considerations-and-trade-offs">7. Practical Considerations and Trade-offs</h2>
-<p>Common operational trade-offs in P/D architectures include:</p>
-<ul>
-<li><strong>Communication vs.&nbsp;Interference:</strong> While disaggregation eliminates prefill/decode interference, it introduces potentially costly KVCache transfers. Hybrid and partially-disaggregated strategies (EcoServe, semi-PD, TaiChi) attempt to balance these competing demands by using temporal disaggregation or intra-instance resource splits [2504.18154][2504.19867][2508.01989].</li>
-<li><strong>Granularity of Partitioning:</strong> Finer-grained (SM-level, chunked pipelining, micro-request splitting) approaches allow more dynamic adaptation but increase scheduler complexity and may reduce hardware efficiency at very high concurrency.</li>
-<li><strong>Adaptive and Predictive Scheduling:</strong> Early rejection, SLO-aware token budgeting, and dynamic pooling (Arrow, HyperFlexis) are most effective when accurate performance models are available for queueing, memory, and transfer overheads [2505.11916][2508.15919]. Metric-driven autoscaling policies based on empirically validated signals (decode TPS) are necessary for efficient cloud deployment at scale [2508.19559].</li>
-<li><strong>Storage and Weight Duplication:</strong> Disaggregated computation with unified storage (semi-PD) avoids weight replication and storage imbalance, achieving both low overhead and high request capacity [2504.19867].</li>
-</ul>
-<hr>
-<p>P/D Disaggregated Architectures, through phase-aware hardware allocation, fine-grained resource control, predictive and dynamic scheduling, and advanced KVCache transfer and compression techniques, set a robust foundation for scalable, efficient, and SLO-compliant large model inference in modern datacenter deployments. Their continued evolution is characterized by the fusion of algorithmic, systems, and hardware-affinity optimizations, as substantiated by rigorous empirical studies and production-scale deployments.</p>
-<p>Source: <a href="https://www.emergentmind.com/articles/prefill-decode-p-d-disaggregated-architectures" class="uri">https://www.emergentmind.com/articles/prefill-decode-p-d-disaggregated-architectures</a></p>
+<p>英伟达 GB200 Grace Blackwell 超级芯片通过 900GB/s 超低功耗的片间互联，将两个英伟达 B200 Tensor Core GPU 与英伟达 Grace CPU 相连。在 90 天内训练一个 1.8 万亿参数的 MoE 架构 GPT 模型，需要 8000 个 Hopper 架构 GPU，15 兆瓦功率，Blackwell 架构只需要 2000 个 GPU，以及 ¼ 的能源消耗。</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
