@@ -100,4 +100,4 @@ Common operational trade-offs in P/D architectures include:
 
 P/D Disaggregated Architectures, through phase-aware hardware allocation, fine-grained resource control, predictive and dynamic scheduling, and advanced KVCache transfer and compression techniques, set a robust foundation for scalable, efficient, and SLO-compliant large model inference in modern datacenter deployments. Their continued evolution is characterized by the fusion of algorithmic, systems, and hardware-affinity optimizations, as substantiated by rigorous empirical studies and production-scale deployments.
 
-Source: https://www.emergentmind.com/articles/prefill-decode-p-d-disaggregated-architectures
+Source: <https://www.emergentmind.com/articles/prefill-decode-p-d-disaggregated-architectures>
