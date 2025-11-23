@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>vllm从v0到v1的核心升级 – fywc's Blog</title>
+<title>prefill-decode-p-d-disaggregated-architectures – fywc's Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -69,6 +69,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -122,120 +151,181 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<section id="vllm从v0到v1的核心升级" class="level1">
-<h1>vLLM从V0到V1的核心升级</h1>
-<p>vLLM在V1版本上进行了较大的代码重构，本文将分析架构演进的内容与原因。</p>
-<p>框架调整主要原因：</p>
+<section id="prefill-decode-disaggregated-architectures" class="level1">
+<h1>Prefill-Decode Disaggregated Architectures</h1>
+<p>Prefill-Decode (P/D) Disaggregated Architectures constitute a leading paradigm for optimizing large language model (LLM) inference at scale. By decoupling the compute-intensive prefill (prompt/context processing) stage from the memory-intensive decode (tokenwise autoregressive generation) stage, these architectures allow for separate, phase-aware hardware allocation, minimizing resource contention and enabling throughput and latency optimizations subject to diverse service-level objectives (SLOs). The following sections survey the defining principles, architectural variants, resource management strategies, scheduling solutions, and empirical findings from key research threads, with a focus on the most impactful methods, metrics, and trade-offs.</p>
+<section id="architectural-principles-and-variants" class="level2">
+<h2 class="anchored" data-anchor-id="architectural-principles-and-variants">1. Architectural Principles and Variants</h2>
+<p>P/D disaggregated architectures physically or logically separate the prefill and decode stages of LLM inference, typically assigning each phase to distinct GPU (or accelerator) pools, hardware configurations, or temporal resource partitions. The fundamental rationale is the orthogonality of resource bottlenecks: prefill is compute-FLOPs bound (requiring peak GPU arithmetic throughput), whereas decode is usually memory bandwidth and working set bound, due to the need for holding long KV caches and streaming tokens sequentially.</p>
+<p>Major architectural variants include:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 38%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variant</th>
+<th>Disaggregation Dimension</th>
+<th>Characteristic Features</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Classical P/D</td>
+<td>Resource (node or device-level)</td>
+<td>Prefill and decode on separate devices; KVCache transfer via RDMA or NVLink</td>
+</tr>
+<tr class="even">
+<td>Temporal (PaDG, TD-Pipe)</td>
+<td>Time (intra-instance time-sharing)</td>
+<td>Single device alternates prefill and decode in rolling slots or pipeline phases</td>
+</tr>
+<tr class="odd">
+<td>Intra-GPU (Nexus, semi-PD)</td>
+<td>Hardware partitioning (SM-level)</td>
+<td>Dynamic allocation of GPU SMs or logical cores per phase, decoupling prefill/decode computation within a device</td>
+</tr>
+<tr class="even">
+<td>Multi-stage (EPD, HydraInfer)</td>
+<td>Functional (encode, prefill, decode)</td>
+<td>Explicit splitting for multimodal models: image/audio encode, textual prefill, token decode, possibly run on separate heterogeneous clusters</td>
+</tr>
+</tbody>
+</table>
+<p>Innovations such as KVCache-centric buffering (Mooncake), block-contiguous D2D KVCache transfer (P/D-Serve, FlowKV), homomorphic KVCache quantization (HACK), and hierarchical scheduling/control (TD-Pipe, Arrow) are tailored to reduce phase interference, resource underutilization, and communication bottlenecks [2407.00079][2408.08147][2502.03589][2504.03775][2506.10470].</p>
+</section>
+<section id="phase-decoupling-and-resource-management" class="level2">
+<h2 class="anchored" data-anchor-id="phase-decoupling-and-resource-management">2. Phase Decoupling and Resource Management</h2>
+<p>Successful P/D disaggregation requires tightly coordinated resource management:</p>
 <ul>
-<li>性能问题：V0版本提升整体性能遇到瓶颈，其CPU侧计算问题较多，异步执行不够优秀，影响GPU性能发挥。</li>
-<li>扩展问题：V0版本历史负担太重，代码复杂度高，不利于功能扩展。</li>
+<li><strong>KVCache Handling:</strong> Effective reuse, remote retrieval, or cross-node migration of key-value caches is central. Designs such as Mooncake feature disaggregated KVCache that resides in CPU/DRAM/SSD, accessible via GPUDirect-RDMA, supporting cache prefix sharing across requests.</li>
+<li><strong>Fine-grained Partitioning:</strong> Partitioning computational or memory resources at sub-device (SM/block/core) granularity enables adaptive response to phase-specific workload (semi-PD, Nexus). For instance, semi-PD partitions streaming multiprocessors between phases using CUDA MPS, supporting asynchronous workers with unified memory pointers and atomic allocation to prevent write-after-read hazards [2504.19867][2507.06608].</li>
+<li><strong>Topology-aware Deployment:</strong> In large heterogeneous clusters, intelligent partitioning and placement (HexGen-2, HeteroScale) optimize the mapping of prefill and decode groups onto GPUs and network subgroups to match bandwidth and compute requirements and minimize cross-switch contention [2502.07903][2508.19559].</li>
 </ul>
 </section>
-<section id="整体架构" class="level1">
-<h1>整体架构</h1>
-<p><img src="image/image_rzhCHyCOcw.png" class="img-fluid"></p>
-<p>vLLM的0.6.x及之前版本中使用V0引擎，其支持多种模型与特性，但在0.7.x版本开始更新了V1版本。目前V1和V0版本并存，通过环境变量<code>VLLM_USE_V1</code>来设置，默认使用V1版本引擎。</p>
-<section id="架构分析" class="level2">
-<h2 class="anchored" data-anchor-id="架构分析">架构分析</h2>
-<p>先回顾V0的整体：架构关键模块LLM Engine（异步模式：AsyncLLM Engine），负责处理前端传递过来的请求。</p>
-<p>Engine内部的处理一般流程：</p>
+<section id="scheduling-load-balancing-and-autoscaling" class="level2">
+<h2 class="anchored" data-anchor-id="scheduling-load-balancing-and-autoscaling">3. Scheduling, Load Balancing, and Autoscaling</h2>
+<p>Dynamic and predictive scheduling is essential to meet latency objectives and maximize throughput in the face of varying workloads and phase imbalances.</p>
 <ul>
-<li>request先经过数据处理（input_processor），把字符序列转换成特定结构体(SequenceGroup)然后经由调度器(scheduler)进行统一的分配到执行器。</li>
-<li>执行器(executor)创建执行实例(worker)和任务分发；</li>
-<li>worker管理单个GPU硬件资源，通过模型运行器（ModelRunner）加载模型进行计算获得请求返回值。</li>
-</ul>
-<p>框架的几个特点：</p>
-<ul>
-<li>scheduler管理每个请求的状态（如，处于什么阶段、是否因为资源被换出）、为请求分配kv-cache；</li>
-<li>worker的命令执行（如，状态检查）由executor通过RPC通道完成；请求的处理则是由worker0进行广播；</li>
-<li>数据前后处理、调度、执行器都处于相同进程；</li>
-</ul>
-<p><img src="image/aa34a1c75e392913fd3142286ef6e8fd_aJ5XKlbNoa.png" class="img-fluid"></p>
-<p>框架搭建过程一般优先考虑基本功能实现，而非完整的架构规划，因此伴随了一些问题：</p>
-<p>1.单线程/进程计算开销过重。很多处理集中在一个线程内：</p>
-<ul>
-<li>输入处理 ：请求处理成模型所需的数据，比如准备kv、sampler处理、CPU密集型任务（多模态的模型）；</li>
-<li>请求广播处理：每个step处理都由scheduler发送请求到worker，状态的处理由scheduler完成；</li>
-<li>输出处理：Sampler开销，De-tokenization处理开销（尤其是当batch size大时）。</li>
-</ul>
-<p>一方面，这些操作基本是python代码，其执行效率不高，另一方面不能很好让GPU与CPU协同。</p>
-<ol type="1">
-<li>当前prefix cache在命中为0时，性能会受影响；</li>
-<li>增量inputs的构建在GPU中（可以在CPU中完成）等。</li>
-</ol>
-<p>在代码可扩展方面也存在问题，如：</p>
-<ul>
-<li>scheduler负担过重：scheduler是有状态（stateful）的。scheduler需要记录请求的处理状态，记录prefill/decoder阶段、KV的传输情况；每个step执行都会涉及scheduler到worker的状态信息传递；</li>
-<li>config构建类型太多：不同模型/特性的入参不统一，需单独构建。</li>
+<li><p><strong>KVCache-aware Scheduling:</strong> Schedulers (e.g., Mooncake’s Conductor) analyze cache prefix overlaps, queue delays (<span class="math inline">\(T_{queue}\)</span>), prefill compute times (<span class="math inline">\(T_{prefill}\)</span>), and transfer latencies (<span class="math inline">\(T_{transfer}\)</span>), selecting instance pairs that minimize time-to-first-token (TTFT) and inter-token decode time (TBT), subject to kvcache_balancing_thresholds:</p>
+<p><span class="math display">\[
+\text{TTFT} = T_\text{queue} + T_\text{prefill} \quad \text{or} \quad T_\text{transfer} + T_\text{queue} + T_\text{prefill}
+\]</span></p></li>
+<li><p><strong>Early Rejection and Load Prediction:</strong> Imposing SLOs, systems like Mooncake and P/D-Serve employ early rejection by predicting whether a request would cause downstream SLO violation, often using rolling predictions of average decoding time per token ((t_d)) and comparing predicted ratios to SLO thresholds:</p>
+<p><span class="math display">\[
+\text{Predicted TBT Ratio} = \frac{\text{Average decoding time per token}}{l_\text{tbt}}
+\]</span></p>
+<p>If the ratio exceeds threshold, requests are dropped preemptively.</p></li>
+<li><p><strong>Decoupled and Elastic Scheduling:</strong> Arrow, DynaServe, and HyperFlexis dynamically flip instance roles (prefill/decode), size task/batch pools, and enable real-time resource reallocation under SLOs. Arrow, for instance, treats prefill/decode as per-request attributes and maintains multiple elastic pools, using minimal-load greedy assignment to predict and bound TTFT/TPOT per request [2505.11916][2504.09285][2508.15919].</p></li>
+<li><p><strong>Autoscaling Policies:</strong> HeteroScale demonstrates that decode phase tokens-per-second (TPS) is the robust metric for coordinated scaling, leading to significant GPU utilization gains over naive SM or tail-latency signals. The autoscaling logic maintains the P/D pool ratio within empirically determined ranges and uses proportional controllers and topology-aware schedulers to maximize token throughput even in hardware-diverse and network-constrained environments [2508.19559].</p></li>
 </ul>
 </section>
-<section id="v1架构的变化" class="level2">
-<h2 class="anchored" data-anchor-id="v1架构的变化">V1架构的变化</h2>
-<p>V1在原有基础上对LLM Engine模块功能进行了解耦拆分，将scheduler和executor用一个Engine Core的模块承载，数据的处理保留在上层，通过process0和process1分别运行（机器内进程编号不一定就是相邻），如下图所示，底层执行还是由executor负责。</p>
-<p><img src="image/d20aab145b60ab64646147a53894651b_cgte1-4ouc.png" class="img-fluid"></p>
-<p>调度器scheduler的变化：把部分功能进行了下沉，且scheduler去状态化，worker则变为有状态化（stateful），需要记录请求相关信息。scheduler与work0不共线程，在TP场景下scheduler下发的请求广播不再由worker0进行，而是由scheduler所在进程执行，这样worker与executor的交互变得清晰。</p>
-<p><img src="image/42fd5ac1e6ce929d931e7a0601341ac6_Fhg6ZB-aNF.png" class="img-fluid"></p>
-<p>通过生产者/消费者队列的方式把上层（AsyncLLM Engine）与中间层（EngineCore）联系起来，Process0发送请求到Engine Core的等待队列，AsyncLLM层进行poll轮询查询请求结果，请求处理完成后Engine Core放入另一个队列中；Engine Core与worker的传递方式保持不变。队列处理细节上面，EngineCore队列和AsyncLLM Engine的输出处理上面都使用了”busy_loop”方式。</p>
-<p><img src="image/37c3d4578a3f648562226eeb03c30e97_CzqQAv-7CG.png" class="img-fluid"></p>
-<p>框架其它改动：将beam search从vLLM engine内部移动到外层，增强了prefix-caching特性；代码优化方面也做了工作，比如，用numpy操作代替一些python操作。整体目标是使得框架迭代后结构清晰、更好扩展、性能更好。</p>
-</section>
-</section>
-<section id="scheduler模块" class="level1">
-<h1>Scheduler模块</h1>
-<p>Scheduler模块作为vLLM的一个核心模块，主要负责请求调度。</p>
-<p>V0版本的scheduler需要记录请求状态、区分prefill/decoder阶段，根据调度优先级、GPU资源负载情况对请求进行换入换出（swap）。 scheduler记录的请求体的格式是sequenceGroup，scheduler通过三个队列管理请求处理流程：</p>
+<section id="kvcache-transfer-and-compression-strategies" class="level2">
+<h2 class="anchored" data-anchor-id="kvcache-transfer-and-compression-strategies">4. KVCache Transfer and Compression Strategies</h2>
+<p>Transmission of KVCache between prefill and decode stages can be a principal bottleneck in P/D architectures, especially under long-context scenarios:</p>
 <ul>
-<li>waiting队列：等待处理的请求，仅包含prefill阶段的请求；</li>
-<li>running队列：在运行的decode阶段的请求（开启了chunked模式可包含prefill）；</li>
-<li>swapped队列：存放running队列里面因为系统资源或者优先级的原因被换出的请求，实现调度均衡。</li>
+<li><p><strong>Contiguous and Block-free KVCache Transfer:</strong> Systems such as FlowKV and P/D-Serve restructure KVCache memory layouts to enable merging of layer-wise blocks into large segments, reducing per-request NVLink/NCCL transfer calls by up to <span class="math inline">\(L \times 2\)</span> and cutting transmission latency by nearly 96% [2504.03775][2408.08147].</p></li>
+<li><p><strong>Pull-based Tensor-Centric RPC:</strong> KVDirect eliminates heavy synchronization by letting decode workers “pull” required KV cache blocks in coalesced RDMA reads, thus decoupling memory reservation/provision and reducing per-request latency by up to 55% over push-mode baselines [2501.14743].</p></li>
+<li><p><strong>Lossy and Lossless Compression:</strong> HACK applies asymmetric 2-bit quantization to KV data and directly performs homomorphic matrix multiplications—approximate attention—on the quantized data, circumventing costly dequantization. The key approximation is:</p>
+<p><span class="math display">\[
+\sum_{z} a_{iz} b_{zj} \approx s_{a_i} s_{b_j} \sum_z a'_{iz} b'_{zj}
++ m_{b_j} s_{a_i} \sum_z a'_{iz}
++ m_{a_i} s_{b_j} \sum_z b'_{zj}
++ Z m_{a_i} m_{b_j}
+\]</span></p>
+<p>This achieves JCT reductions of up to 70.9% over uncompressed baselines [2502.03589].</p></li>
 </ul>
-<p><img src="image/f8ee5434af067cec57f0bdd990bea936_SHFbE6XzI0.png" class="img-fluid"></p>
-<p>内存的block的管理工作也在scheduler完成，通过block manager -&gt; block allocator完成KV cache的分配。&nbsp;</p>
-<p>V0的scheduler任务处理工作比较重，而且代码实现比较混杂（扩展性不好），比如需要支持prefill chunked特性时需要耦合修改，逻辑变得更加复杂（代码引入大量if-else，圈复杂度增加）。</p>
-<p>V1上则让scheduler去状态化（stateless），请求体内容上不区分P/D；scheduler的输出格式也做了改变，调度器输格式：{request_id: num_tokens}&nbsp;，指定某个请求id和对应处理的长度，多个请求可以混合执行。</p>
-<p>如下展示了一个三个请求混合执行的例子，请求R1/2/3在不同step的计算处理长度不同。对于单个请求而言，其处于什么状态（P阶段/D阶段），scheduler output里面未做区分。</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="image/46fe11cc9bb0049291221d21525b5847_soOs8INypS.png" title="R1和R2在step0完成prefill计算，R3到step2才完成。 R1和R2在step0完成prefill计算，R3到step2才完成。" class="img-fluid figure-img"></p>
-<figcaption>R1和R2在step0完成prefill计算，R3到step2才完成。 R1和R2在step0完成prefill计算，R3到step2才完成。</figcaption>
-</figure>
-</div>
-<p>在V0版本上scheduler每个step都要重新构建输入tensor以及metadata，V1的只需要传递差异下发信息更加简单：在P阶段需要把token IDs、block IDs、采样信息等传递下去，到了D阶段只需要传递请求IDs和新的blocks IDs。&nbsp;</p>
-<p>V1 scheduler的队列变化上只需要保留waiting和running队列、删除了swapped，即使没有swapped队列同样能够完成优先级调度、以及系统资源压力缓解等处理工作。</p>
-<p>![ Scheduler的变化 Scheduler的变化 ](image/7d86cab464d1ed190d530f915f187361_eqVJNYjh9k.png ” Scheduler的变化 Scheduler的变化 “)</p>
 </section>
-<section id="kv-cache-manager模块" class="level1">
-<h1>KV Cache Manager模块</h1>
-<p>kv cache的管理模块主要是完成内存分配/使用/释放（原理参看PagedAttention），该模块需要给sequence的计算提供足够的存储空间，并且负责跟踪KV cache的状态，模块由scheduler调用。</p>
-<p>在V0版本中BlockManager模块的搭建层次如下图所示，在scheduler初始化时会调用BlockSpaceManager来创建实例，BlockTable完成内存块到sequence的映射，底层主要是用allocator进行内存的申请与释放，内存用块（block）为单位管理。</p>
-<p><img src="image/890b23b6ff255f035080a72aeadd7c41_Q64vovHox_.png" class="img-fluid"></p>
-<p>BlockManager支持的功能：</p>
+<section id="specializations-multimodal-and-heterogeneous-deployments" class="level2">
+<h2 class="anchored" data-anchor-id="specializations-multimodal-and-heterogeneous-deployments">5. Specializations: Multimodal and Heterogeneous Deployments</h2>
+<p>Adapting P/D architectures for heterogeneous hardware and multimodal input increases system complexity but yields notable performance improvements.</p>
 <ul>
-<li>Copy-on-write（COW，写时复制）：当多个逻辑块映射到同一个物理块时，物理块的引用计数会增加；当需要对物理块进行写操作时，如果该物理块的引用计数大于 1，则会触发COW；</li>
-<li>Swapping KV（存储切换）：GPU/CPU之间内存换入/换出；</li>
-<li>Lookahead scheduling（预测调度）：为decode阶段提供相匹配的kv存储；</li>
+<li><strong>Multimodal EPD Disaggregation:</strong> For large multimodal models, the EPD architecture (HydraInfer, EPD Disaggregation) inserts an explicit “encode” stage (for images/audio/video), allocating it to dedicated GPUs and separating prefill/decode to maximize batch size and minimize memory contention. Caching multimedia tokens, parallelization of intra-request image patch encodings, and black-box resource optimization improve memory efficiency by up to 15× and batch size by up to 22× [2505.12658][2501.05460].</li>
+<li><strong>Heterogeneous GPU Scheduling:</strong> HexGen-2 formalizes scheduling as a constraint optimization problem, partitioning the GPU communication topology graph via spectral partitioning and max-flow algorithms to assign heterogeneous GPUs to prefill or decode, considering distinct parallelism strategies (tensor, pipeline) per group [2502.07903]. HeteroScale’s topology-aware scheduler ensures that prefill and decode groups are assigned to network-affine subgroups (RDMA affinity) for minimal transfer bottlenecks.</li>
 </ul>
-<p>还有prefix caching和Sliding window等。</p>
-<p>V1上面，由于scheduler的管理方式以及输出的内容进行了调整，所以BlockManager也进行相应修改。在V1中BlockManager的工作由KVCacheManager替代，KVCacheManager结构更加的简单。</p>
-<p>block table替换成了req_to_blocks，它是一个字典，完成request到KVCacheBlock映射；在KVCacheManager里面有一个BlockPool负责内存块的管理，里面有一个空闲block管理队列（FreeKVCacheBlockQueue）以及一个映射字典（block哈希值到block的映射）。FreeKVCacheBlockQueue通过LRU策略管理队列中的block，队列移除block的操作复杂度是O(1)。</p>
-<p><img src="image/e28a7f6da1416c0f15091752f6cd6001_ZfoOsYnnEf.png" class="img-fluid"></p>
-<p>结合kv管理机制和部分优化（降低python对象创建开销）在prefix caching特性上面V1性能优化较大，这里给出社区的一个测试结果：</p>
-<p><img src="image/361d14c07d2ac7248505a4254e76be45_zKZuWYvsif.png" class="img-fluid"></p>
 </section>
-<section id="其他" class="level1">
-<h1>其他</h1>
-<p>值得注意的是框架的升级不一定都是最优解，要考虑新引入的问题。比如，以前位于同一个线程/进程内的模块，在V1中拆分到多个进程中，这增加了信息传递成本，可能会降低系统的可靠性；还需要考虑对于高并发流量的处理场景，相比进程内数据传递，新增一个生产者/消费者队列是否性能最优，诸如此类。</p>
-<p>当然V1框架目前在开发完善中，还没达到完全取代V0的状态，有些特性正在适配中（user_guide）：</p>
-<p><img src="image/f55e8e51bc0dd99821add0e988fb1a1f_rKE9A0Ao-b.png" class="img-fluid"></p>
-<p>除了上述，V1框架里面值得关注的更新点：</p>
+<section id="comparative-metrics-and-empirical-outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="comparative-metrics-and-empirical-outcomes">6. Comparative Metrics and Empirical Outcomes</h2>
+<p>Experimental results across the literature consistently report:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 19%">
+<col style="width: 28%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>System</th>
+<th>Throughput Gain</th>
+<th>TTFT / TPOT Improvements</th>
+<th>Additional Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mooncake</td>
+<td>up to 525% (simulated)</td>
+<td>75% more requests at SLO</td>
+<td>Long-context, early rejection, KVCache reuse [2407.00079]</td>
+</tr>
+<tr class="even">
+<td>P/D-Serve</td>
+<td>6.7× over aggregation</td>
+<td>42% TTFT reduction, 46% transfer</td>
+<td>8+ month prod deployment, fine-group RoCE [2408.08147]</td>
+</tr>
+<tr class="odd">
+<td>FlowKV</td>
+<td>15.2–48.9% over baseline</td>
+<td>96% lower KVCache transfer latency</td>
+<td>Heterogeneous GPU support, segment management [2504.03775]</td>
+</tr>
+<tr class="even">
+<td>TD-Pipe</td>
+<td>1.91–2.73× over pipeline</td>
+<td>Pipeline bubble minimization</td>
+<td>Hierarchical controller, prefill predicting [2506.10470]</td>
+</tr>
+<tr class="odd">
+<td>Arrow</td>
+<td>5.62–7.78× request rate</td>
+<td>TTFT predictively bounded</td>
+<td>Stateless instances, elastic pools [2505.11916]</td>
+</tr>
+<tr class="even">
+<td>Nexus</td>
+<td>2.2× throughput vs vLLM</td>
+<td>20× TTFT, 2.5× TBT reductions</td>
+<td>Intra-GPU SM partitioning, cost model [2507.06608]</td>
+</tr>
+<tr class="odd">
+<td>TaiChi</td>
+<td>Up to 77% more goodput</td>
+<td>13.2× TTFT, 1.69× TPOT reductions</td>
+<td>Hybrid PD (aggreg/disagg), per-request scheduling [2508.01989]</td>
+</tr>
+</tbody>
+</table>
+<p>These results demonstrate dramatic improvements in both throughput and SLO adherence, especially under diverse prompt lengths, tidal (burst) request patterns, and heterogeneous infrastructures.</p>
+</section>
+<section id="practical-considerations-and-trade-offs" class="level2">
+<h2 class="anchored" data-anchor-id="practical-considerations-and-trade-offs">7. Practical Considerations and Trade-offs</h2>
+<p>Common operational trade-offs in P/D architectures include:</p>
 <ul>
-<li>torch.compile + piecewise CUDA graphs&nbsp;</li>
-<li>整图编译以单kernel下发，能降低CPU端处理时间但灵活度不够；</li>
-<li>piecewise方式CPU端开销增加但灵活度变高，可结合一些现有优化模块减少自定义算子编写。</li>
-<li>PD分离</li>
+<li><strong>Communication vs.&nbsp;Interference:</strong> While disaggregation eliminates prefill/decode interference, it introduces potentially costly KVCache transfers. Hybrid and partially-disaggregated strategies (EcoServe, semi-PD, TaiChi) attempt to balance these competing demands by using temporal disaggregation or intra-instance resource splits [2504.18154][2504.19867][2508.01989].</li>
+<li><strong>Granularity of Partitioning:</strong> Finer-grained (SM-level, chunked pipelining, micro-request splitting) approaches allow more dynamic adaptation but increase scheduler complexity and may reduce hardware efficiency at very high concurrency.</li>
+<li><strong>Adaptive and Predictive Scheduling:</strong> Early rejection, SLO-aware token budgeting, and dynamic pooling (Arrow, HyperFlexis) are most effective when accurate performance models are available for queueing, memory, and transfer overheads [2505.11916][2508.15919]. Metric-driven autoscaling policies based on empirically validated signals (decode TPS) are necessary for efficient cloud deployment at scale [2508.19559].</li>
+<li><strong>Storage and Weight Duplication:</strong> Disaggregated computation with unified storage (semi-PD) avoids weight replication and storage imbalance, achieving both low overhead and high request capacity [2504.19867].</li>
 </ul>
+<hr>
+<p>P/D Disaggregated Architectures, through phase-aware hardware allocation, fine-grained resource control, predictive and dynamic scheduling, and advanced KVCache transfer and compression techniques, set a robust foundation for scalable, efficient, and SLO-compliant large model inference in modern datacenter deployments. Their continued evolution is characterized by the fusion of algorithmic, systems, and hardware-affinity optimizations, as substantiated by rigorous empirical studies and production-scale deployments.</p>
+<p>Source: https://www.emergentmind.com/articles/prefill-decode-p-d-disaggregated-architectures</p>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
