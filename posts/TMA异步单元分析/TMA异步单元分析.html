@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.26">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>tma异步单元分析 – fywc's Blog</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-587c61ba64f3a5504c4d52d930310e48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-0b37c64f34216b628666a8dac638b53b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">fywc’s Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">fywc</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block"></header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="tma异步单元分析" class="level1">
+<h1>TMA异步单元分析</h1>
+</section>
+<section id="tma产生背景" class="level1">
+<h1>TMA产生背景</h1>
+<p>GPU中，数据储存在Global Memory（一般为HBM，下称GMEM），计算单元（CUDA core/ Tensor core）位于SM中，数据需要搬运到SM内的Shared Memory（下称SMEM）中用于计算，计算后再搬回GMEM中。</p>
+<p>SM中的线程除了负责发起计算外，还要先负责搬运数据。线程需要承担地址计算、越界处理、同步管理等一系列任务。据调查，开发者90%的时间花费在编写数据访问的代码上，10%以上的性能损耗源于内存访问开销<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>。</p>
+<p>为了解决这一问题，英伟达在Hopper架构中引入了 Tensor Memory Accelerator (TMA)<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>，将数据访问的复杂性从软件层（线程）剥离，交由专用硬件（TMA）处理，实现数据搬运与计算解耦。</p>
+</section>
+<section id="tma是什么" class="level1">
+<h1>TMA是什么</h1>
+<p>TMA是一个地址计算单元，用于在GMEM与SMEM之间，或在一个线程块集群（CTA Cluster）内的多个CTA之间搬运张量数据。本文主要以GMEM-&gt;SMEM为例，SMEM到GMEM是对称的。</p>
+<p>如专利<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>中所示，TMA位于SM层级，每个SM专有一个TMA。TMA把数据从GMEM搬到SM内的SMEM，后续Functional Unit，也就是CTA+Cuda core，控制数据从SMEM加载到寄存器，Cuda core进行计算。</p>
+<p><img src="image/5b27d6abfcb67871230c55dc209a2e9e_7IuOjj8Lgm.png" class="img-fluid"></p>
+<p>在A100中，搬运数据需要用Thread来产生访存请求，引入TMA后，数据搬运由TMA自动完成，thread可以用作其它用途。</p>
+<p><img src="image/c5e807886f6a8025c3f65fe167ea3f15_gvuN9JtOua.png" class="img-fluid"></p>
+<p>整体来说，TMA并没有改变数据通路，也没有改变搬运数据的带宽大小，只是搬运数据的控制逻辑从thread切换到了TMA上。</p>
+<p><img src="image/25255a3c41c9b68459716a1e524db81d_DIJn8fj0M7.png" class="img-fluid"></p>
+</section>
+<section id="张量访问" class="level1">
+<h1>张量访问</h1>
+<p>TMA主要用于搬运张量，但也可以搬运没有被定义为张量的连续数据。</p>
+<section id="访问方法" class="level2">
+<h2 class="anchored" data-anchor-id="访问方法">访问方法</h2>
+<p>TMA使用张量描述符（Tensor Descriptor，或Tensor Map）替代显式地址计算，开发者只需定义“搬什么”，而无需关心“怎么搬”，避免与复杂的物理地址接触。描述符是储存在GMEM中的一个数据结构，包含张量的所有属性。如果输入布局发生更改，修改GMEM中的描述符即可，无需重新修改编译整个kernel。</p>
+<p>TMA以Bounding Box为单位搬运数据，一个thread发起一次TMA搬运操作，搬运一个Box。Box是张量中抠出的一个块，维度与张量相同。TMA支持1~5维张量。</p>
+<p>如下图所示，蓝色立方体是原始张量，绿色立方体是一次TMA操作搬运的Box。因为访问Box地址必须16Byte对齐，但张量的边长可能是非对齐的，所以要求张量加上padding，让每个方向上tensor第一个元素都是16B对齐的，透明立方体描述的就是张量做16B对齐padding后。</p>
+<p><img src="image/214b3777b76321dcf1430eccbcc6de27_6WrrAqryhp.png" class="img-fluid"></p>
+<p>因此，在描述符中指定张量的起始地址、数据类型、搬运模式，以及蓝色、绿色、透明立方体的参数，就可以指定TMA如何访问张量。具体有以下参数：</p>
+<ul>
+<li><strong>tensorDataType</strong>: 元素的数据类型。</li>
+<li><strong>tensorRank</strong>: 张量维度数，支持1D~5D。</li>
+<li><strong>globalAddress</strong>: 张量的内存起始地址，需16B对齐。</li>
+<li><strong>globalDim</strong>: 一个数组，存放张量在每个维度的长度（图中的TensorSize）。</li>
+<li><strong>globalStrides</strong>: 一个数组，存放张量在每个维度padding后的长度，即在每个维度上连续两行张量首地址之间的间隔（图中的TensorStride），需要16B对齐。</li>
+<li><strong>boxDim</strong>: 一个数组，存放box在每个维度的长度（图中的AccessBoxSize），需要16B对齐。</li>
+<li><strong>elementSritde</strong>: 一个数组，存放box在每个维度的间隔，即在每个维度上连续两个box首地址之间的间隔（图中的TraversalStride），box之间是可以重叠的。需要16B对齐。</li>
+<li><strong>interleave、swizzle</strong>: 用于改变数据排列的顺序，下文介绍。</li>
+<li><strong>L2Promotion</strong>: 用于L2 cache取数据优化。</li>
+<li><strong>oobFill</strong>: 当访问的box超过张量的范围时，会填充为0或NaN。如下图黄色区域。</li>
+</ul>
+<p><img src="image/8c773f5355a143eab46ab1333196f712_r1YzVVpyge.png" class="img-fluid"></p>
+<p>参数详见<a href="https://docs.nvidia.com/cuda/cuda-driver-api/group__CUDA__TENSOR__MEMORY.html" title="CUDA Driver: Tensor Map Object Management">CUDA Driver: Tensor Map Object Management</a></p>
+<p>一条TMA指令搬运一个box，为TMA提供描述符，以及要访问的box在张量内的坐标，给出目标地址，TMA就会开始搬运这个box。 坐标的确定方法，以二维举例：</p>
+<p><span class="math display">\[
+box首地址=张量首地址+coord[x]*TraversalStride[x]+coord[y]*TraversalStride[y]
+\]</span></p>
+<p>GMEM-&gt;SMEM时，坐标可以为负数，但SMEM-&gt;GMEM时，坐标必须为正。</p>
+</section>
+<section id="搬运模式" class="level2">
+<h2 class="anchored" data-anchor-id="搬运模式">搬运模式</h2>
+<p>张量搬运的详细模式详见<a href="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tensor-access-modes" title="CUDA: Tensor Access Modes">CUDA: Tensor Access Modes</a></p>
+<p>TMA支持两种张量搬运模式，Tile mode和im2col mode。</p>
+<section id="tile-mode" class="level3">
+<h3 class="anchored" data-anchor-id="tile-mode">Tile Mode</h3>
+<p>在Tile Mode下，box搬运进SMEM后保持与GMEM中相同的排布。 </p>
+<p>对于2D矩阵，TMA还支持两种特殊的模式：</p>
+<ul>
+<li><strong>tile.scatter4 mode</strong>，将张量中连续的四行，搬运后变为分散的四行。</li>
+<li><strong>tile.gather4 mode</strong>，张量中分散的四行，搬运后变为连续的四行。 </li>
+</ul>
+<p>下图举例为gather4 mode，提供起始坐标(1, 2), (1, 5), (1, 0) ,(1, 9)，以及搬运长度4，TMA将按坐标顺序，把这四行搬运进SMEM中，并拼到连续四行。</p>
+<p><img src="image/601a99d320d6ea39c12fb3ba339ffb42_adxYzywdGD.png" class="img-fluid"></p>
+</section>
+<section id="im2col-mode" class="level3">
+<h3 class="anchored" data-anchor-id="im2col-mode">im2col Mode</h3>
+<p>张量将被视为一组图像做im2col的转换后放入SMEM，用于卷积运算。此时不用boxSize参数，改为Bounding-Box Lower-Corner，Bounding-Box Upper-Corner，Pixels-per-Column，Channels-per-Pixel参数确定im2col的访问顺序。支持3D、4D、5D<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>。</p>
+</section>
+</section>
+<section id="interleave-layout" class="level2">
+<h2 class="anchored" data-anchor-id="interleave-layout">Interleave layout</h2>
+<p>Interleave layout支持3D、4D、5D，有三种模式：</p>
+<ul>
+<li><strong>No interleave (NDHWC)</strong></li>
+<li><strong>8 byte interleave (NC/8DHWC8)</strong>&nbsp;: C8 utilizes 16 bytes in memory assuming 2B per channel.</li>
+<li><strong>16 byte interleave (NC/16HWC16)</strong>&nbsp;: C16 utilizes 32 bytes in memory assuming 4B per channel.</li>
+</ul>
+<p>以8 byte interleave举例：NDHWC格式的张量，本来是以N，D，H，W、C从外到内的顺序遍历存储。此模式下，在最内层Channel维度被切片成C/8个长度为8的组，连续的8个channel(C8)被存储在一起。外层按N，C/8，D，H，W的顺序循环遍历。当C不能被8整除时，最后一组C会被0填充。 这种Interleave layout应该是专为Tensor core设计，每个切片正好匹配一个Tensot Core的大小，做一次矩阵乘法。 TMA不做layout的转换，只是以这种顺序访问GMEM，要求GMEM中存放的切片后的格式。</p>
+</section>
+<section id="swizzling-mode" class="level2">
+<h2 class="anchored" data-anchor-id="swizzling-mode">swizzling mode</h2>
+<p>SMEM由32个bank组成，在一次访问中，可以同时读/写多个bank，但一个bank只允许读一个和写一个元素，如果同时读/写的两个元素在同一个bank中，则称为bank conflict，只能等一个访问结束后才允许另一个访问。如下图，一列为一个bank，一共32个bank。 </p>
+<p>例如，如果做矩阵乘法，是用矩阵A的行乘以矩阵B的列，假设有B是一个16*32的矩阵，以行优先搬入SMEM中。搬入时（如下图绿色框），是分别写入32个bank，没有发生bank conflict，可以同时写入。但做乘法以列读出时（高亮色0和1），一列数据在同一个bank中，无法同时读出，只能按顺序一个一个读出花费很多时间。</p>
+<p><img src="image/1415b4f790c7c2d0a877d1e4932dc44a_RqyJiE6t8r.png" class="img-fluid"></p>
+<p>Swizzling操作就是为了避免这种情况，如下图，搬运进SMEM时（横向绿色框），以交错的顺序写入32个bank中，没有bank conflict。读出时，因为做了交错，原本一列中的数据被分散到了不同的bank（高亮色0和1），因此可以一次读出B矩阵的一列，节约了访存时间。</p>
+<p><img src="image/d536a64a61eb8493a29865311b3b05ce_dLkBoDqYAL.png" class="img-fluid"></p>
+<p>TMA支持以下几种Swizzling Mode，简单来说就是不同的交错方法<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>。</p>
+<p><img src="image/eab64d4635180d078c78d0e64d1c344d_nmZVS72yR7.png" class="img-fluid"></p>
+</section>
+<section id="支持multicast" class="level2">
+<h2 class="anchored" data-anchor-id="支持multicast">支持multicast</h2>
+<p>在数据并行训练中，所有SM可能需要访问相同的权重进行计算。multicast支持一个SM发起的TMA访问，数据广播到多个SM的SMEM上。编程时通过CTA ID mask定位需要数据的SM。</p>
+</section>
+<section id="支持规约" class="level2">
+<h2 class="anchored" data-anchor-id="支持规约">支持规约</h2>
+<p>TMA支持规约操作（Reduction）：AND, ADD, XOR, MIN, MAX, DEC, OR, INC等。就是把搬运的数据，和目的地的数据做运算，结果存放进目的地。</p>
+</section>
+</section>
+<section id="tma的同步机制" class="level1">
+<h1>TMA的同步机制</h1>
+<p>因为TMA是异步于SM的，因此当数据准备完成后，需要通知SM。英伟达把数据同步抽象为生产者（producer）和消费者（consumer）。</p>
+<p><img src="image/733fc47cfd4398cb241c3f89fde60a1e_e0Q_WAnCi4.png" class="img-fluid"></p>
+<p>当生产者完成数据准备后，会发出arrive()的标识。消费者会提前发出wait()，等待消费者的arrive()。消费者在等待生产者的arrive时，可以先运行不依赖这些数据的其它任务，这就带来了更高的并发性。如上图中，Process依赖Copy into SMEM的数据，Copy to Global依赖Process的数据，对同一块数据，后一个操作必须等待前面的操作完成。但对于不同的数据，如搬运蓝色数据和计算绿色数据就可以同时运行，节约等待时间。 </p>
+<p>以上同步机制在A100中也有用到，不过A100中是thread发起的异步搬运，而H100中变为TMA。 </p>
+<p>在H100中，还提供了新机制：transaction barrier。在多次搬运的场景下，TMA每搬运一个box， transaction counter会+1，当counter达到预设的值后，消费者自动释放wait，无需为每次TMA搬运做同步。counter的来源可以是多个不同的copy操作。</p>
+</section>
+<section id="tma架构" class="level1">
+<h1>TMA架构</h1>
+<section id="拓扑位置" class="level2">
+<h2 class="anchored" data-anchor-id="拓扑位置">拓扑位置</h2>
+<p>在GPU中TMA的位置如下图。 </p>
+<p>在一个GPC中有多个SM，一个SM对应一个TMA，TMA接到到MMU上，MMU做虚拟地址到物理地址的转换、内存保护、访问仲裁等。 </p>
+<p>多个GPC中MMU接到XBar总线上，访问Memory Partition Unit，这个单元用来访问不同的片外HBM。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ab528487d40c9e6edfff1f865184975f_l7mZSy5bDn.png" title="图中的DPC 1120(Data Processing Clusters)，把几个SM组成一组共同管理。指的是产品中的TPC，H100和B200中，一个TPC管理两个SM。在GPC中，Pipeline Manager把任务分给不同的DPC，在DPC内部，MPC负责把任务切分给SM或Primitive Engine（几何计算）。 图中的DPC 1120(Data Processing Clusters)，把几个SM组成一组共同管理。指的是产品中的TPC，H100和B200中，一个TPC管理两个SM。在GPC中，Pipeline Manager把任务分给不同的DPC，在DPC内部，MPC负责把任务切分给SM或Primitive Engine（几何计算）。" class="img-fluid figure-img"></p>
+<figcaption>图中的DPC 1120(Data Processing Clusters)，把几个SM组成一组共同管理。指的是产品中的TPC，H100和B200中，一个TPC管理两个SM。在GPC中，Pipeline Manager把任务分给不同的DPC，在DPC内部，MPC负责把任务切分给SM或Primitive Engine（几何计算）。 图中的DPC 1120(Data Processing Clusters)，把几个SM组成一组共同管理。指的是产品中的TPC，H100和B200中，一个TPC管理两个SM。在GPC中，Pipeline Manager把任务分给不同的DPC，在DPC内部，MPC负责把任务切分给SM或Primitive Engine（几何计算）。</figcaption>
+</figure>
+</div>
+<p><img src="image/254e145293afb5221805bc91edb842cb_go9OSNMbOh.png" class="img-fluid"></p>
+</section>
+<section id="工作流程" class="level2">
+<h2 class="anchored" data-anchor-id="工作流程">工作流程</h2>
+<p>TMA一个典型的工作流程如下：</p>
+<ul>
+<li><p>SM发送单次请求（204），提供2.1节的信息和指令启动TMA，此后TMA开始异步执行。</p></li>
+<li><p>地址计算由TMA完成，如果数据量过大，TMA分解为多个子请求，符合L2单次访问的大小，逐个发送到L2（206）。</p></li>
+<li><p>数据返回TMA（208），TMA把数据写入SMEM (212)。</p></li>
+<li><p>每个子块写入SMEM后，计数器递增，SM监控计数器（214），到达预期值后SM就知道数据已就绪。 </p>
+<p>相比之前的LDGSTS方法，SM上的每个线程不需要自己计算每个子块的地址，只需一个线程发出单次的请求，由TMA负责后续操作。地址计算由TMA完成，SM不再需要主动管理每个子块的同步，仅需监控计数器最终状态。在发出请求后SM可异步的执行其他任务。</p></li>
+</ul>
+<p><img src="image/271af8452143e1425f3787195c8fe88e_DC9R06Vfzd.jpg" class="img-fluid"></p>
+</section>
+<section id="tma内部流水线" class="level2">
+<h2 class="anchored" data-anchor-id="tma内部流水线">TMA内部流水线</h2>
+<ul>
+<li>MIOC(Memory I/O Controller, 604)接收SM的请求。</li>
+<li>请求放入Request Queue（606）中，可以根据请求类型调整优先级。</li>
+<li>对于张量请求，需要一个指向GMEM中描述符的地址，从GMEM读取描述符。</li>
+<li>为了避免多次访问GMEM中相同的描述符，TMA中放置了Descriptor Cache暂存描述符。</li>
+<li>Setup Block(610)合并Tensor 和 请求指令的信息，进行错误检查。</li>
+<li>Request Generator遍历box中每个元素，计算其在GMEM中的物理地址，和在SMEM中的地址，发出L2 request。swizzle地址计算也在此生成。</li>
+<li>request通过GNIC（general network interface controller，614）发送到L2。</li>
+<li>Req Completion Tracking block(618)负责跟踪数据请求是否完成。</li>
+<li>非张量的连续数据访问可跳过Descriptor Cache和Setup部分。</li>
+</ul>
+<p><img src="image/3ed45153cdb60e06589e52af7b0e8584_gOqaap3WxH.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="tma编程方式" class="level1">
+<h1>TMA编程方式</h1>
+<section id="cutlass-c" class="level2">
+<h2 class="anchored" data-anchor-id="cutlass-c">CUTLASS C++</h2>
+<blockquote class="blockquote">
+<p>📌cutlass TMA 编程可参考：<a href="https://research.colfax-intl.com/tutorial-hopper-tma/" title="tutorial-hopper-tma">tutorial-hopper-tma</a></p>
+</blockquote>
+<p>构建于CuTe库之上的CUTLASS 3.0，为TMA编程提供了一套C++模板抽象API 。TMA编程可以分为以下环节：</p>
+<ul>
+<li>主机端配置：使用make_tma_copy函数，创建一个包含了2.1节介绍的Tma描述符。</li>
+<li>传递至GPU：描述符会被加载到GMEM/constant内存中 。</li>
+<li>设备端执行：单线程（例如threadIdx.x == 0）发起TMA的async copy命令。</li>
+</ul>
+<p>cutlass为TMA提供如下接口：</p>
+<ul>
+<li><p><strong>TMA_LOAD系列</strong>，从GMEM加载数据到SMEM：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> SM90_TMA_LOAD_1D <span class="op">/</span> <span class="dv">2</span><span class="er">D</span> <span class="op">/</span> <span class="dv">3</span><span class="er">D</span> <span class="op">/</span> <span class="dv">4</span><span class="er">D</span> <span class="op">/</span> <span class="dv">5</span><span class="er">D</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">struct</span> <span class="dt">void</span> copy<span class="op">(</span><span class="dt">void</span> <span class="at">const</span><span class="op">*</span> desc_ptr<span class="op">,</span> <span class="dt">uint64_t</span><span class="op">*</span> mbar_ptr<span class="op">,</span> <span class="dt">void</span><span class="op">*</span> smem_ptr<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">int32_t</span> <span class="at">const</span><span class="op">&amp;</span> crd<span class="op">...);</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p>TMA_LOAD_IM2COL系列，卷积专用的im2col模式</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> SM90_TMA_LOAD_IM2COL_3D <span class="op">/</span> <span class="dv">4</span><span class="er">D</span> <span class="op">/</span> <span class="dv">5</span><span class="er">D</span> <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> <span class="dt">void</span> copy<span class="op">(</span><span class="dt">void</span> <span class="at">const</span><span class="op">*</span> desc_ptr<span class="op">,</span> <span class="dt">uint64_t</span><span class="op">*</span> mbar_ptr<span class="op">,</span> <span class="dt">void</span><span class="op">*</span> smem_ptr<span class="op">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">int32_t</span> <span class="at">const</span><span class="op">&amp;</span> coord_c<span class="op">,</span> <span class="dt">int32_t</span> <span class="at">const</span><span class="op">&amp;</span> coord_w<span class="op">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">int32_t</span> <span class="at">const</span><span class="op">&amp;</span> coord_n<span class="op">,</span> <span class="dt">uint16_t</span> <span class="at">const</span><span class="op">&amp;</span> offset_w<span class="op">);</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p>TMA_LOAD_MULTICAST系列，集群内多SM同时接收同一数据：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> SM90_TMA_LOAD_MULTICAST_1D <span class="op">/</span> <span class="dv">2</span><span class="er">D</span> <span class="op">/</span> <span class="dv">3</span><span class="er">D</span> <span class="op">/</span> <span class="dv">4</span><span class="er">D</span> <span class="op">/</span> <span class="dv">5</span><span class="er">D</span> <span class="op">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> <span class="dt">void</span> copy<span class="op">(</span><span class="dt">void</span> <span class="at">const</span><span class="op">*</span> desc_ptr<span class="op">,</span> <span class="dt">uint64_t</span><span class="op">*</span> mbar_ptr<span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">uint16_t</span> multicast_mask<span class="op">,</span> <span class="dt">void</span><span class="op">*</span> smem_ptr<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">int32_t</span> <span class="at">const</span><span class="op">&amp;</span> crd<span class="op">...);</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p>TMA_STORE系列，从SMEM store到GMEM：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> SM90_TMA_STORE_1D <span class="op">/</span> <span class="dv">2</span><span class="er">D</span> <span class="op">/</span> <span class="dv">3</span><span class="er">D</span> <span class="op">/</span> <span class="dv">4</span><span class="er">D</span> <span class="op">/</span> <span class="dv">5</span><span class="er">D</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> <span class="dt">void</span> copy<span class="op">(</span><span class="dt">void</span> <span class="at">const</span><span class="op">*</span> desc_ptr<span class="op">,</span> <span class="dt">void</span> <span class="at">const</span><span class="op">*</span> smem_ptr<span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">int32_t</span> <span class="at">const</span><span class="op">&amp;</span> crd<span class="op">...);</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+<li><p><strong>TMA_REDUCE_ADD系列</strong>，与目标地址做规约add后存入：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> SM90_TMA_REDUCE_ADD_1D <span class="op">/</span> <span class="dv">2</span><span class="er">D</span> <span class="op">/</span> <span class="dv">3</span><span class="er">D</span> <span class="op">/</span> <span class="dv">4</span><span class="er">D</span> <span class="op">/</span> <span class="dv">5</span><span class="er">D</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">static</span> <span class="dt">void</span> copy<span class="op">(</span><span class="dt">void</span> <span class="at">const</span><span class="op">*</span> desc_ptr<span class="op">,</span> <span class="dt">void</span> <span class="at">const</span><span class="op">*</span> smem_ptr<span class="op">,</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">int32_t</span> <span class="at">const</span><span class="op">&amp;</span> crd<span class="op">...);</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
+</ul>
+<p>CUTLASS使用函数重载提供统一的接口, 根据tensor的维度确定调用哪条指令执行TMA，简化用户编程。</p>
+<p>每种LOAD操作都提供对应的PREFETCH版本，更多详细代码见：<a href="https://github.com/NVIDIA/cutlass/blob/main/include/cute/arch/copy_sm90_tma.hpp" title="copy_sm90_tma.hpp">copy_sm90_tma.hpp</a></p>
+</section>
+<section id="ptx" class="level2">
+<h2 class="anchored" data-anchor-id="ptx">PTX</h2>
+<p>PTX是英伟达开放给用户的虚拟汇编语言，可以理解为是Cuda代码转换为真正的GPU硬件指令的中间层。CUTLASS中对TMA的操作其实就是调用相应的PTX指令。</p>
+<p>与TMA相关的PTX指令有以下几类：</p>
+<ol type="1">
+<li><p><strong>Bulk Copy / Reduce / Prefetch</strong>（非张量的搬运） </p>
+<p><code>cp.async.bulk</code> </p>
+<p><code>cp.reduce.async.bulk</code> </p>
+<p><code>cp.async.bulk.prefetch</code></p></li>
+<li><p><strong>Tensor Copy / Reduce / Prefetch</strong>（多维张量搬运） </p>
+<p><code>cp.async.bulk.tensor</code> </p>
+<p><code>cp.reduce.async.bulk.tensor</code> </p>
+<p><code>cp.async.bulk.prefetch.tensor</code></p></li>
+<li><p><strong>同步管理指令</strong> </p>
+<p><code>cp.async.bulk.commit_group</code> </p>
+<p><code>cp.async.bulk.wait_group</code></p></li>
+<li><p><strong>修改已存在的Tensor map (描述符)字段</strong> </p>
+<p><code>tensormap.replace</code></p></li>
+</ol>
+<p>关于PTX指令的具体介绍见：<a href="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-asynchronous-copy" title="CUDA: asynchronous-copy">CUDA: asynchronous-copy</a></p>
+</section>
+</section>
+<section id="应用" class="level1">
+<h1>应用</h1>
+<p><strong>DeepSeek</strong>开源的<strong>DeepGEMM</strong>是一个高效的矩阵乘法库，利用TMA加载 LHS矩阵、缩放因子、RHS矩阵等。也使用了多播在多CTA间共享权重，减少冗余加载<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>。</p>
+<p><strong>Flash Attention 3</strong>是一种基于Hopper GPU高度优化的Transformer架构，其中也利用TMA异步的把QKV矩阵加载到SMEM，并利用swizzle高效的完成数据转置用于tensor core<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>。</p>
+<p><strong>GTC 2024上的Topic</strong>：<a href="https://www.nvidia.com/en-us/on-demand/session/gtc24-s62192/" title="Advanced Performance Optimization in CUDA">Advanced Performance Optimization in CUDA</a></p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>NVIDIA: Techniques for efficiently transferring data to a processor <a href="https://patentimages.storage.googleapis.com/2e/65/c9/73308c2c12e3d5/US11080051.pdf" title="https://patentimages.storage.googleapis.com/2e/65/c9/73308c2c12e3d5/US11080051.pdf">https://patentimages.storage.googleapis.com/2e/65/c9/73308c2c12e3d5/US11080051.pdf</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Hopper Architecture Whitepaper <a href="https://resources.nvidia.com/en-us-hopper-architecture/" title="https://resources.nvidia.com/en-us-hopper-architecture/">https://resources.nvidia.com/en-us-hopper-architecture/</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>NVIDIA: Method and Apparatus for Efficient Access to Multidimensional Data Structures and/or Other Large Data Blocks <a href="https://patentimages.storage.googleapis.com/23/89/13/0914c8f599bd9e/US20230289304A1.pdf" title="https://patentimages.storage.googleapis.com/23/89/13/0914c8f599bd9e/US20230289304A1.pdf">https://patentimages.storage.googleapis.com/23/89/13/0914c8f599bd9e/US20230289304A1.pdf</a><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>im2col mode detail <a href="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tensor-im2col-mode" title="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tensor-im2col-mode">https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tensor-im2col-mode</a><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Swizzling Modes Detail <a href="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tensor-swizzling-modes" title="https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tensor-swizzling-modes">https://docs.nvidia.com/cuda/parallel-thread-execution/index.html#tensor-swizzling-modes</a><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>deepseek: DeepGEMM <a href="https://github.com/deepseek-ai/DeepGEMM" title="https://github.com/deepseek-ai/DeepGEMM">https://github.com/deepseek-ai/DeepGEMM</a><a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Flash Attention 3 Paper <a href="https://arxiv.org/html/2407.08608v1" title="https://arxiv.org/html/2407.08608v1">https://arxiv.org/html/2407.08608v1</a><a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/fywc\.github\.io\/pages\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

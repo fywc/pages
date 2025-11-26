@@ -127,9 +127,9 @@ ul.task-list li input[type="checkbox"] {
 <p>1999 年，英伟达发明了 GPU（graphics processing unit），英伟达 GPU 从 Fermi 到 Blackwell 共 9 代架构，时间跨度从 2010 年至 2024 年，具体包括费米（Feimi）、开普勒（Kepler）、麦克斯韦（Maxwell）、帕斯卡（Pashcal）、伏特（Volt）、图灵（Turing）、安培（Ampere）和赫柏（Hopper）和布莱克韦尔（Blackwell）架构。经过 15 年的发展，CUDA 已成为英伟达的技术“护城河”，Tensor Core5.0，NVLink5.0，NVswitch4.0，Transformer Engine2.0 等技术迭代更新，正如英伟达公司官方宣传语所言：人工智能计算领域的领导者，推动了 AI、HPC、游戏、创意设计、自动驾驶汽车和机器人开发领域的进步。 ​</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 7%">
-<col style="width: 3%">
-<col style="width: 50%">
+<col style="width: 6%">
+<col style="width: 2%">
+<col style="width: 51%">
 <col style="width: 39%">
 </colgroup>
 <thead>
@@ -209,8 +209,107 @@ ul.task-list li input[type="checkbox"] {
 <li><strong>解压缩引擎</strong>：拥有解压缩引擎以及通过 900GB/s 双向带宽的高速链路访问英伟达 Grace CPU 中大量内存的能力，可加速整个数据库查询工作流，从而在数据分析和数据科学方面实现更高性能。</li>
 </ul>
 <p>英伟达 GB200 Grace Blackwell 超级芯片通过 900GB/s 超低功耗的片间互联，将两个英伟达 B200 Tensor Core GPU 与英伟达 Grace CPU 相连。在 90 天内训练一个 1.8 万亿参数的 MoE 架构 GPT 模型，需要 8000 个 Hopper 架构 GPU，15 兆瓦功率，Blackwell 架构只需要 2000 个 GPU，以及 ¼ 的能源消耗。</p>
+</section>
+<section id="tensorcore" class="level1">
+<h1>TensorCore</h1>
+<section id="volta" class="level2">
+<h2 class="anchored" data-anchor-id="volta">Volta</h2>
+<p>2017年，NVIDIA推出了划时代的&nbsp;Volta&nbsp;架构，并首次在&nbsp;Tesla V100 GPU&nbsp;中引入了名为&nbsp;Tensor Core（张量核心）的专用计算单元。</p>
+<section id="volta之前的mma" class="level3">
+<h3 class="anchored" data-anchor-id="volta之前的mma">Volta之前的MMA</h3>
+<p>对于传统GPU做矩阵乘法，“指令开销”远大于“计算开销”；</p>
+<p>在Volta之前，GPU虽然广泛用于深度学习训练，但其核心计算仍依赖通用的CUDA核心执行浮点运算。以半精度（FP16）的融合乘加（HFMA）操作为例：</p>
+<p>一次简单的浮点乘加仅消耗约1.5皮焦（pJ）的能量；</p>
+<p>而驱动这条指令所需的控制逻辑开销——包括指令发射、调度、寄存器访问等——却高达&nbsp;30皮焦（pJ）。</p>
+<p>这意味着：95%&nbsp;的能耗花在了“如何算”，而不是“算本身”。这种“指令功耗远高于计算功耗”的失衡，严重制约了AI训练的能效比和可扩展性。</p>
+</section>
+<section id="volta解决指令开销hmma-tensorecore" class="level3">
+<h3 class="anchored" data-anchor-id="volta解决指令开销hmma-tensorecore">volta解决指令开销：HMMA + TensoreCore</h3>
+<section id="引入hmma指令" class="level4">
+<h4 class="anchored" data-anchor-id="引入hmma指令">引入HMMA指令</h4>
+<p>Volta新增了一条全新的指令：HMMA（Half Precision Matrix Multiply-Accumulate）。</p>
+<p>它不再处理单个数字，而是直接操作小规模矩阵块（如8x8），将数十次独立的乘加操作打包成一条指令执行。这样极大减少了指令调度次数。</p>
+</section>
+<section id="tensorcore硬件落地" class="level4">
+<h4 class="anchored" data-anchor-id="tensorcore硬件落地">TensorCore硬件落地</h4>
+<p>每个SM（流式多处理器）集成 8 个 Tensor Core；每4个线程组成一个“quadpair”，8个线程协同驱动一个Tensor Core；单次执行可完成 8×8×4 的矩阵乘法（A[8×4] × B[4×8] = C[8×8]），输出FP32精度结果。支持 FP16 输入 + FP32 累加，兼顾速度与数值稳定性。</p>
+</section>
+</section>
+</section>
+<section id="turing" class="level2">
+<h2 class="anchored" data-anchor-id="turing">Turing</h2>
+<p>Volta的缺陷在于，对于功耗、延迟、成本等方面敏感的部署场景，使用FP16仍然笨重，且需要完整权重计算，无法利用神经网络的稀疏性。</p>
+<section id="turing解决方案整数精度-稀疏计算" class="level3">
+<h3 class="anchored" data-anchor-id="turing解决方案整数精度-稀疏计算">Turing解决方案：整数精度 + 稀疏计算</h3>
+<section id="int8int4支持" class="level4">
+<h4 class="anchored" data-anchor-id="int8int4支持">INT8/INT4支持</h4>
+<p>使用8位或4位整数表示权重和激活值，显著降低存储和计算开销。</p>
+</section>
+<section id="结构化稀疏化" class="level4">
+<h4 class="anchored" data-anchor-id="结构化稀疏化">结构化稀疏化</h4>
+<p>硬件级支持跳过零值计算，编译过程自动将网络压缩为稀疏模式。</p>
+</section>
+</section>
+</section>
+<section id="ampere" class="level2">
+<h2 class="anchored" data-anchor-id="ampere">Ampere</h2>
+<p>前两代遗留的性能瓶颈在于：寄存器压力过大，内存带宽浪费严重。</p>
+<p>数据从全局内存加载到共享内存时，必须先经过寄存器文件中转，而TensorCore执行MMA指令本身也需要大量寄存器来存储矩阵分块。由于寄存器资源有限，这会导致严重的资源竞争，并且还进行了两次的数据复制，浪费了宝贵的内存带宽。</p>
+<section id="ampere创新异步数据拷贝与warp级mma同步" class="level3">
+<h3 class="anchored" data-anchor-id="ampere创新异步数据拷贝与warp级mma同步">Ampere创新：异步数据拷贝与warp级MMA同步</h3>
+<section id="异步数据拷贝" class="level4">
+<h4 class="anchored" data-anchor-id="异步数据拷贝">异步数据拷贝</h4>
+<p><img src="image/image_lNeU_pubJY.png" class="img-fluid"></p>
+<p>Ampere&nbsp;新方式中，数据可以直接从全局内存搬移到共享内存，完全绕开寄存器文件</p>
+</section>
+<section id="warp级mma" class="level4">
+<h4 class="anchored" data-anchor-id="warp级mma">Warp级MMA</h4>
+<p>对Tensor Core的线程调度模型，Ampere引入了&nbsp;Warp宽度的MMA指令。</p>
+<p>Volta&nbsp;的复杂协作原理：需要&nbsp;8个线程（4个“quadpair”）协同执行一次8x8x4矩阵运算，线程分工精细、编程模型复杂的情况下，容易出错。</p>
+<p>Ampere 做了下面的简化设计：每次MMA操作由一个完整Warp（32个线程）协同完成，每个Tensor Core每周期执行&nbsp;512 FLOP&nbsp;的密集计算，每个SM（流式多处理器）集成&nbsp;4个Tensor Core，那么每周期可达&nbsp;2048 FLOP&nbsp;的FP16算力，这是Volta SM性能的整整两倍。下图是 16x8x16 形状的混合精度浮点的线程和数据布局：</p>
+<p><img src="image/微信图片_2025-11-24_210919_938_asWsndzlEJ.png" class="img-fluid"></p>
+</section>
+</section>
+</section>
+<section id="hopper" class="level2">
+<h2 class="anchored" data-anchor-id="hopper">Hopper</h2>
+<p>Hopper通过分布式共享内存架构、异步批量内存传输和混合精度动态调度，系统性地解决了AI大模型训练中的跨设备协同、显存带宽限制及精度-效率权衡三大难题。</p>
+<section id="并行计算层级扩展" class="level3">
+<h3 class="anchored" data-anchor-id="并行计算层级扩展">并行计算层级扩展</h3>
+<p>Hopper架构中，线程块集群（CGA）是新增的中间层次，将多个流式多处理器（SM）按物理位置分组到同一图形处理集群（GPC）内。每个集群内的CTA（线程块）被固定分配到对应的SM，并共享一个低延迟的分布式共享内存（DSMEM），允许线程直接访问其他SM的共享内存（无需经过全局内存或L2缓存）。这种设计通过硬件级协同调度，让多个SM上的线程能高效协作、共享数据，既减少了跨SM的数据搬运开销，又提升了计算局部性——就像把原本分散在不同房间的工人集中到一个车间，既能快速传递工具，又能统一指挥作业。如下图所示：</p>
+<p><img src="image/image_YisZKuQLRn.png" class="img-fluid"></p>
+</section>
+<section id="异步内存拷贝" class="level3">
+<h3 class="anchored" data-anchor-id="异步内存拷贝">异步内存拷贝</h3>
+<p>新增张量内存加速器（TMA），以块坐标寻址替代传统地址直接寻址，支持1D-5D张量布局的异步批量传输。TMA通过以下方式缓解内存墙问题：</p>
+<p>异步执行，即数据复制由TMA独立完成，释放线程算力执行计算任务，避免CPU/GPU空等；</p>
+<p>多播模式：同一数据可同时传输至多个目标地址，减少L2缓存和HBM的重复读取流量；</p>
+<p>压缩传输：通过块级管理降低冗余寻址开销，提升显存带宽利用率（H200显存带宽达4.8TB/s）。</p>
+<p><img src="image/image_ZKbZ3cnugA.png" class="img-fluid"></p>
+</section>
+<section id="精度与效率平衡fp8与warpgroup级mma" class="level3">
+<h3 class="anchored" data-anchor-id="精度与效率平衡fp8与warpgroup级mma">精度与效率平衡：FP8与warpgroup级MMA</h3>
+<p>四代Tensor Core引入FP8（E4M3/E5M2）低精度格式，结合FP32/FP16累加路径，在保持模型精度的前提下，将存储需求减半、吞吐量翻倍。同时支持warpgroup级异步MMA（wgmma）：4个warp组成warpgroup，可执行更大规模矩阵运算（如m64n256k16），提升算力密度。又可以支持动态精度切换（Transformer引擎）：根据网络层需求自动在FP8、FP16等格式间转换，兼顾训练速度与推理精度（如LLM推理速度较H100提升30倍）。</p>
+<p><img src="image/image_cis5r5CObV.png" class="img-fluid"></p>
+</section>
+</section>
+<section id="blackwell" class="level2">
+<h2 class="anchored" data-anchor-id="blackwell">BlackWell</h2>
+<section id="寄存器压力终结" class="level3">
+<h3 class="anchored" data-anchor-id="寄存器压力终结">寄存器压力终结</h3>
+<p>引入256KB SM级张量内存（TMEM），以warpgroup为单位访问，每个warp仅操作特定存储通道，硬件端口需求减少30%。操作数直接从共享内存/TMEM读取，彻底摒弃寄存器存储矩阵。</p>
+</section>
+<section id="cta对机制" class="level3">
+<h3 class="anchored" data-anchor-id="cta对机制">CTA对机制</h3>
+<p>两个CTA共享相同操作数，内存带宽需求降低50%（如LLM推理中激活层共享）；MMA.2SM模式：跨两个SM协作执行MMA，M维度翻倍，突破单SM算力限制。</p>
+</section>
+<section id="精度-效率新平衡" class="level3">
+<h3 class="anchored" data-anchor-id="精度-效率新平衡">精度-效率新平衡</h3>
+<p>NVFP4：两级量化（块内+块间）精度优于MXFP4，存储需求减半。</p>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
