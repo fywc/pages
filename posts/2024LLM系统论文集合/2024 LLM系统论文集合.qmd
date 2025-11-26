@@ -1,0 +1,179 @@
+# 2024 LLM系统论文集合
+
+### **Pre-Training**
+
+- Megatron-LM: Training Multi-Billion Parameter Language Models Using Model Parallelism
+- Efficient Large-Scale Language Model Training on GPU Clusters Using Megatron-LM
+- Reducing Activation Recomputation in Large Transformer Models
+- Optimized Network Architectures for Large Language Model Training with Billions of Parameters | MIT
+- Carbon Emissions and Large Neural Network Training | Google, UCB
+- Oobleck: Resilient Distributed Training of Large Models Using Pipeline Templates | SOSP 23
+- GEMINI: Fast Failure Recovery in Distributed Training with In-Memory Checkpoints
+- Perseus: Removing Energy Bloat from Large Model Training
+- MegaScale: Scaling Large Language Model Training to More Than 10,000 GPUs | ByteDance
+- DISTMM: Accelerating distributed multimodal model training | NSDI' 24
+- A Codesign of Scheduling and Parallelization for Large Model Training in Heterogeneous Clusters
+- Pipeline Parallelism with Controllable Memory | Sea AI Lab
+
+### Serving
+
+- Orca: A Distributed Serving System for Transformer-Based Generative Models | OSDI 22
+- Response Length Perception and Sequence Scheduling: An LLM-Empowered LLM Inference Pipeline | NUS
+- Efficiently Scaling Transformer Inference | MLSys' 23
+- Flover: A Temporal Fusion Framework for Efficient Autoregressive Model Parallel Inference
+- FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness
+- DeepSpeed Inference : Enabling Efficient Inference of Transformer Models at Unprecedented Scale.
+- TurboTransformers: An Efficient GPU Serving System For Transformer Models
+- MPCFormer : fast, performant, and private transformer inference with MPC | ICLR'23
+- POLCA: Power Oversubscription in LLM Cloud Providers | Microsoft
+- SARATHI: Efficient LLM Inference by Piggybacking Decodes with Chunked Prefills | Microsoft
+- FlexGen: High-throughput Generative Inference of Large Language Models with a Single GPU | ICML' 23
+- AttMemo: Accelerating Self-Attention with Memoization on Big Memory Systems
+- vLLM: Easy, Fast, and Cheap LLM Serving with PagedAttention | SOSP' 23
+- Tabi: An Efficient Multi-Level Inference System for Large Language Models | EuroSys' 23
+- Flash-LLM: Enabling Cost-Effective and Highly-Efficient Large Generative Model Inference with Unstructured Sparsity | VLDB' 24
+- AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation | Microsoft
+- FlashDecoding++: Faster Large Language Model Inference on GPUs | Tsinghua
+- DeepSpeed-MII: Model Implementations for Inference (MII) ｜ Microsoft
+- Punica: Multi-Tenant LoRA Serving
+- S-LoRA: Serving Thousands of Concurrent LoRA Adapters
+- STI: Turbocharge NLP Inference at the Edge via Elastic Pipelining | ASPLOS 23
+- SpotServe: Serving Generative Large Language Models on Preemptible Instances | CMU
+- LLM in a flash: Efficient Large Language Model Inference with Limited Memory | Apple
+- SuperServe: Fine-Grained Inference Serving for Unpredictable Workloads
+- Fairness in Serving Large Language Models | OSDI' 24
+- Infinite-LLM: Efficient LLM Service for Long Context with DistAttention and Distributed KVCache
+- CaraServe: CPU-Assisted and Rank-Aware LoRA Serving for Generative LLM Inference
+- DistServe: Disaggregating Prefill and Decoding for Goodput-optimized Large Language Model Serving
+- Inference without Interference: Disaggregate LLM Inference for Mixed Downstream Workloads
+- APIServe: Efficient API Support for Large-Language Model Inferencing
+- FlexLLM: A System for Co-Serving Large Language Model Inference and Parameter-Efficient Finetuning
+- DéjàVu: KV-cache Streaming for Fast, Fault-tolerant Generative LLM Serving
+- Optimizing LLM Queries in Relational Workloads | UCB
+- AttentionStore: Cost-effective Attention Reuse across Multi-turn Conversations in Large Language Model Serving | NUS
+- MuxServe: Flexible Multiplexing for Efficient Multiple LLM Serving
+- LoongServe: Efficiently Serving Long-context Large Language Models with Elastic Sequence Parallelism | PKU
+- RAGCache: Efficient Knowledge Caching for Retrieval-Augmented Generation | PKU
+- Andes: Defining and Enhancing Quality-of-Experience in LLM-Based Text Streaming Services | Umich
+- BlockLLM: Multi-tenant Finer-grained Serving for Large Language Models
+- vAttention: Dynamic Memory Management for Serving LLMs without PagedAttention
+
+### Fine-tuning Systems
+
+- Ymir: A Scheduler for Foundation Model Fine-tuning Workloads in Datacenters | ICS' 24
+
+### Multi-Model Systems
+
+- MOSEL: Inference Serving Using Dynamic Modality Selection
+- DISTMM: Accelerating distributed multimodal model training | NSDI' 24
+
+### Image Generation Systems
+
+- Approximate Caching for Efficiently Serving Diffusion Models | Adobe Research
+- DistriFusion: Distributed Parallel Inference for High-Resolution Diffusion Models | MIT
+
+## LLM for Systems
+
+- Large Language Models for Compiler Optimization
+- The Hitchhiker's Guide to Program Analysis: A Journey with Large Language Models
+- LLM-Assisted Code Cleaning For Training Accurate Code Generators | UCB
+
+### System Efficiency Optimization
+
+- Fast Distributed Inference Serving for Large Language Models | PKU
+- FrugalGPT: How to Use Large Language Models While Reducing Cost and Improving Performance | Stanford
+- H2O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models | ICML ES-FoMo Workshop 2023
+- Inference with Reference: Lossless Acceleration of Large Language Models
+- SkipDecode: Autoregressive Skip Decoding with Batching and Caching for Efficient LLM Inferencex
+- Scissorhands: Exploiting the Persistence of Importance Hypothesis for LLM KV Cache Compression at Test Time
+- Knowledge-preserving Pruning for Pre-trained Language Models without Retraining | SNU
+- Accelerating LLM Inference with Staged Speculative Decoding | ICML' 23
+- SpecInfer: Accelerating Generative LLM Serving with Speculative Inference and Token Tree Verification | CMU
+- Deja Vu: Contextual Sparsity for Efficient LLMs at Inference Time | ICML' 23
+- S3: Increasing GPU Utilization during Generative Inference for Higher Throughput | Havard
+- LLMCad: Fast and Scalable On-device Large Language Model Inference
+- Skeleton-of-Thought: Large Language Models Can Do Parallel Decoding | THU
+- LoRAShear: Efficient Large Language Model Structured Pruning and Knowledge Recovery ｜ Microsoft
+- Ring Attention with Blockwise Transformers for Near-Infinite Context | UCB
+- Learned Best-Effort LLM Serving | UCB
+
+## ML Systems
+
+- INFaaS: Automated Model-less Inference Serving | ATC’ 21
+- Alpa : Automating Inter- and Intra-Operator Parallelism for Distributed Deep Learning | OSDI' 22
+- Pathways : Asynchronous Distributed Dataflow for ML | MLSys' 22
+- AlpaServe: Statistical Multiplexing with Model Parallelism for Deep Learning Serving
+- DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale ICML' 2022.
+- ZeRO-Offload : Democratizing Billion-Scale Model Training.
+- ZeRO-Infinity : Breaking the GPU Memory Wall for Extreme Scale Deep Learning
+- ZeRO : memory optimizations toward training trillion parameter models.
+- Band: Coordinated Multi-DNN Inference on Heterogeneous Mobile Processors | MobiSys ’22
+- Serving Heterogeneous Machine Learning Models on Multi-GPU Servers with Spatio-Temporal Sharing | ATC'22
+- Fast and Efficient Model Serving Using Multi-GPUs with Direct-Host-Access | Eurosys'23
+- Cocktail: A Multidimensional Optimization for Model Serving in Cloud | NSDI'22
+- Merak: An Efficient Distributed DNN Training Framework with Automated 3D Parallelism for Giant Foundation Models
+- SHEPHERD : Serving DNNs in the Wild
+- Efficient GPU Kernels for N:M-Sparse Weights in Deep Learning
+- AutoScratch: ML-Optimized Cache Management for Inference-Oriented GPUs
+- ZeRO++: Extremely Efficient Collective Communication for Giant Model Training
+- Channel Permutations for N:M Sparsity | MLSys' 23
+- Welder : Scheduling Deep Learning Memory Access via Tile-graph | OSDI' 23
+- Optimizing Dynamic Neural Networks with Brainstorm | OSDI'23
+- ModelKeeper: Accelerating DNN Training via Automated Training Warmup | NSDI'23
+- Breadth-First Pipeline Parallelism | MLSys' 23
+- MGG : Accelerating Graph Neural Networks with Fine-Grained Intra-Kernel Communication-Computation Pipelining on Multi-GPU Platforms | OSDI' 23
+- Hydro: Surrogate-Based Hyperparameter Tuning Service in Datacenters | OSDI' 23
+- Cocktailer: Analyzing and Optimizing Dynamic Control Flow in Deep Learning | OSDI' 23
+- BPipe: Memory-Balanced Pipeline Parallelism for TrainingLarge Language Models
+
+## Survey Paper
+
+- Efficient Large Language Models: A Survey
+- Challenges and Applications of Large Language Models
+- Beyond Efficiency: A Systematic Survey of Resource-Efficient Large Language Models
+- Towards Efficient Generative Large Language Model Serving: A Survey from Algorithms to Systems
+
+## LLM Benchmark / Leaderboard Traces
+
+- LLM Energy Leaderboard | Umich
+- LLM-Perf Leaderboard | HuggingFace
+- Aviary Explorer | Anyscale
+- Open LLM Leaderboard | HuggingFace
+- HELM | Stanford
+- LMSYS | UCB
+- Towards Efficient and Reliable LLM Serving: A Real-World Workload Study
+
+## LLM Frameworks
+
+- AutoGen :Enable Next-Gen Large Language Model Applications | Microsoft
+- DeepSpeed: a deep learning optimization library that makes distributed training and inference easy, efficient, and effective | Microsoft
+- TensorRT-LLM | Nvidia
+- Accelerate | Hugging Face
+- vLLM | UCB
+- Ray-LLM | Ray
+
+## Related ML Readings
+
+- Large Transformer Model Inference Optimization
+- Transformer Inference Arithmetic
+- The Transformer Family Version 2.0
+- Full Stack Optimization of Transformer Inference: a Survey | UCB
+
+## MLSys Courses
+
+- Systems for Machine Learning | (Stanford)\[[https://cs229s.stanford.edu/fall2023/](https://cs229s.stanford.edu/fall2023/ "https://cs229s.stanford.edu/fall2023/")]
+- Systems for Generative AI | (Umich)\[[https://github.com/mosharaf/eecs598/tree/w24-genai](https://github.com/mosharaf/eecs598/tree/w24-genai "https://github.com/mosharaf/eecs598/tree/w24-genai")]
+- Systems for AI - LLMs | (GT)\[[https://cs8803-sp24.anand-iyer.com/](https://cs8803-sp24.anand-iyer.com/ "https://cs8803-sp24.anand-iyer.com/")]
+
+## Other list
+
+- A curated list of Large Language Model【Hannibal046/Awesome-LLM: Awesome-LLM: a curated list of Large Language Model ([github.com](http://github.com "github.com"))】
+- AI systems paper list【lambda7xx/awesome-AI-system: paper and its code for AI System ([github.com](http://github.com "github.com"))】
+- A baseline repository of Auto-Parallelism in Training Neural Networks【ConnollyLeon/awesome-Auto-Parallelism: A baseline repository of Auto-Parallelism in Training Neural Networks ([github.com](http://github.com "github.com"))】
+- Numbers every LLM Developer should know【ray-project/llm-numbers: Numbers every LLM developer should know ([github.com](http://github.com "github.com"))】
+
+readlist · 目录
+
+上一篇机器学习系统推荐阅读
+
+阅读 858
