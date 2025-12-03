@@ -1,0 +1,250 @@
+# CUDA异步拷贝的隐式同步机制
+
+# 异步拷贝
+
+## CUDA API
+
+cudaMemcpyAsync 是 CUDA 运行时 API 中一个非常重要的函数，用于在主机（Host）和设备（Device）之间异步地复制内存数据。与同步版本 cudaMemcpy 不同，cudaMemcpyAsync 可以在不阻塞主机线程的情况下启动数据传输，从而实现计算与数据传输的重叠（overlap），提升程序整体性能。
+
+从原理上讲，异步拷贝的实现依赖于GPU的DMA设备(也称为拷贝引擎)，主机将目的地址、源地址以及长度发送给设备后，即可返回，之后设备从队列中获取拷贝命令，并调用GPU硬件执行拷贝动作。
+
+## 异步拷贝限制
+
+cudaMemcpyAsync要求参与主机传输的内存必须是pinned memory，当然官方文档中并没有描述该规则，实际上我们也可以将malloc的指针传入这个API，出现这个限制的原因是，由操作系统申请的内存，CUDA Driver无法管理它的生命周期，从而导致无法完成真正的异步。 例如如下的代码执行
+
+```c 
+int *a;
+int *b;
+a = (int *)malloc(1024 * 1024);
+cudaMalloc((int **)&b, 1024 * 1024);
+cudaMemcpyAsync(b, a, 1024 * 1024, cudaMemcpyHostToDevice, stream);
+free(a);
+```
+
+
+对于操作系统提供的malloc以及free函数，cuda本身是无法修改的，而free函数的执行本身要保证不能影响到cudaMemcpyAsync的执行结果，就是说GPU在完成拷贝之前，主机内存是不能被释放的，在这种情况下，cudaMemcpyAsync函数本身需要具备一定的同步性，从原理上来说，它可以先在内部申请pinnged memory然后把，主机的内存拷贝到pinnged memory之后，主机内存的耦合就可以解决，剩下的交给GPU即可。实际上如果是大段的内存信息，内核不能保证一次性申请足够大的pinnged memory，那内核很可能会进行分块拷贝，此时cudaMemcpyAsync函数几乎是需要等待设备将数据全部拷贝完毕后才能返回。
+
+## 实验验证
+
+源码参考：[github/Tony-Tan/CUDA\_Freshman](https://github.com/Tony-Tan/CUDA_Freshman/blob/master/35_multi_add_depth/multi_add_depth.cu "github/Tony-Tan/CUDA_Freshman")
+
+```c 
+#include <cuda_runtime.h>
+#include <stdio.h>
+#include "freshman.h"
+#define N_REPEAT 10
+#define N_SEGMENT 4
+
+void sumArrays(float * a,float * b,float * res,const int size)
+{
+    for(int i=0;i<size;i+=4)
+    {
+        res[i]=a[i]+b[i];
+        res[i+1]=a[i+1]+b[i+1];
+        res[i+2]=a[i+2]+b[i+2];
+        res[i+3]=a[i+3]+b[i+3];
+    }
+}
+__global__ void sumArraysGPU(float*a,float*b,float*res,int N)
+{
+    int idx=blockIdx.x*blockDim.x+threadIdx.x;
+    if(idx < N)
+    //for delay
+    {
+        for(int j=0;j<N_REPEAT;j++)
+            res[idx]=a[idx]+b[idx];
+    }
+
+}
+int main(int argc,char **argv)
+{
+    // set up device
+    initDevice(0);
+    double iStart,iElaps;
+    iStart=cpuSecond();
+    int nElem=1<<24;
+    printf("Vector size:%d\n",nElem);
+    int nByte=sizeof(float)*nElem;
+    float * a_h,*b_h,*res_h,*res_from_gpu_h;
+    CHECK(cudaHostAlloc((float**)&a_h,nByte,cudaHostAllocDefault));
+    CHECK(cudaHostAlloc((float**)&b_h,nByte,cudaHostAllocDefault));
+    CHECK(cudaHostAlloc((float**)&res_h,nByte,cudaHostAllocDefault));
+    CHECK(cudaHostAlloc((float**)&res_from_gpu_h,nByte,cudaHostAllocDefault));
+    
+    cudaMemset(res_h,0,nByte);
+    cudaMemset(res_from_gpu_h,0,nByte);
+
+    float *a_d,*b_d,*res_d;
+    CHECK(cudaMalloc((float**)&a_d,nByte));
+    CHECK(cudaMalloc((float**)&b_d,nByte));
+    CHECK(cudaMalloc((float**)&res_d,nByte));
+
+    initialData(a_h,nElem);
+    initialData(b_h,nElem);
+    
+    sumArrays(a_h,b_h,res_h,nElem);
+    dim3 block(512);
+    dim3 grid((nElem-1)/block.x+1);
+
+
+    //asynchronous calculation
+    int iElem=nElem/N_SEGMENT;
+    cudaStream_t stream[N_SEGMENT];
+    for(int i=0;i<N_SEGMENT;i++)
+    {
+        CHECK(cudaStreamCreate(&stream[i]));
+    }
+    cudaEvent_t start,stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    cudaEventRecord(start,0);
+    for(int i=0;i<N_SEGMENT;i++)
+    {
+        int ioffset=i*iElem;
+        CHECK(cudaMemcpyAsync(&a_d[ioffset],&a_h[ioffset],nByte/N_SEGMENT,cudaMemcpyHostToDevice,stream[i]));
+        CHECK(cudaMemcpyAsync(&b_d[ioffset],&b_h[ioffset],nByte/N_SEGMENT,cudaMemcpyHostToDevice,stream[i]));
+        sumArraysGPU<<<grid,block,0,stream[i]>>>(&a_d[ioffset],&b_d[ioffset],&res_d[ioffset],iElem);
+        CHECK(cudaMemcpyAsync(&res_from_gpu_h[ioffset],&res_d[ioffset],nByte/N_SEGMENT,cudaMemcpyDeviceToHost,stream[i]));
+    }
+    //timer
+    CHECK(cudaEventRecord(stop, 0));
+    CHECK(cudaEventSynchronize(stop));
+    iElaps=cpuSecond()-iStart;
+    printf("Asynchronous Execution configuration<<<%d,%d>>> Time elapsed %f sec\n",grid.x,block.x,iElaps);
+    checkResult(res_h,res_from_gpu_h,nElem);
+    for(int i=0;i<N_SEGMENT;i++)
+    {
+        CHECK(cudaStreamDestroy(stream[i]));
+    }
+    cudaFree(a_d);
+    cudaFree(b_d);
+    cudaFree(a_h);
+    cudaFree(b_h);
+    cudaFree(res_h);
+    cudaFree(res_from_gpu_h);
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+
+    return0;
+}
+```
+
+
+在测试源码中，分别使用CUDA的内存申请API和操作系统提供的内存申请API来运行程序，获取它的性能数据：
+
+```c++ title="diff --git a/35_multi_add_depth/multi_add_depth.cu b/35_multi_add_depth/multi_add_depth.cu
+index d8f27ea..44ef011 100644
+--- a/35_multi_add_depth/multi_add_depth.cu
++++ b/35_multi_add_depth/multi_add_depth.cu
+@@ -35,11 +35,15 @@ int main(int argc,char argv)
+printf(%22Vector size:%d\n%22,nElem);
+int nByte=sizeof(float)nElem;
+float * a_h,b_h,res_h,res_from_gpu_h;
+-    CHECK(cudaHostAlloc((float)&a_h,nByte,cudaHostAllocDefault));
+-    CHECK(cudaHostAlloc((float)&b_h,nByte,cudaHostAllocDefault));
+-    CHECK(cudaHostAlloc((float)&res_h,nByte,cudaHostAllocDefault));
+-    CHECK(cudaHostAlloc((float**)&res_from_gpu_h,nByte,cudaHostAllocDefault));
+-
++//    CHECK(cudaHostAlloc((float**)&a_h,nByte,cudaHostAllocDefault));
++//    CHECK(cudaHostAlloc((float**)&b_h,nByte,cudaHostAllocDefault));
++//    CHECK(cudaHostAlloc((float**)&res_h,nByte,cudaHostAllocDefault));
++//    CHECK(cudaHostAlloc((float**)&res_from_gpu_h,nByte,cudaHostAllocDefault));
++    a_h = (float *)malloc(nByte);
++    b_h = (float *)malloc(nByte);
++    res_h = (float *)malloc(nByte);
++    res_from_gpu_h = (float *)malloc(nByte);
++
+cudaMemset(res_h,0,nByte);
+cudaMemset(res_from_gpu_h,0,nByte);"
+diff --git a/35_multi_add_depth/multi_add_depth.cu b/35_multi_add_depth/multi_add_depth.cu
+index d8f27ea..44ef011 100644
+--- a/35_multi_add_depth/multi_add_depth.cu
++++ b/35_multi_add_depth/multi_add_depth.cu
+@@ -35,11 +35,15 @@ int main(int argc,char **argv)
+     printf("Vector size:%d\n",nElem);
+     int nByte=sizeof(float)*nElem;
+     float * a_h,*b_h,*res_h,*res_from_gpu_h;
+-    CHECK(cudaHostAlloc((float**)&a_h,nByte,cudaHostAllocDefault));
+-    CHECK(cudaHostAlloc((float**)&b_h,nByte,cudaHostAllocDefault));
+-    CHECK(cudaHostAlloc((float**)&res_h,nByte,cudaHostAllocDefault));
+-    CHECK(cudaHostAlloc((float**)&res_from_gpu_h,nByte,cudaHostAllocDefault));
+-    
++//    CHECK(cudaHostAlloc((float**)&a_h,nByte,cudaHostAllocDefault));
++//    CHECK(cudaHostAlloc((float**)&b_h,nByte,cudaHostAllocDefault));
++//    CHECK(cudaHostAlloc((float**)&res_h,nByte,cudaHostAllocDefault));
++//    CHECK(cudaHostAlloc((float**)&res_from_gpu_h,nByte,cudaHostAllocDefault));
++    a_h = (float *)malloc(nByte);
++    b_h = (float *)malloc(nByte);
++    res_h = (float *)malloc(nByte);
++    res_from_gpu_h = (float *)malloc(nByte);
++
+     cudaMemset(res_h,0,nByte);
+     cudaMemset(res_from_gpu_h,0,nByte);
+```
+
+
+使用CUDA API申请主机内存，程序执行后得到的性能数据如下所示 ，可以看到每个stream的D2H拷贝和H2D拷贝几乎是可以并行的。&#x20;
+
+![](image/image_oZoOPz4aJG.png)
+
+使用操作系统提供的API申请主机内存，程序执行后得到的性能数据如下所示，可以看到各个stream几乎是串行执行的，没有起到并行的效果。
+
+![](image/image_YWWUt_1OOx.png)
+
+## 内存拷贝异步级别
+
+```c 
+/**
+ * \brief Flags to indicate synchronization to be done in memcpy functions.
+ */
+typedefenum CUImemcpySync_enum
+{
+    //! Synchronous memcpy with respect to host memory
+    //! - for pageable->device transfers
+    //!   - sync before doing the copy
+    //!   - return once the pageable buffer has been copied to staging 
+    //!     memory (the DMA to final destination may not have be done yet)
+    //! - for device->pageable, device->pinned, and device->pinned
+    //!   return only once the copy has completed
+    //! - for device->device, do no host-side synchronization
+    CUI_MEMCPY_SYNCHRONOUS = 1,
+
+    //! Async memcpy as it exists in CUDA 4.0 and earlier
+    //! This is idiosyncratic
+    //! - for pageable->device transfers, 
+    //!   - copy the data to a staging buffer immediately (no sync before)
+    //!   - return once the pageable buffer has been copied to staging 
+    //!     memory (the DMA to final destination may not have be done yet)
+    //! - for device->pageable, return only once the copy has
+    //!   completed
+    //! - all others are fully async
+    CUI_MEMCPY_ASYNC_EXCEPT_PAGEABLE = 2,
+
+    //! Fully async copy -- will use perform pageable<->staging copies
+    //! asynchronously in a worker thread
+    //! XXX - cannot be used without a donor worker thread to handle
+    //!       DPCs (OpenCL-only until it gets wired to the trap handler)
+    CUI_MEMCPY_ASYNC = 3,
+
+} CUImemcpySync;
+```
+
+
+这个枚举定义了不同级别的内存拷贝同步行为，总结一下是。
+
+- **CUI\_MEMCPY\_SYNCHRONOUS**最保守，强调同步，适合需要确定性行为的场景
+- **CUI\_MEMCPY\_ASYNC\_EXCEPT\_PAGEABLE**兼容旧版 CUDA 的“伪异步”行为，部分异步，部分同步
+- **CUI\_MEMCPY\_ASYNC**真正的完全异步，依赖后台线程处理，尚未在 CUDA 中完全启用
+
+从CUI\_MEMCPY\_ASYNC\_EXCEPT\_PAGEABLE的注释中我们可以得到CUDA的异步内存拷贝行为
+
+**对于 可分页内存 → 设备 的传输：**
+
+- 立即将数据复制到暂存缓冲区（拷贝前不进行同步）
+- 一旦可分页缓冲区被复制到暂存内存后即返回（DMA 到最终目标可能尚未完成）
+
+**对于 设备 → 可分页内存 的传输：**
+
+- 仅在拷贝完全完成后才返回
+
+**其他所有类型的传输（如设备→页锁定、设备→设备）均为完全异步**
